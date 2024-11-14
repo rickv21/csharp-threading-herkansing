@@ -3,7 +3,7 @@
 Startdocument van **Monique Sabong Land**, **Rick Vinke**, **Thijs Janse** en **Chris Klunder**.
 
 ## Applicatie Beschrijving
-Voor het vak Threading in C# gaan wij een weerapplicatie voor Windows maken.
+Voor het vak Threading in C# gaan wij een weerapplicatie voor in eerste instantie Nederland voor Windows maken.
 
 De applicatie zal ontwikkeld worden met **C# .NET versie 8** en **.NET Maui**. 
 
