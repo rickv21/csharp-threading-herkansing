@@ -5,7 +5,8 @@ Startdocument van **Monique Sabong Land**, **Rick Vinke**, **Thijs Janse** en **
 ## Applicatie Beschrijving
 Voor het vak Threading in C# gaan wij een weerapplicatie voor in eerste instantie Nederland voor Windows maken.
 
-De applicatie zal ontwikkeld worden met **C# .NET versie 8** en **.NET Maui**. 
+De applicatie zal ontwikkeld worden met **C# .NET versie 8** en **.NET Maui**.
+Voor de structuur zal MVVM worden toegepast. 
 
 ## MosCow analyse
 Must haves:
@@ -39,7 +40,11 @@ Won't have:
 - Async & await: Voor het ophalen van de data van de API('s) en het laden van de verschillende pagina's in de applicatie.
 
 ## Klassendiagram
-![Class Diagram](./img/classdiagram.png "First Version of the class diagram")
+![Class Diagram](./img/classdiagram.png "Second Version of the class diagram")
+
+## Sequencediagram
+![Sequence Diagram](./img/sequencediagram.png "First Version of the sequence diagram")
+Responses vanuit API's zullen in JSON formaat zijn
 
 ## Planning
 Om de voortgang van dit project te bewaken, is er een planning gemaakt. Deze planning bevat in grote lijnen hetgeen waarmee wij ons bezig zullen houden per week tot de deadline. Er kan natuurlijk afgeweken worden van deze planning, maar het is het doel om deze in grote lijnen te volgen.
