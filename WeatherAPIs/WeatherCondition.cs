@@ -1,5 +1,8 @@
 ﻿namespace WeatherApp.WeatherAPIs
 {
+    /// <summary>
+    /// Represents a weather condition.
+    /// </summary>
     public enum WeatherCondition
     {
         SUNNY,

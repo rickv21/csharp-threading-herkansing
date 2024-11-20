@@ -3,12 +3,35 @@ using Newtonsoft.Json.Linq;
 
 namespace WeatherApp.WeatherAPIs
 {
+    /// <summary>
+    /// Base class for API WeatherServices.
+    /// </summary>
     public abstract class WeatherService
     {
+        /// <summary>
+        /// The API key of the API, is set by GetAPIKeyFromEnv()
+        /// </summary>
         protected string _apiKey;
+
+        /// <summary>
+        /// The baseURL of the API that is used as a base to send requests.
+        /// </summary>
         protected string _baseURL;
+
+        /// <summary>
+        /// The name of the API.
+        /// Is used for getting the API key from .env and in the settings view.
+        /// </summary>
         public string Name {  get; private set; }
+
+        /// <summary>
+        /// The request limit and current request data for the current day.
+        /// </summary>
         public ServiceRequestLimit RequestLimitDay { get; private set; }
+
+        /// <summary>
+        /// The request limit and current request data for the current month.
+        /// </summary>
         public ServiceRequestLimit RequestLimitMonth { get; private set; }
 
         public WeatherService(string name, string baseURL, int requestLimitDay, int requestLimitMonth)
@@ -28,16 +51,18 @@ namespace WeatherApp.WeatherAPIs
         /// Gets the weather data for a day and returns the weather data for each hour as a list.
         /// </summary>
         /// <param name="day">The day that will be passed to the API, only the day of the DateTime object will be looked at.</param>
-        /// <param name="Location">The location as a string that will be passed to the API.</param>
+        /// <param name="location">The location as a string that will be passed to the API.</param>
+        /// <param name="simulate">If the request should be simulated instead of sending a actual request, defaults to false if not set.</param>
         /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
-        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string Location);
+        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false);
 
         /// <summary>
         /// Gets the weather data for the current week and returns the weather data for each day as a list.
         /// </summary>
-        /// <param name="Location">The location as a string that will be passed to the API.</param>
+        /// <param name="location">The location as a string that will be passed to the API.</param>
+        /// <param name="simulate">If the request should be simulated instead of sending a actual request, defaults to false if not set.</param>
         /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
-        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string Location); //TODO: Maybe we could pass a week number if we later want to check more weeks.
+        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false); //TODO: Maybe we could pass a week number if we later want to check more weeks.
 
 
         /// <summary>
