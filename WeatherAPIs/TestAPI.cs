@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
@@ -21,19 +16,20 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
-                    ErrorMessage = "Request limit reached",
+                    ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
                     Data = null
                 };
             }
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts/1");
+                HttpResponseMessage response = await client.GetAsync($"{_baseURL}/posts/1");
                 response.EnsureSuccessStatusCode();
                 CountRequest(); // Important: this counts the requests for the limit.
 
                 string responseBody = await response.Content.ReadAsStringAsync();
                 Debug.Write(responseBody);
                 JObject post = JObject.Parse(responseBody);
+                int id = (int?)post["id"] ?? -1; //Fallback to -1 if not found in response.
 
                 // Creating dummy weather data using the response
                 var weatherData = new List<WeatherDataModel>
@@ -43,7 +39,7 @@ namespace WeatherApp.WeatherAPIs
                         day,
                         minTemperature: 15.0,
                         maxTemperature: 25.0,
-                        humidity: 50.0
+                        humidity: id
                     )
                 };
 
@@ -63,7 +59,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
-                    ErrorMessage = "Request limit reached",
+                    ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
                     Data = null
                 };
             }
