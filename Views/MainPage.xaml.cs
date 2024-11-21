@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Platform;
 
 namespace WeatherApp.Views
 {
@@ -7,6 +8,7 @@ namespace WeatherApp.Views
         public MainPage()
         {
             InitializeComponent();
+            MapWebView.Source = "map.html";
         }
     }
 }
