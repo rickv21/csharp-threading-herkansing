@@ -215,10 +215,17 @@ namespace WeatherApp.WeatherAPIs
             SaveRequestCountsToFile();
         }
 
+        /// <summary>
+        /// Converts weather info from an API to a WeatherCondition enum.
+        /// </summary>
+        /// <param name="data">The weather info. Is a object because some API's use codes and some names.</param>
+        /// <returns>The WeatherCondition.</returns>
+        protected abstract WeatherCondition CalculateWeatherCondition(object data);
 
-
-
-
-
+        /// <summary>
+        /// Returns a example JSON query result to use for testing.
+        /// </summary>
+        /// <returns>The test data.</returns>
+        protected abstract string GetTestJSON();
     }
 }

@@ -127,5 +127,21 @@ namespace WeatherApp.WeatherAPIs
             }
     }
 
-}
+        protected override WeatherCondition CalculateWeatherCondition(object data)
+        {
+            return WeatherCondition.SUNNY;
+        }
+
+        protected override string GetTestJSON()
+        {
+            return @"
+                {
+                  id: 1,
+                  title: 'Test',
+                  body: 'Test body',
+                  userId: 1
+                }
+                ";
+        }
+    }
 }

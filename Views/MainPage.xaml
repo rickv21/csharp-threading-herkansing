@@ -23,8 +23,13 @@
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="Simulate requests:" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding SimulateMode, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
             <Label
-                Text="Click to send Test API request:"
+                Text="Test API:"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Click to send Test API request" />
@@ -34,7 +39,22 @@
                 Text="{Binding TestCounterText}" 
                 SemanticProperties.Hint="Sends a request to the test api"
                 Command="{Binding TestAPICommand}"
-                HorizontalOptions="Fill" />
+                HorizontalOptions="Center" />
+            <Label
+                Text="Open Weather Map:"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Open Weather Map" />
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                <RadioButton Content="Day" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsOpenWeatherMapDay, Mode=TwoWay}" />
+                <RadioButton Content="Week" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsOpenWeatherMapWeek, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+            <Button
+                x:Name="OpenWeatherMapButton"
+                Text="Click to send Weather Map API Request" 
+                SemanticProperties.Hint="Sends a request to the Open Weather Map api"
+                Command="{Binding OpenWeatherMapCommand}"
+                HorizontalOptions="Center" />
         </VerticalStackLayout>
     </ScrollView>
 

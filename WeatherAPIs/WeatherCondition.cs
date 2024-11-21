@@ -14,6 +14,17 @@
         HAIL,
         MIST,
         STORMY,
-        WINDY
+        WINDY,
+        DRIZZLE,
+        FOG,
+        HAZE,
+        DUST,
+        ASH,
+        SQUALL,
+        TORNADO,
+        SAND,
+        SMOKE,
+        
+        UNKNOWN
     }
 }
