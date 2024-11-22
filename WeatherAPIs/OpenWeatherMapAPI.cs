@@ -6,7 +6,7 @@ namespace WeatherApp.WeatherAPIs
 {
     public class OpenWeatherMapAPI : WeatherService
     {
-        public OpenWeatherMapAPI() : base("Test", "https://api.openweathermap.org/data/2.5/", 1000, -1)
+        public OpenWeatherMapAPI() : base("Open Weather Map", "https://api.openweathermap.org/data/2.5/", 1000, -1)
         {
         }
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false)

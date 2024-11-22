@@ -140,7 +140,7 @@ namespace WeatherApp.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error loading Test API: {ex.Message}");
+                Debug.WriteLine($"Error loading Open Weather Map API: {ex.Message}");
                 return;
             }
 
