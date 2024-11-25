@@ -55,6 +55,12 @@
                 SemanticProperties.Hint="Sends a request to the Open Weather Map api"
                 Command="{Binding OpenWeatherMapCommand}"
                 HorizontalOptions="Center" />
+            <Button
+                 x:Name="WeerLive_Button"
+                 Text="WeerLiveTest" 
+                 SemanticProperties.Hint="Sends a request to the WeerLive api"
+                 Command="{Binding OpenWeerLiveCommand}"
+                 HorizontalOptions="Center" />
         </VerticalStackLayout>
     </ScrollView>
 

@@ -9,13 +9,16 @@ namespace WeatherApp.ViewModels
 {
     public class MainViewModel : BindableObject
     {
-        private int count = 0; 
+        private int count = 0;
+        public ICommand OpenWeerLiveCommand { get; }
+
 
         public MainViewModel()
         {
             TestCounterText = "Click to send Test API request.";
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
+            OpenWeerLiveCommand = new Command(ExecuteOpenWeerLiveCommand);
             IsOpenWeatherMapDay = true;
             SimulateMode = false;
         }
@@ -172,6 +175,44 @@ namespace WeatherApp.ViewModels
                         // Show a simple alert
                         await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
                     }
+                }
+                else
+                {
+                    Debug.WriteLine(task.ErrorMessage);
+                    await Shell.Current.DisplayAlert("Error", task.ErrorMessage, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
+            }
+        }
+        private async void ExecuteOpenWeerLiveCommand()
+        {
+            WeerLiveAPI api;
+            try
+            {
+                api = new WeerLiveAPI();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading WeerLive API: {ex.Message}");
+                return;
+            }
+
+            try
+            {
+                APIResponse<List<WeatherDataModel>> task;
+                task = await api.GetWeatherDataAsync(DateTime.Today, "Emmen", SimulateMode);
+               
+                Debug.WriteLine("Is success: " + task.Success);
+                if (task.Success)
+                {
+                    Debug.WriteLine(task.Data);
+                    //An assertion to throw a exception if Data is null when Success is true, which should never happen.
+                    Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
+
                 }
                 else
                 {
