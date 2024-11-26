@@ -9,26 +9,16 @@ namespace WeatherApp.ViewModels
 {
     public class MainViewModel : BindableObject
     {
-        private int count = 0; 
+
+        private LocationModel testLocationModel = new("Emmen", 52.787701, 6.894810);
 
         public MainViewModel()
         {
-            TestCounterText = "Click to send Test API request.";
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
-            IsOpenWeatherMapDay = true;
+            AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
+            IsDay = true;
             SimulateMode = false;
-        }
-
-        private string _testCounterText;
-        public string TestCounterText
-        {
-            get => _testCounterText;
-            set
-            {
-                _testCounterText = value;
-                OnPropertyChanged();
-            }
         }
 
         private bool _simulateMode;
@@ -42,32 +32,32 @@ namespace WeatherApp.ViewModels
             }
         }
 
-        private bool _openWeatherMapDay;
-        private bool _openWeatherMapWeek;
+        private bool _isDay;
+        private bool _isWeek;
 
-        public bool IsOpenWeatherMapDay
+        public bool IsDay
         {
-            get => _openWeatherMapDay;
+            get => _isDay;
             set
             {
-                if (_openWeatherMapDay != value)
+                if (_isDay != value)
                 {
-                    _openWeatherMapDay = value;
-                    if (value) IsOpenWeatherMapWeek = false; // Ensure only one option is selected
+                    _isDay = value;
+                    if (value) IsWeek = false; // Ensure only one option is selected
                     OnPropertyChanged();
                 }
             }
         }
 
-        public bool IsOpenWeatherMapWeek
+        public bool IsWeek
         {
-            get => _openWeatherMapWeek;
+            get => _isWeek;
             set
             {
-                if (_openWeatherMapWeek != value)
+                if (_isWeek != value)
                 {
-                    _openWeatherMapWeek = value;
-                    if (value) _openWeatherMapDay = false; // Ensure only one option is selected
+                    _isWeek = value;
+                    if (value) IsDay = false; // Ensure only one option is selected
                     OnPropertyChanged();
                 }
             }
@@ -82,8 +72,6 @@ namespace WeatherApp.ViewModels
 
         public ICommand TestAPICommand { get; }
 
-        public ICommand OpenWeatherMapCommand { get; }
-
         private async Task OnTestButtonClick()
         {
             TestAPI api;
@@ -93,43 +81,15 @@ namespace WeatherApp.ViewModels
             }
             catch (Exception ex)
             {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading Test API: {ex.Message}");
                 return;
             }
 
-            count++;
-            TestCounterText = count == 1 ? $"Clicked {count} time" : $"Clicked {count} times";
-
-            try
-            {
-                var task = await api.GetWeatherDataAsync(DateTime.Today, "testlocation", SimulateMode);
-                Debug.WriteLine("Is success: " + task.Success);
-                if (task.Success)
-                {
-                    //An assertion to throw a exception if Data is null when Success is true, which should never happen.
-                    Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
-
-                    //It is supposed to return a list for each hour, but for this test API we only add 1 WeatherDataModel to the list.
-                    foreach (var model in task.Data)
-                    {
-                        Debug.WriteLine(model.ToString());
-
-                        // Show a simple alert
-                        await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
-                    }
-                }
-                else
-                {
-                    Debug.WriteLine(task.ErrorMessage);
-                    await Shell.Current.DisplayAlert("Error", task.ErrorMessage, "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
-            }
+            await HandleButtonClick(api);
         }
+
+        public ICommand OpenWeatherMapCommand { get; }
 
         private async Task OnOpenWeatherMapClick()
         {
@@ -140,28 +100,58 @@ namespace WeatherApp.ViewModels
             }
             catch (Exception ex)
             {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading Open Weather Map API: {ex.Message}");
                 return;
             }
 
+            await HandleButtonClick(api);
+        }
+
+        public ICommand AccuWeatherCommand { get; }
+
+        private async Task OnAccuWeatherClick()
+        {
+            AccuWeatherAPI api;
+            try
+            {
+                api = new AccuWeatherAPI();
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
+                Debug.WriteLine($"Error loading Accuweather API: {ex.Message}");
+                return;
+            }
+
+            await HandleButtonClick(api);
+        }
+
+        private async Task HandleButtonClick(WeatherService api)
+        {
             try
             {
                 APIResponse<List<WeatherDataModel>> task;
-                if (IsOpenWeatherMapDay)
+                if (IsDay)
                 {
-                    task = await api.GetWeatherDataAsync(DateTime.Today, "Emmen", SimulateMode);
-                } 
+                    task = await api.GetWeatherDataAsync(DateTime.Today, testLocationModel, SimulateMode);
+                }
                 else
                 {
-                    task = await api.GetWeatherForAWeekAsync("Emmen", SimulateMode);
+                    task = await api.GetWeatherForAWeekAsync(testLocationModel, SimulateMode);
                 }
-            
+
                 Debug.WriteLine("Is success: " + task.Success);
                 if (task.Success)
                 {
                     Debug.WriteLine(task.Data);
                     //An assertion to throw a exception if Data is null when Success is true, which should never happen.
                     Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
+
+                    if(task.Data.Count == 0)
+                    {
+                        await Shell.Current.DisplayAlert("Error", "WeatherDataModel list is empty!", "OK");
+                    }
 
                     //OpenWeatherMap only supports showing weather for every 3 hours -.-
                     foreach (var model in task.Data)
@@ -185,5 +175,6 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
             }
         }
+
     }
 }
