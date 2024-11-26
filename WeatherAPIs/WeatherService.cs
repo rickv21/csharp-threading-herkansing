@@ -79,7 +79,7 @@ namespace WeatherApp.WeatherAPIs
             string envPath = Path.Combine(baseDirectory, ".env");
 
             DotNetEnv.Env.Load(envPath);
-            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper() + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables");
+            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper().Replace(" ", "_") + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables");
             if (string.IsNullOrEmpty(apiKey))
             {
                 throw new InvalidOperationException("API key not found in environment variables.");
@@ -132,11 +132,18 @@ namespace WeatherApp.WeatherAPIs
                     // Save the potentially reset counts
                     SaveRequestCountsToFile();
                 }
+                else
+                {
+                    RequestLimitDay = new ServiceRequestLimit(requestLimitDay, 0);
+                    RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, 0);
+
+                    SaveRequestCountsToFile();
+                }
             }
             else
             {
-                RequestLimitDay = new ServiceRequestLimit(-1, 0);
-                RequestLimitMonth = new ServiceRequestLimit(-1, 0);
+                RequestLimitDay = new ServiceRequestLimit(requestLimitDay, 0);
+                RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, 0);
 
                 SaveRequestCountsToFile();
             }
