@@ -8,7 +8,12 @@ namespace WeatherApp.Views
         public MainPage()
         {
             InitializeComponent();
-            MapWebView.Source = "map.html";
+        }
+
+        private async void OnNavigateButtonClicked(object sender, EventArgs e)
+        {
+            // Navigeer naar overview
+            await Navigation.PushAsync(new WeatherOverviewView());
         }
     }
 }

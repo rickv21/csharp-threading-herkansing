@@ -55,14 +55,11 @@
                 SemanticProperties.Hint="Sends a request to the Open Weather Map api"
                 Command="{Binding OpenWeatherMapCommand}"
                 HorizontalOptions="Center" />
-            
-            <WebView x:Name="MapWebView"
-         HeightRequest="400"
-         WidthRequest="300"
-         HorizontalOptions="Fill"
-         VerticalOptions="FillAndExpand" />
 
-
+            <Button
+                Text="Overview"
+                HorizontalOptions="Center"
+                Clicked="OnNavigateButtonClicked" />
         </VerticalStackLayout>
     </ScrollView>
 
