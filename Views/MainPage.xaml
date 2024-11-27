@@ -70,7 +70,10 @@
                 Command="{Binding AccuWeatherCommand}"
                 HorizontalOptions="Center" />
 
-
+            <Button
+                Text="Overview"
+                HorizontalOptions="Center"
+                Clicked="OnNavigateButtonClicked" />
         </VerticalStackLayout>
     </ScrollView>
 

@@ -87,6 +87,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Views\WeatherOverviewView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update=".env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

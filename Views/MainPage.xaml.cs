@@ -1,4 +1,5 @@
 ﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Platform;
 
 namespace WeatherApp.Views
 {
@@ -7,6 +8,12 @@ namespace WeatherApp.Views
         public MainPage()
         {
             InitializeComponent();
+        }
+
+        private async void OnNavigateButtonClicked(object sender, EventArgs e)
+        {
+            // Navigeer naar overview
+            await Navigation.PushAsync(new WeatherOverviewView());
         }
     }
 }
