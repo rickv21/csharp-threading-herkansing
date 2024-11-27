@@ -61,6 +61,11 @@
                  SemanticProperties.Hint="Sends a request to the WeerLive api"
                  Command="{Binding OpenWeerLiveCommand}"
                  HorizontalOptions="Center" />
+
+            <Button
+                Text="Overview"
+                HorizontalOptions="Center"
+                Clicked="OnNavigateButtonClicked" />
         </VerticalStackLayout>
     </ScrollView>
 
