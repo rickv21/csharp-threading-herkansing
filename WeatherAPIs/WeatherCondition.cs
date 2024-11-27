@@ -24,7 +24,7 @@
         TORNADO,
         SAND,
         SMOKE,
-        
+        CLEAR,
         UNKNOWN
     }
 }

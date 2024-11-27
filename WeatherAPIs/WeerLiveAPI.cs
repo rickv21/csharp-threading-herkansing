@@ -1,10 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json.Linq;
 using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
@@ -30,7 +24,8 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             using (HttpClient client = new HttpClient())
             {
-                string url = $"{_baseURL}{_apiKey}&locatie=Emmen";
+                long unixTimestamp = new DateTimeOffset(day).ToUnixTimeSeconds();
+                string url = $"{_baseURL}{_apiKey}&locatie={location}";
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -48,17 +43,37 @@ namespace WeatherApp.WeatherAPIs
                 CountRequest(); // Important: this counts the requests for the limit.
                 responseBody = await response.Content.ReadAsStringAsync();
 
+                JObject weatherResponse = JObject.Parse(responseBody);
+
+                // Extract "list" element or throw an exception if not found
+                var liveWeer = weatherResponse["liveweer"] ?? throw new Exception("Missing list data in API response");
+
                 var weatherData = new List<WeatherDataModel>();
 
 
-                /*weatherData.Add(new WeatherDataModel(
-                        condition,
-                        forecastDate,
-                        minTemperature: (double)main["temp_min"]!,
-                        maxTemperature: (double)main["temp_max"]!,
-                        humidity: (double)main["humidity"]!
-                        ));*/
+                // Extract "main" and "weather" data
+                JToken? temp = liveWeer[0]["temp"];
+                JToken? weather = liveWeer[0]["image"];
+                JToken? humidity = liveWeer[0]["lv"];
 
+                // Ensure all necessary data exists
+                if (temp == null || weather == null || humidity == null)
+                {
+                    throw new Exception($"Missing data in API response");
+                }
+                var condition = CalculateWeatherCondition((string)weather);
+                DateTime forecastDate = DateTime.Parse((string)liveWeer[0]["time"]!);
+
+                // Add the weather data to the list
+                weatherData.Add(new WeatherDataModel(
+                    condition,
+                    forecastDate,
+                    minTemperature: (double)temp,
+                    maxTemperature: (double)temp,
+                    humidity: (double)humidity
+                ));
+
+                // Return the response
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = true,
@@ -66,8 +81,8 @@ namespace WeatherApp.WeatherAPIs
                     Data = weatherData
                 };
             }
-
         }
+
 
         public override Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
         {
@@ -76,7 +91,40 @@ namespace WeatherApp.WeatherAPIs
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-            throw new NotImplementedException();
+            switch ((string)data)
+            {
+                case "zonnig":
+                    return WeatherCondition.SUNNY;
+                case "bliksem":
+                    return WeatherCondition.THUNDERSTORM;
+                case "regen":
+                    return WeatherCondition.RAIN;
+                case "buien":
+                    return WeatherCondition.RAIN;
+                case "hagel":
+                    return WeatherCondition.HAIL;
+                case "mist":
+                    return WeatherCondition.MIST;
+                case "sneeuw":
+                    return WeatherCondition.SNOW;
+                case "bewolkt":
+                    return WeatherCondition.CLOUDY;
+                case "lichtbewolkt":
+                    return WeatherCondition.PARTLY_CLOUDY;
+                case "halfbewolkt":
+                    return WeatherCondition.PARTLY_CLOUDY;
+                case "halfbewolkt_regen":
+                    return WeatherCondition.RAIN;
+                case "zwaarbewolkt":
+                    return WeatherCondition.CLOUDY;
+                case "nachtmist":
+                    return WeatherCondition.MIST;
+                case "helderenacht":
+                    return WeatherCondition.CLEAR;
+                case "nachtbewolkt":
+                    return WeatherCondition.CLOUDY;
+            }
+            return WeatherCondition.UNKNOWN;
         }
 
         protected override string GetTestJSON()
