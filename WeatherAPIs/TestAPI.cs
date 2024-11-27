@@ -87,7 +87,7 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON("accu_weather_hour_test.json");
+                responseBody = GetTestJSON("test_api.json");
                 CountRequest(); // TODO: Do we want to count if we are simulating??
 
             }

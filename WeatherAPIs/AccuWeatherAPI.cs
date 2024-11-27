@@ -14,6 +14,15 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        /// <summary>
+        /// Gets the location key for the given location via the AccuWeather geolocation API.
+        /// </summary>
+        /// <param name="location">The location data.</param>
+        /// <param name="simulate">If the request should use test data.</param>
+        /// <returns>
+        /// An API Response containing the location key if successful
+        /// Otherwise it contains an errorMessage.
+        /// </returns>
         private async Task<APIResponse<string>> GetLocationKey(LocationModel location, bool simulate)
         {
             if (HasReachedRequestLimit())
@@ -90,9 +99,12 @@ namespace WeatherApp.WeatherAPIs
         {
             JsonFileManager jsonFileManager = new();
 
-            string? locationKey = jsonFileManager.GetNestedValue("data", Name, "storedPlaceKeys", location.Name) as string;
+            //Check if locationKey existst in the JSON file, otherwise get it from AccuWeather.
+            string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
+            Debug.WriteLine(locationKey);
             if (locationKey == null)
             {
+                Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
                 APIResponse<string> locationKeyResponse = await GetLocationKey(location, simulate);
                 if (!locationKeyResponse.Success)
                     return new APIResponse<List<WeatherDataModel>>
@@ -102,8 +114,9 @@ namespace WeatherApp.WeatherAPIs
                     };
                 {
                 }
+                Debug.Assert(locationKeyResponse.Data != null);
                 locationKey = locationKeyResponse.Data;
-                jsonFileManager.SetNestedValue(new { key = locationKey }, "data", Name, "storedPlaceKeys", location.Name);
+                jsonFileManager.SetData(locationKey, "data", Name, "storedPlaceKeys", location.Name);
             }
 
             if (HasReachedRequestLimit())
@@ -163,7 +176,6 @@ namespace WeatherApp.WeatherAPIs
             {
                 try
                 {
-           
                     string dateString = (string)item["DateTime"]!;
                     DateTime forecastDate = DateTime.ParseExact(dateString, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
@@ -227,9 +239,11 @@ namespace WeatherApp.WeatherAPIs
         {
             JsonFileManager jsonFileManager = new JsonFileManager();
 
-            string? locationKey = jsonFileManager.GetNestedValue("data", Name, "storedPlaceKeys", location.Name) as string;
+            string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
+            Debug.WriteLine(locationKey);
             if (locationKey == null)
             {
+                Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
                 APIResponse<String> locationKeyResponse = await GetLocationKey(location, simulate);
                 if (!locationKeyResponse.Success)
                     return new APIResponse<List<WeatherDataModel>>
@@ -241,7 +255,8 @@ namespace WeatherApp.WeatherAPIs
                 }
                 Debug.Assert(locationKeyResponse.Data != null);
                 locationKey = locationKeyResponse.Data;
-                jsonFileManager.SetNestedValue(new { key = locationKey }, "data", Name, "storedPlaceKeys", location.Name);
+                string locationName = location.Name!;
+                jsonFileManager.SetData(locationKey, "data", Name, "storedPlaceKeys", location.Name);
             }
 
             if (HasReachedRequestLimit())

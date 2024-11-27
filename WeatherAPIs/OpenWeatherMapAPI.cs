@@ -54,6 +54,7 @@ namespace WeatherApp.WeatherAPIs
             JObject weatherResponse = JObject.Parse(responseBody);
             var list = weatherResponse["list"] ?? throw new Exception("Missing list data in API response");
             var weatherData = new List<WeatherDataModel>();
+            bool setTestDay = false;
 
             foreach (var item in list)
             {
@@ -64,19 +65,27 @@ namespace WeatherApp.WeatherAPIs
                     throw new Exception($"Missing data in API response at {item}");
                 }
                 DateTime forecastDate = DateTime.Parse((string)item["dt_txt"]!);
-                if (!simulate && forecastDate.Date == day.Date)
+                if (simulate && !setTestDay)
                 {
-                    int weatherId = (int)weather["id"]!;
-                    WeatherCondition condition = CalculateWeatherCondition(weatherId);
-
-                    weatherData.Add(new WeatherDataModel(
-                        condition,
-                        forecastDate,
-                        minTemperature: (double)main["temp_min"]!,
-                        maxTemperature: (double)main["temp_max"]!,
-                        humidity: (double)main["humidity"]!
-                        ));
+                    day = forecastDate;
+                    setTestDay = true;
                 }
+                if (forecastDate.Date != day.Date)
+                {
+                    Debug.WriteLine("Skipping entry as dates do not match.");
+                    continue; // Skip entries not matching the requested day (only when not simulating).
+                }
+    
+                int weatherId = (int)weather["id"]!;
+                WeatherCondition condition = CalculateWeatherCondition(weatherId);
+
+                weatherData.Add(new WeatherDataModel(
+                    condition,
+                    forecastDate,
+                    minTemperature: (double)main["temp_min"]!,
+                    maxTemperature: (double)main["temp_max"]!,
+                    humidity: (double)main["humidity"]!
+                    ));
             }
 
             return new APIResponse<List<WeatherDataModel>>

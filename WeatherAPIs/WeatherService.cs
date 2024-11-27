@@ -81,10 +81,10 @@ namespace WeatherApp.WeatherAPIs
             string envPath = Path.Combine(baseDirectory, ".env");
 
             DotNetEnv.Env.Load(envPath);
-            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper().Replace(" ", "_") + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables");
+            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper().Replace(" ", "_") + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.\nPlease check that the correct key/value is set in the .env file.");
             if (string.IsNullOrEmpty(apiKey))
             {
-                throw new InvalidOperationException("API key not found in environment variables.");
+                throw new InvalidOperationException("API key not found in environment variables.\nPlease check that the correct key/value is set in the .env file.");
             }
             return apiKey;
         }
@@ -103,23 +103,23 @@ namespace WeatherApp.WeatherAPIs
             string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             string currentMonth = DateTime.Now.ToString("yyyy-MM");
 
-            int dailyCount = jsonManager.GetNestedValue("requestCounts", Name, "requestsDay", "count") as int? ?? 0;
-            string? dailyDate = jsonManager.GetNestedValue("requestCounts", Name, "requestsDay", "date") as string;
+            int dailyCount = jsonManager.GetData("requestCounts", Name, "requestsDay", "count") as int? ?? 0;
+            string? dailyDate = jsonManager.GetData("requestCounts", Name, "requestsDay", "date") as string;
 
-            int monthlyCount = jsonManager.GetNestedValue("requestCounts", Name, "requestsMonth", "count") as int? ?? 0;
-            string? monthlyDate = jsonManager.GetNestedValue("requestCounts", Name, "requestsMonth", "month") as string;
+            int monthlyCount = jsonManager.GetData("requestCounts", Name, "requestsMonth", "count") as int? ?? 0;
+            string? monthlyDate = jsonManager.GetData("requestCounts", Name, "requestsMonth", "month") as string;
 
             // Reset counters if dates don't match
             if (dailyDate != currentDate)
             {
                 dailyCount = 0;
-                jsonManager.SetNestedValue(new { count = dailyCount, date = currentDate }, "requestCounts", Name, "requestsDay");
+                jsonManager.SetData(new { count = dailyCount, date = currentDate }, "requestCounts", Name, "requestsDay");
             }
 
             if (monthlyDate != currentMonth)
             {
                 monthlyCount = 0;
-                jsonManager.SetNestedValue(new { count = monthlyCount, month = currentMonth }, "requestCounts", Name, "requestsMonth");
+                jsonManager.SetData(new { count = monthlyCount, month = currentMonth }, "requestCounts", Name, "requestsMonth");
             }
 
             RequestLimitDay = new ServiceRequestLimit(requestLimitDay, dailyCount);
@@ -137,13 +137,13 @@ namespace WeatherApp.WeatherAPIs
             JsonFileManager jsonManager = new JsonFileManager();
 
             // Save daily request count and date
-            jsonManager.SetNestedValue(
+            jsonManager.SetData(
                 new { count = RequestLimitDay.CurrentRequestCount, date = DateTime.Now.ToString("yyyy-MM-dd") },
                 "requestCounts", Name, "requestsDay"
             );
 
             // Save monthly request count and month
-            jsonManager.SetNestedValue(
+            jsonManager.SetData(
                 new { count = RequestLimitMonth.CurrentRequestCount, month = DateTime.Now.ToString("yyyy-MM") },
                 "requestCounts", Name, "requestsMonth"
             );

@@ -1,12 +1,16 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace WeatherApp.Utils
 {
+    /// <summary>
+    /// This class manages JSON data stored in a file.
+    /// </summary>
     public class JsonFileManager
     {
         private readonly string _filePath;
@@ -16,7 +20,11 @@ namespace WeatherApp.Utils
             _filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "weatherAppData.json");
         }
 
-        public JObject GetJson()
+        /// <summary>
+        /// Gets all JSON data from the file.
+        /// </summary>
+        /// <returns>A <see cref="JObject"/> representing the JSON data.</returns>
+        public JObject GetAllJson()
         {
             if (File.Exists(_filePath))
             {
@@ -27,30 +35,52 @@ namespace WeatherApp.Utils
             return new JObject();
         }
 
-        public void SaveJson(JObject data)
+        /// <summary>
+        /// Saves all JSON data to the file.
+        /// </summary>
+        /// <param name="data">The <see cref="JObject"/> representing the JSON data to save.</param>
+        public void SaveAllJson(JObject data)
         {
             string json = data.ToString();
             File.WriteAllText(_filePath, json);
         }
 
-        public T? GetData<T>(string key) where T : class
+        /// <summary>
+        /// Gets a section of the JSON data as a class object.
+        /// </summary>
+        /// <typeparam name="T">The type of the class to convert the JSON data to.</typeparam>
+        /// <param name="key">The key of the section to get.</param>
+        /// <returns>An object of type <typeparamref name="T"/> representing the JSON data, or null if the section does not exist.</returns>
+        public T? GetSectionAsClass<T>(string key) where T : class
         {
-            JObject root = GetJson();
+            JObject root = GetAllJson();
             return root[key]?.ToObject<T>();
         }
 
-        public void SetData<T>(string key, T value)
+        /// <summary>
+        /// Sets a section of the JSON data.
+        /// </summary>
+        /// <typeparam name="T">The type of the value to set in the JSON data.</typeparam>
+        /// <param name="key">The key of the section to set.</param>
+        /// <param name="value">The value to set in the JSON data.</param>
+        public void SetSection<T>(string key, T value)
         {
-            JObject root = GetJson();
+            JObject root = GetAllJson();
             root[key] = JToken.FromObject(value);
-            SaveJson(root);
+            SaveAllJson(root);
         }
 
-        public object? GetNestedValue(params string[] keys)
+        /// <summary>
+        /// Gets a value from the JSON data using a specified path of keys.
+        /// </summary>
+        /// <param name="keys">An array of keys representing the path to the value.</param>
+        /// <returns>The value as an object, or null if the path does not exist.</returns>
+        public object? GetData(params string[] keys)
         {
-            JObject root = GetJson();
+            JObject root = GetAllJson();
             JToken? token = root;
 
+            // Traverse the JSON hierarchy to the specified key path
             foreach (var key in keys)
             {
                 token = token?[key];
@@ -60,11 +90,17 @@ namespace WeatherApp.Utils
             return token?.ToObject<object>(); // Return as object (can cast to specific type)
         }
 
-        public void SetNestedValue(object value, params string[] keys)
+        /// <summary>
+        /// Sets a value in the JSON data using a specified path of keys.
+        /// </summary>
+        /// <param name="value">The value to set in the JSON data.</param>
+        /// <param name="keys">An array of keys representing the path to the value.</param>
+        public void SetData(object value, params string[] keys)
         {
-            JObject root = GetJson();
+            JObject root = GetAllJson();
             JToken current = root;
 
+            // Traverse the JSON hierarchy to the specified key path
             for (int i = 0; i < keys.Length - 1; i++)
             {
                 string key = keys[i];
@@ -77,9 +113,7 @@ namespace WeatherApp.Utils
             }
 
             current[keys[^1]] = JToken.FromObject(value); // Set value at final key
-            SaveJson(root);
+            SaveAllJson(root);
         }
-
     }
-
 }
