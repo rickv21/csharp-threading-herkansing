@@ -76,6 +76,7 @@ namespace WeatherApp.ViewModels
             }
         }
 
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -204,7 +205,7 @@ namespace WeatherApp.ViewModels
             try
             {
                 APIResponse<List<WeatherDataModel>> task;
-                task = await api.GetWeatherDataAsync(DateTime.Today, "Emmen", SimulateMode);
+                task = await api.GetWeatherForAWeekAsync("Emmen", SimulateMode);
                
                 Debug.WriteLine("Is success: " + task.Success);
                 if (task.Success)

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Maui.Controls;
+using Newtonsoft.Json.Linq;
 using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
@@ -22,26 +23,33 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            using (HttpClient client = new HttpClient())
+            if (simulate)
             {
-                long unixTimestamp = new DateTimeOffset(day).ToUnixTimeSeconds();
-                string url = $"{_baseURL}{_apiKey}&locatie={location}";
-                HttpResponseMessage response = await client.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
+                responseBody = GetTestJSON();
+            }
+            else
+            {
+                using (HttpClient client = new HttpClient())
                 {
-                    responseBody = await response.Content.ReadAsStringAsync();
-                    var errorResponse = JObject.Parse(responseBody);
-                    string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
-                    string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
-                    return new APIResponse<List<WeatherDataModel>>
+                    string url = $"{_baseURL}{_apiKey}&locatie={location}";
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
                     {
-                        Success = false,
-                        ErrorMessage = $"{errorCode} - {errorMessage}",
-                        Data = null
-                    };
+                        responseBody = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JObject.Parse(responseBody);
+                        string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
+                        string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
+                        return new APIResponse<List<WeatherDataModel>>
+                        {
+                            Success = false,
+                            ErrorMessage = $"{errorCode} - {errorMessage}",
+                            Data = null
+                        };
+                    }
+                    CountRequest(); // Important: this counts the requests for the limit.
+                    responseBody = await response.Content.ReadAsStringAsync();
                 }
-                CountRequest(); // Important: this counts the requests for the limit.
-                responseBody = await response.Content.ReadAsStringAsync();
+            }
 
                 JObject weatherResponse = JObject.Parse(responseBody);
 
@@ -81,12 +89,77 @@ namespace WeatherApp.WeatherAPIs
                     Data = weatherData
                 };
             }
-        }
 
 
-        public override Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
+
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
         {
-            throw new NotImplementedException();
+            if (HasReachedRequestLimit())
+            {
+                return new APIResponse<List<WeatherDataModel>>
+                {
+                    Success = false,
+                    ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
+                    Data = null
+                };
+            }
+
+            string responseBody;
+            if (simulate)
+            {
+                responseBody = GetTestJSON();
+            }
+            else
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    string url = $"{_baseURL}{_apiKey}&locatie={location}";
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        responseBody = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JObject.Parse(responseBody);
+                        string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
+                        string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
+                        return new APIResponse<List<WeatherDataModel>>
+                        {
+                            Success = false,
+                            ErrorMessage = $"{errorCode} - {errorMessage}",
+                            Data = null
+                        };
+                    }
+                    CountRequest(); // Important: this counts the requests for the limit.
+                    responseBody = await response.Content.ReadAsStringAsync();
+                }
+            }
+
+            JObject weatherResponse = JObject.Parse(responseBody);
+
+            // Extract "list" element or throw an exception if not found
+            var weekPredictions = weatherResponse["wk_verw"] ?? throw new Exception("Missing list data in API response");
+            var weatherData = new List<WeatherDataModel>();
+
+            foreach (var day in weekPredictions)
+            {
+                var condition = CalculateWeatherCondition((string)day["image"]);
+                DateTime forecastDate = DateTime.Parse((string)day["dag"]!);
+                var minTemp = day["min_temp"];
+                var maxTemp = day["max_temp"];
+
+                weatherData.Add(new WeatherDataModel(
+                   condition,
+                   forecastDate,
+                   minTemperature: (double)minTemp,
+                   maxTemperature: (double)maxTemp,
+                   humidity: -1.0
+               ));
+            }
+            return new APIResponse<List<WeatherDataModel>>
+            {
+                Success = true,
+                ErrorMessage = null,
+                Data = weatherData
+            };
         }
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
