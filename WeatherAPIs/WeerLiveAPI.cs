@@ -196,6 +196,8 @@ namespace WeatherApp.WeatherAPIs
                     return WeatherCondition.CLEAR;
                 case "nachtbewolkt":
                     return WeatherCondition.CLOUDY;
+                case "wolkennacht":
+                    return WeatherCondition.CLOUDY;
             }
             return WeatherCondition.UNKNOWN;
         }

@@ -19,7 +19,7 @@ namespace WeatherApp.ViewModels
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
             OpenWeerLiveCommand = new Command(ExecuteOpenWeerLiveCommand);
-            IsOpenWeatherMapDay = true;
+            IsAPIDay = true;
             SimulateMode = false;
         }
 
@@ -45,32 +45,32 @@ namespace WeatherApp.ViewModels
             }
         }
 
-        private bool _openWeatherMapDay;
-        private bool _openWeatherMapWeek;
+        private bool _isAPIDay;
+        private bool _isAPIWeek;
 
-        public bool IsOpenWeatherMapDay
+        public bool IsAPIDay
         {
-            get => _openWeatherMapDay;
+            get => _isAPIDay;
             set
             {
-                if (_openWeatherMapDay != value)
+                if (_isAPIDay != value)
                 {
-                    _openWeatherMapDay = value;
-                    if (value) IsOpenWeatherMapWeek = false; // Ensure only one option is selected
+                    _isAPIDay = value;
+                    if (value) IsAPIWeek = false; // Ensure only one option is selected
                     OnPropertyChanged();
                 }
             }
         }
 
-        public bool IsOpenWeatherMapWeek
+        public bool IsAPIWeek
         {
-            get => _openWeatherMapWeek;
+            get => _isAPIWeek;
             set
             {
-                if (_openWeatherMapWeek != value)
+                if (_isAPIWeek != value)
                 {
-                    _openWeatherMapWeek = value;
-                    if (value) _openWeatherMapDay = false; // Ensure only one option is selected
+                    _isAPIWeek = value;
+                    if (value) _isAPIDay = false; // Ensure only one option is selected
                     OnPropertyChanged();
                 }
             }
@@ -151,7 +151,7 @@ namespace WeatherApp.ViewModels
             try
             {
                 APIResponse<List<WeatherDataModel>> task;
-                if (IsOpenWeatherMapDay)
+                if (IsAPIDay)
                 {
                     task = await api.GetWeatherDataAsync(DateTime.Today, "Emmen", SimulateMode);
                 } 
@@ -205,8 +205,16 @@ namespace WeatherApp.ViewModels
             try
             {
                 APIResponse<List<WeatherDataModel>> task;
-                task = await api.GetWeatherForAWeekAsync("Emmen", SimulateMode);
-               
+
+                if (IsAPIDay)
+                {
+                    task = await api.GetWeatherDataAsync(DateTime.Now, "Emmen", SimulateMode);
+                }
+                else
+                {
+                    task = await api.GetWeatherForAWeekAsync("Emmen", SimulateMode);
+                }
+
                 Debug.WriteLine("Is success: " + task.Success);
                 if (task.Success)
                 {

@@ -41,13 +41,13 @@
                 Command="{Binding TestAPICommand}"
                 HorizontalOptions="Center" />
             <Label
-                Text="Open Weather Map:"
+                Text="API's:"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Open Weather Map" />
+                SemanticProperties.Description="API's" />
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <RadioButton Content="Day" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsOpenWeatherMapDay, Mode=TwoWay}" />
-                <RadioButton Content="Week" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsOpenWeatherMapWeek, Mode=TwoWay}" />
+                <RadioButton Content="Day" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIDay, Mode=TwoWay}" />
+                <RadioButton Content="Week" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIWeek, Mode=TwoWay}" />
             </HorizontalStackLayout>
             <Button
                 x:Name="OpenWeatherMapButton"
