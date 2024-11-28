@@ -214,7 +214,16 @@ namespace WeatherApp.ViewModels
                     //An assertion to throw a exception if Data is null when Success is true, which should never happen.
                     Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
 
+                    foreach (var model in task.Data)
+                    {
+                        Debug.WriteLine("Model loop!");
+                        Debug.WriteLine(model.ToString());
+
+                        // Show a simple alert
+                        await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
+                    }
                 }
+
                 else
                 {
                     Debug.WriteLine(task.ErrorMessage);
