@@ -28,7 +28,7 @@ namespace WeatherApp.ViewModels
         public WeatherOverviewViewModel()
         {
             TabNames.Add("1");
-            TabNames.Add("111111111111111111111111111111111111111111111");
+            TabNames.Add("2");
             TabNames.Add("3");
         }
         private void SetTabs()

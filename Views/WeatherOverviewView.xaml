@@ -8,19 +8,29 @@
         <local:WeatherOverviewViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="*, 2*">
-        <!-- Verdeel het scherm in twee rijen -->
+    <Grid RowDefinitions="Auto, *, Auto, 2*">
         <!-- Bovenste helft met tabbladen -->
-        <TabbedPage Grid.Row="0">
-            <ContentPage Title="Tab 1">
-                <Label Text="Inhoud van Tab 1" />
-            </ContentPage>
-            <ContentPage Title="Tab 2">
-                <Label Text="Inhoud van Tab 2" />
-            </ContentPage>
-        </TabbedPage>
+        <HorizontalStackLayout Grid.Row="0">
+            <CollectionView ItemsSource="{Binding TabNames}" SelectionMode="Single" x:Name="TabCollection">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10" Margin="5" BorderColor="LightGray" CornerRadius="10">
+                            <Label Text="{Binding}" />
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </HorizontalStackLayout>
+        <!-- Tab Content Display -->
+        <ContentView Grid.Row="1">
+            <!-- This is where you can display content based on selected tab -->
+            <Label x:Name="TabContentLabel" Text="Tab content will be displayed here" />
+        </ContentView>
         <!-- Onderste helft met bestaande content -->
-        <VerticalStackLayout Grid.Row="1">
+        <VerticalStackLayout Grid.Row="3">
             <Label Text="Welcome to .NET MAUI!" VerticalOptions="Center" HorizontalOptions="Center" />
             <WebView x:Name="MapWebView" HeightRequest="400" WidthRequest="300" HorizontalOptions="Fill" VerticalOptions="FillAndExpand" />
         </VerticalStackLayout>
