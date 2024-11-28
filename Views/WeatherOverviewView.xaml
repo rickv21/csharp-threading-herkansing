@@ -10,7 +10,7 @@
 
     <Grid RowDefinitions="Auto, *, Auto, 2*">
         <!-- Bovenste helft met tabbladen -->
-        <HorizontalStackLayout Grid.Row="0">
+        <ScrollView Orientation="Horizontal" Grid.Row="0">
             <CollectionView ItemsSource="{Binding TabNames}" SelectionMode="Single" x:Name="TabCollection">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" />
@@ -23,10 +23,9 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-        </HorizontalStackLayout>
+        </ScrollView>
         <!-- Tab Content Display -->
         <ContentView Grid.Row="1">
-            <!-- This is where you can display content based on selected tab -->
             <Label x:Name="TabContentLabel" Text="Tab content will be displayed here" />
         </ContentView>
         <!-- Onderste helft met bestaande content -->

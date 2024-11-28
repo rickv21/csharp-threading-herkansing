@@ -30,6 +30,43 @@ namespace WeatherApp.ViewModels
             TabNames.Add("1");
             TabNames.Add("2");
             TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("3");
+            TabNames.Add("1");
+            TabNames.Add("2");
+            TabNames.Add("1");
+            TabNames.Add("3");
+            TabNames.Add("3");
+            TabNames.Add("3");
+            TabNames.Add("9");
+
+            TabNames.Add("3");
+            TabNames.Add("3");
         }
         private void SetTabs()
         {
