@@ -1,5 +1,7 @@
 ﻿using WeatherApp.Models;
 using Newtonsoft.Json.Linq;
+using WeatherApp.Utils;
+using System.Reflection;
 
 namespace WeatherApp.WeatherAPIs
 {
@@ -22,7 +24,7 @@ namespace WeatherApp.WeatherAPIs
         /// The name of the API.
         /// Is used for getting the API key from .env and in the settings view.
         /// </summary>
-        public string Name {  get; private set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// The request limit and current request data for the current day.
@@ -54,7 +56,7 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="location">The location as a string that will be passed to the API.</param>
         /// <param name="simulate">If the request should be simulated instead of sending a actual request, defaults to false if not set.</param>
         /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
-        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false);
+        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false);
 
         /// <summary>
         /// Gets the weather data for the current week and returns the weather data for each day as a list.
@@ -62,7 +64,7 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="location">The location as a string that will be passed to the API.</param>
         /// <param name="simulate">If the request should be simulated instead of sending a actual request, defaults to false if not set.</param>
         /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
-        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false); //TODO: Maybe we could pass a week number if we later want to check more weeks.
+        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false); //TODO: Maybe we could pass a week number if we later want to check more weeks.
 
 
         /// <summary>
@@ -79,10 +81,10 @@ namespace WeatherApp.WeatherAPIs
             string envPath = Path.Combine(baseDirectory, ".env");
 
             DotNetEnv.Env.Load(envPath);
-            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper().Replace(" ", "_") + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables");
+            string apiKey = Environment.GetEnvironmentVariable(Name.ToUpper().Replace(" ", "_") + "_API_KEY") ?? throw new InvalidOperationException("API key not found in environment variables.\nPlease check that the correct key/value is set in the .env file.");
             if (string.IsNullOrEmpty(apiKey))
             {
-                throw new InvalidOperationException("API key not found in environment variables.");
+                throw new InvalidOperationException("API key not found in environment variables.\nPlease check that the correct key/value is set in the .env file.");
             }
             return apiKey;
         }
@@ -97,56 +99,34 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="requestLimitMonth">The request limit per month.</param>
         protected void GetCurrentRequestsFromFile(int requestLimitDay, int requestLimitMonth)
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "weatherAppData.json");
+            JsonFileManager jsonManager = new JsonFileManager();
             string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             string currentMonth = DateTime.Now.ToString("yyyy-MM");
 
-            if (File.Exists(filePath))
+            int dailyCount = jsonManager.GetData("requestCounts", Name, "requestsDay", "count") as int? ?? 0;
+            string? dailyDate = jsonManager.GetData("requestCounts", Name, "requestsDay", "date") as string;
+
+            int monthlyCount = jsonManager.GetData("requestCounts", Name, "requestsMonth", "count") as int? ?? 0;
+            string? monthlyDate = jsonManager.GetData("requestCounts", Name, "requestsMonth", "month") as string;
+
+            // Reset counters if dates don't match
+            if (dailyDate != currentDate)
             {
-                string json = File.ReadAllText(filePath);
-                JObject requestCountsWrapper = JObject.Parse(json);
-                if (requestCountsWrapper["requestCounts"] is JObject requestCounts && requestCounts[Name] is JObject counts)
-                {
-                    if (counts["requestsDay"]?["date"]?.ToString() != currentDate)
-                    {
-                        counts["requestsDay"] = new JObject
-                    {
-                            { "count", 0 },
-                            { "date", currentDate }
-                    };
-                    }
-
-                    if (counts["requestsMonth"]?["month"]?.ToString() != currentMonth)
-                    {
-                        counts["requestsMonth"] = new JObject
-                    {
-                        { "count", 0 },
-                        { "month", currentMonth }
-                    };
-                        }
-
-                    // Update the request limits here, based on updated counts from the file
-                    RequestLimitDay = new ServiceRequestLimit(requestLimitDay, (int)counts["requestsDay"]?["count"]!);
-                    RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, (int)counts["requestsMonth"]?["count"]!);
-
-                    // Save the potentially reset counts
-                    SaveRequestCountsToFile();
-                }
-                else
-                {
-                    RequestLimitDay = new ServiceRequestLimit(requestLimitDay, 0);
-                    RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, 0);
-
-                    SaveRequestCountsToFile();
-                }
+                dailyCount = 0;
+                jsonManager.SetData(new { count = dailyCount, date = currentDate }, "requestCounts", Name, "requestsDay");
             }
-            else
+
+            if (monthlyDate != currentMonth)
             {
-                RequestLimitDay = new ServiceRequestLimit(requestLimitDay, 0);
-                RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, 0);
-
-                SaveRequestCountsToFile();
+                monthlyCount = 0;
+                jsonManager.SetData(new { count = monthlyCount, month = currentMonth }, "requestCounts", Name, "requestsMonth");
             }
+
+            RequestLimitDay = new ServiceRequestLimit(requestLimitDay, dailyCount);
+            RequestLimitMonth = new ServiceRequestLimit(requestLimitMonth, monthlyCount);
+
+            // Save any changes
+            SaveRequestCountsToFile();
         }
 
         /// <summary>
@@ -154,45 +134,19 @@ namespace WeatherApp.WeatherAPIs
         /// </summary>
         protected void SaveRequestCountsToFile()
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "weatherAppData.json");
-            JObject requestCountsWrapper;
+            JsonFileManager jsonManager = new JsonFileManager();
 
-            if (File.Exists(filePath))
-            {
-                string json = File.ReadAllText(filePath);
-                requestCountsWrapper = JObject.Parse(json);
-            }
-            else
-            {
-                requestCountsWrapper = new JObject();
-            }
+            // Save daily request count and date
+            jsonManager.SetData(
+                new { count = RequestLimitDay.CurrentRequestCount, date = DateTime.Now.ToString("yyyy-MM-dd") },
+                "requestCounts", Name, "requestsDay"
+            );
 
-            if (requestCountsWrapper["requestCounts"] is not JObject requestCounts)
-            {
-                requestCounts = new JObject();
-                requestCountsWrapper["requestCounts"] = requestCounts;
-            }
-
-            if (requestCounts[Name] is not JObject serviceCounts)
-            {
-                serviceCounts = new JObject();
-                requestCounts[Name] = serviceCounts;
-            }
-
-            serviceCounts["requestsDay"] = new JObject
-            {
-                { "count", RequestLimitDay.CurrentRequestCount },
-                { "date", DateTime.Now.ToString("yyyy-MM-dd") }
-            };
-
-            serviceCounts["requestsMonth"] = new JObject
-            {
-                { "count", RequestLimitMonth.CurrentRequestCount },
-                { "month", DateTime.Now.ToString("yyyy-MM") }
-            };
-
-            string updatedJson = requestCountsWrapper.ToString();
-            File.WriteAllText(filePath, updatedJson);
+            // Save monthly request count and month
+            jsonManager.SetData(
+                new { count = RequestLimitMonth.CurrentRequestCount, month = DateTime.Now.ToString("yyyy-MM") },
+                "requestCounts", Name, "requestsMonth"
+            );
         }
 
 
@@ -230,9 +184,26 @@ namespace WeatherApp.WeatherAPIs
         protected abstract WeatherCondition CalculateWeatherCondition(object data);
 
         /// <summary>
-        /// Returns a example JSON query result to use for testing.
+        /// Reads an embedded JSON resource file and returns its content as a string.
         /// </summary>
-        /// <returns>The test data.</returns>
-        protected abstract string GetTestJSON();
+        /// <param name="folderName">The folder where the JSON file is located.</param>
+        /// <param name="fileName">The name of the JSON file (include the extension).</param>
+        /// <returns>The content of the JSON file as a string.</returns>
+        public static string GetTestJSON(string fileName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourceName = $"{assembly.GetName().Name}.TestData.{fileName}";
+
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    throw new FileNotFoundException($"Resource '{resourceName}' not found. Ensure the file is embedded as a resource and the folder structure matches.");
+
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
     }
 }
