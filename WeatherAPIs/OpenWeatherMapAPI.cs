@@ -51,7 +51,7 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
             var list = weatherResponse["list"] ?? throw new Exception("Missing list data in API response");
             var weatherData = new List<WeatherDataModel>();
@@ -147,7 +147,7 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Check if weatherResponse["list"] exists and is not null
