@@ -22,6 +22,10 @@
                 Text="Hello, World!"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                <RadioButton Content="Day" GroupName="APIToggleGroup" IsChecked="{Binding IsDay, Mode=TwoWay}" />
+                <RadioButton Content="Week" GroupName="APIToggleGroup" IsChecked="{Binding IsWeek, Mode=TwoWay}" />
+            </HorizontalStackLayout>
 
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
                 <Label Text="Simulate requests:" VerticalOptions="Center" />
@@ -36,7 +40,7 @@
 
             <Button
                 x:Name="TestButton"
-                Text="{Binding TestCounterText}" 
+                Text="Click to send Test API Request" 
                 SemanticProperties.Hint="Sends a request to the test api"
                 Command="{Binding TestAPICommand}"
                 HorizontalOptions="Center" />
@@ -49,6 +53,8 @@
                 <RadioButton Content="Day" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIDay, Mode=TwoWay}" />
                 <RadioButton Content="Week" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIWeek, Mode=TwoWay}" />
             </HorizontalStackLayout>
+                SemanticProperties.Description="Open Weather Map" />
+
             <Button
                 x:Name="OpenWeatherMapButton"
                 Text="Click to send Weather Map API Request" 
@@ -61,6 +67,19 @@
                  SemanticProperties.Hint="Sends a request to the WeerLive api"
                  Command="{Binding OpenWeerLiveCommand}"
                  HorizontalOptions="Center" />
+            
+            <Label
+                Text="AccuWeather:"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Open Weather Map" />
+
+            <Button
+                x:Name="AccuWeatherButton"
+                Text="Click to send AccuWeather API Request" 
+                SemanticProperties.Hint="Sends a request to the AccuWeather api"
+                Command="{Binding AccuWeatherCommand}"
+                HorizontalOptions="Center" />
 
             <Button
                 Text="Overview"
