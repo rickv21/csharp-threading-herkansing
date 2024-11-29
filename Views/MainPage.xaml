@@ -49,11 +49,6 @@
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="API's" />
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <RadioButton Content="Day" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIDay, Mode=TwoWay}" />
-                <RadioButton Content="Week" GroupName="OpenWeatherMapGroup" IsChecked="{Binding IsAPIWeek, Mode=TwoWay}" />
-            </HorizontalStackLayout>
-                SemanticProperties.Description="Open Weather Map" />
 
             <Button
                 x:Name="OpenWeatherMapButton"
@@ -65,7 +60,7 @@
                  x:Name="WeerLive_Button"
                  Text="WeerLiveTest" 
                  SemanticProperties.Hint="Sends a request to the WeerLive api"
-                 Command="{Binding OpenWeerLiveCommand}"
+                 Command="{Binding WeerLiveCommand}"
                  HorizontalOptions="Center" />
             
             <Label

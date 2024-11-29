@@ -9,16 +9,16 @@ namespace WeatherApp.ViewModels
 {
     public class MainViewModel : BindableObject
     {
-        private int count = 0;
-        public ICommand OpenWeerLiveCommand { get; }
+        public ICommand WeerLiveCommand { get; }
         private LocationModel testLocationModel = new("Emmen", 52.787701, 6.894810);
 
         public MainViewModel()
         {
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
-
+            WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
+
             IsDay = true;
             SimulateMode = false;
         }
@@ -179,7 +179,7 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
             }
         }
-        private async void ExecuteOpenWeerLiveCommand()
+        private async Task ExecuteWeerLiveCommand()
         {
             WeerLiveAPI api;
             try
@@ -198,11 +198,11 @@ namespace WeatherApp.ViewModels
 
                 if (IsDay)
                 {
-                    task = await api.GetWeatherDataAsync(DateTime.Now, "Emmen", SimulateMode);
+                    task = await api.GetWeatherDataAsync(DateTime.Now, testLocationModel, SimulateMode);
                 }
                 else
                 {
-                    task = await api.GetWeatherForAWeekAsync("Emmen", SimulateMode);
+                    task = await api.GetWeatherForAWeekAsync(testLocationModel, SimulateMode);
                 }
 
                 Debug.WriteLine("Is success: " + task.Success);

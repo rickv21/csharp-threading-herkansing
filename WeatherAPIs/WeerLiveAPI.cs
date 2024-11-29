@@ -1,5 +1,6 @@
 ﻿using Microsoft.Maui.Controls;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
@@ -10,7 +11,7 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
             if (HasReachedRequestLimit())
             {
@@ -25,13 +26,13 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON();
+                responseBody = GetTestJSON("weer_live_test.json");
             }
             else
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}{_apiKey}&locatie={location}";
+                    string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -51,36 +52,42 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-                JObject weatherResponse = JObject.Parse(responseBody);
+            JObject weatherResponse = JObject.Parse(responseBody);
 
-                // Extract "list" element or throw an exception if not found
-                var hourPredictions = weatherResponse["uur_verw"] ?? throw new Exception("Missing list data in API response");
+            // Extract "list" element or throw an exception if not found
+            var hourPredictions = weatherResponse["uur_verw"] ?? throw new Exception("Missing list data in API response");
 
-                var weatherData = new List<WeatherDataModel>();
+            var weatherData = new List<WeatherDataModel>();
+        
 
-
-
+            bool setTestDay = false;
             foreach (var hour in hourPredictions)
             {
                 var condition = CalculateWeatherCondition((string)hour["image"]);
                 DateTime forecastDate = DateTime.Parse((string)hour["uur"]!);
+
+                if (simulate && !setTestDay)
+                {
+                    day = forecastDate;
+                    setTestDay = true;
+                }
+                if (forecastDate.Date != day.Date)
+                {
+                    Debug.WriteLine("Skipping entry as dates do not match.");
+                    continue; // Skip entries not matching the requested day (only when not simulating).
+                }
+
                 var minTemp = hour["temp"];
                 var maxTemp = hour["temp"];
 
-                var test = forecastDate.Date;
-                var testtest = DateTime.Today;
-
-                if (forecastDate.Date < DateTime.Today || forecastDate.Date > DateTime.Today)
-                {
-
-                    weatherData.Add(new WeatherDataModel(
-                       condition,
-                       forecastDate,
-                       minTemperature: (double)minTemp,
-                       maxTemperature: (double)maxTemp,
-                       humidity: -1.0
-                   ));
-                }
+                weatherData.Add(new WeatherDataModel(
+                   condition,
+                   forecastDate,
+                   minTemperature: (double)minTemp,
+                   maxTemperature: (double)maxTemp,
+                   humidity: -1.0
+               ));
+            
             }
 
             // Return the response
@@ -94,7 +101,7 @@ namespace WeatherApp.WeatherAPIs
 
 
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
             if (HasReachedRequestLimit())
             {
@@ -109,13 +116,13 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON();
+                responseBody = GetTestJSON("weer_live_test.json");
             }
             else
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}{_apiKey}&locatie={location}";
+                    string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -202,11 +209,6 @@ namespace WeatherApp.WeatherAPIs
                     return WeatherCondition.CLOUDY;
             }
             return WeatherCondition.UNKNOWN;
-        }
-
-        protected override string GetTestJSON()
-        {
-            throw new NotImplementedException();
         }
     }
 }
