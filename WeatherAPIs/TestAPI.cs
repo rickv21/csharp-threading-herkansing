@@ -11,6 +11,7 @@ namespace WeatherApp.WeatherAPIs
         }
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -48,7 +49,7 @@ namespace WeatherApp.WeatherAPIs
                 CountRequest(); // Important: this counts the requests for the limit.
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Write(responseBody);
+                Debug.WriteLine(responseBody);
                 JObject post = JObject.Parse(responseBody);
                 int id = (int?)post["id"] ?? -1; //Fallback to -1 if not found in response.
 
@@ -75,6 +76,7 @@ namespace WeatherApp.WeatherAPIs
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -103,7 +105,7 @@ namespace WeatherApp.WeatherAPIs
 
                 }
             }
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject post = JObject.Parse(responseBody);
 
             // Creating dummy weather data for a week

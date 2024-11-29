@@ -88,6 +88,7 @@ namespace WeatherApp.ViewModels
                 // Add supported weather services
                 services.Add(new OpenWeatherMapAPI());
                 services.Add(new AccuWeatherAPI());
+                services.Add(new WeerLiveAPI());
             }
             catch (Exception ex)
             {

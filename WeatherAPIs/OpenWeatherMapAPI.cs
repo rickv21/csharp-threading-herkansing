@@ -11,6 +11,7 @@ namespace WeatherApp.WeatherAPIs
         }
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -72,7 +73,7 @@ namespace WeatherApp.WeatherAPIs
                 }
                 if (forecastDate.Date != day.Date)
                 {
-                    Debug.WriteLine("Skipping entry as dates do not match.");
+                    Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
                     continue; // Skip entries not matching the requested day (only when not simulating).
                 }
     
@@ -99,6 +100,7 @@ namespace WeatherApp.WeatherAPIs
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
