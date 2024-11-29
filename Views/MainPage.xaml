@@ -45,10 +45,10 @@
                 Command="{Binding TestAPICommand}"
                 HorizontalOptions="Center" />
             <Label
-                Text="Open Weather Map:"
+                Text="API's:"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Open Weather Map" />
+                SemanticProperties.Description="API's" />
 
             <Button
                 x:Name="OpenWeatherMapButton"
@@ -56,6 +56,12 @@
                 SemanticProperties.Hint="Sends a request to the Open Weather Map api"
                 Command="{Binding OpenWeatherMapCommand}"
                 HorizontalOptions="Center" />
+            <Button
+                 x:Name="WeerLive_Button"
+                 Text="WeerLiveTest" 
+                 SemanticProperties.Hint="Sends a request to the WeerLive api"
+                 Command="{Binding WeerLiveCommand}"
+                 HorizontalOptions="Center" />
             
             <Label
                 Text="AccuWeather:"

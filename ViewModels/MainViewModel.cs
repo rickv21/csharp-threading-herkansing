@@ -9,14 +9,16 @@ namespace WeatherApp.ViewModels
 {
     public class MainViewModel : BindableObject
     {
-
+        public ICommand WeerLiveCommand { get; }
         private LocationModel testLocationModel = new("Emmen", 52.787701, 6.894810);
 
         public MainViewModel()
         {
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
+            WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
+
             IsDay = true;
             SimulateMode = false;
         }
@@ -62,6 +64,7 @@ namespace WeatherApp.ViewModels
                 }
             }
         }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -132,6 +135,7 @@ namespace WeatherApp.ViewModels
             try
             {
                 APIResponse<List<WeatherDataModel>> task;
+
                 if (IsDay)
                 {
                     task = await api.GetWeatherDataAsync(DateTime.Today, testLocationModel, SimulateMode);
@@ -175,6 +179,60 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
             }
         }
+        private async Task ExecuteWeerLiveCommand()
+        {
+            WeerLiveAPI api;
+            try
+            {
+                api = new WeerLiveAPI();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading WeerLive API: {ex.Message}");
+                return;
+            }
 
+            try
+            {
+                APIResponse<List<WeatherDataModel>> task;
+
+                if (IsDay)
+                {
+                    task = await api.GetWeatherDataAsync(DateTime.Now, testLocationModel, SimulateMode);
+                }
+                else
+                {
+                    task = await api.GetWeatherForAWeekAsync(testLocationModel, SimulateMode);
+                }
+
+                Debug.WriteLine("Is success: " + task.Success);
+                if (task.Success)
+                {
+                    Debug.WriteLine(task.Data);
+                    //An assertion to throw a exception if Data is null when Success is true, which should never happen.
+                    Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
+
+                    foreach (var model in task.Data)
+                    {
+                        Debug.WriteLine("Model loop!");
+                        Debug.WriteLine(model.ToString());
+
+                        // Show a simple alert
+                        await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
+                    }
+                }
+
+                else
+                {
+                    Debug.WriteLine(task.ErrorMessage);
+                    await Shell.Current.DisplayAlert("Error", task.ErrorMessage, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
+            }
+        }
     }
 }
