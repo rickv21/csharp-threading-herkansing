@@ -54,35 +54,37 @@ namespace WeatherApp.WeatherAPIs
                 JObject weatherResponse = JObject.Parse(responseBody);
 
                 // Extract "list" element or throw an exception if not found
-                var liveWeer = weatherResponse["liveweer"] ?? throw new Exception("Missing list data in API response");
+                var hourPredictions = weatherResponse["uur_verw"] ?? throw new Exception("Missing list data in API response");
 
                 var weatherData = new List<WeatherDataModel>();
 
 
-                // Extract "main" and "weather" data
-                JToken? temp = liveWeer[0]["temp"];
-                JToken? weather = liveWeer[0]["image"];
-                JToken? humidity = liveWeer[0]["lv"];
 
-                // Ensure all necessary data exists
-                if (temp == null || weather == null || humidity == null)
+            foreach (var hour in hourPredictions)
+            {
+                var condition = CalculateWeatherCondition((string)hour["image"]);
+                DateTime forecastDate = DateTime.Parse((string)hour["uur"]!);
+                var minTemp = hour["temp"];
+                var maxTemp = hour["temp"];
+
+                var test = forecastDate.Date;
+                var testtest = DateTime.Today;
+
+                if (forecastDate.Date < DateTime.Today || forecastDate.Date > DateTime.Today)
                 {
-                    throw new Exception($"Missing data in API response");
+
+                    weatherData.Add(new WeatherDataModel(
+                       condition,
+                       forecastDate,
+                       minTemperature: (double)minTemp,
+                       maxTemperature: (double)maxTemp,
+                       humidity: -1.0
+                   ));
                 }
-                var condition = CalculateWeatherCondition((string)weather);
-                DateTime forecastDate = DateTime.Parse((string)liveWeer[0]["time"]!);
+            }
 
-                // Add the weather data to the list
-                weatherData.Add(new WeatherDataModel(
-                    condition,
-                    forecastDate,
-                    minTemperature: (double)temp,
-                    maxTemperature: (double)temp,
-                    humidity: (double)humidity
-                ));
-
-                // Return the response
-                return new APIResponse<List<WeatherDataModel>>
+            // Return the response
+            return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = true,
                     ErrorMessage = null,
