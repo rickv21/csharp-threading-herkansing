@@ -13,6 +13,7 @@ namespace WeatherApp.ViewModels
         private readonly GeocodingAPI _api;
         private string _searchQuery;
         private Action<string> _onSearchQueryChanged;
+        private CancellationTokenSource _debounceCts;
 
         public ObservableCollection<LocationModel> SearchResults { get; set; }
         public ObservableCollection<LocationModel> SavedLocations { get; set; } = new ObservableCollection<LocationModel>();
@@ -82,20 +83,35 @@ namespace WeatherApp.ViewModels
 
         private async Task PerformSearch()
         {
-            if (string.IsNullOrWhiteSpace(SearchQuery)) return;
-
-            var response = await _api.GetLocationAsync(SearchQuery);
-            if (response.Success)
+            if (_debounceCts != null)
             {
-                SearchResults.Clear();
-                foreach (var result in response.Data)
+                _debounceCts.Cancel();
+                _debounceCts.Dispose();
+            }
+
+            _debounceCts = new CancellationTokenSource();
+            try
+            {
+                await Task.Delay(500, _debounceCts.Token);
+                if (string.IsNullOrWhiteSpace(SearchQuery)) return;
+
+                var response = await _api.GetLocationAsync(SearchQuery);
+                if (response.Success)
                 {
-                    SearchResults.Add(result);
+                    SearchResults.Clear();
+                    foreach (var result in response.Data)
+                    {
+                        SearchResults.Add(result);
+                    }
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", response.ErrorMessage, "OK");
                 }
             }
-            else
+            catch (TaskCanceledException)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", response.ErrorMessage, "OK");
+                // Ignore if the task was canceled due to a new keystroke
             }
         }
 
