@@ -23,6 +23,10 @@
                             <Label Text="{Binding Latitude}" FontSize="Small" />
                             <Label Text="{Binding Longitude}" FontSize="Small" />
                         </StackLayout>
+                        
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

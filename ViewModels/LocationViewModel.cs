@@ -68,18 +68,31 @@ namespace WeatherApp.ViewModels
 
         private void SaveLocation(LocationModel location)
         {
-            var locationData = new
+            try
             {
-                location.Latitude,
-                location.Longitude,
-                location.Name
-            };
+                string testDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TestData");
 
-            string json = JsonConvert.SerializeObject(locationData, Formatting.Indented);
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "selected_location.json");
-            File.WriteAllText(filePath, json);
+                if (!Directory.Exists(testDataPath))
+                {
+                    Directory.CreateDirectory(testDataPath);
+                }
 
-            Application.Current.MainPage.DisplayAlert("Saved", "Location saved successfully!", "OK");
+                string filePath = Path.Combine(testDataPath, "places.json");
+                var locationData = new
+                {
+                    location.Name,
+                    location.Latitude,
+                    location.Longitude
+                };
+
+                string json = JsonConvert.SerializeObject(locationData, Formatting.Indented);
+                File.WriteAllText(filePath, json);
+                Application.Current.MainPage.DisplayAlert("Saved", "Location saved successfully!", "OK");
+            }
+            catch (Exception ex)
+            {
+                Application.Current.MainPage.DisplayAlert("Error", $"Failed to save location: {ex.Message}", "OK");
+            }
         }
     }
 }

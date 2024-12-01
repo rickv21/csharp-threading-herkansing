@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using WeatherApp.ViewModels;
 using WeatherApp.Models;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace WeatherApp.Views
 {
@@ -34,18 +36,71 @@ namespace WeatherApp.Views
             }
         }
 
-        private void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
+        private void OnItemTapped(object sender, EventArgs e)
         {
-            if (e.SelectedItem is LocationModel selectedLocation)
+            var tappedLocation = (LocationModel)((TappedEventArgs)e).Parameter;
+            SaveSelectedLocation(tappedLocation);
+        }
+
+        // Method to save the location to the places.json file
+        private void SaveSelectedLocation(LocationModel selectedLocation)
+        {
+            try
             {
-                SaveSelectedLocation(selectedLocation);
+                string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string solutionDirectory = Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\..\")); // Go up to the solution directory
+                string testDataPath = Path.Combine(solutionDirectory, "TestData");
+
+                if (!Directory.Exists(testDataPath))
+                {
+                    Directory.CreateDirectory(testDataPath);
+                }
+
+                string filePath = Path.Combine(testDataPath, "places.json");
+                List<LocationModel> existingLocations = new List<LocationModel>();
+
+                if (File.Exists(filePath))
+                {
+                    string existingJson = File.ReadAllText(filePath);
+
+                    if (!string.IsNullOrEmpty(existingJson))
+                    {
+                        try
+                        {
+                            existingLocations = JsonConvert.DeserializeObject<List<LocationModel>>(existingJson) ?? new List<LocationModel>();
+                        }
+                        catch (JsonException ex)
+                        {
+                            Console.WriteLine($"Error deserializing JSON: {ex.Message}");
+                            existingLocations = new List<LocationModel>();
+                        }
+                    }
+                }
+
+                bool locationExists = existingLocations.Any(loc =>
+                    loc.Latitude == selectedLocation.Latitude && loc.Longitude == selectedLocation.Longitude);
+
+                if (locationExists)
+                {
+                    DisplayAlert("Info", "This location is already saved!", "OK");
+                    return;
+                }
+
+                existingLocations.Add(selectedLocation);
+                string json = JsonConvert.SerializeObject(existingLocations, Formatting.Indented);
+                File.WriteAllText(filePath, json);
+                DisplayAlert("Saved", "Location saved successfully!", "OK");
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Error", $"Failed to save location: {ex.Message}", "OK");
             }
         }
 
-        //TODO
-        private void SaveSelectedLocation(LocationModel selectedLocation)
-        {
-            
-        }
+
+
+
+
+
     }
 }
