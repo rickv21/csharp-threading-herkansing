@@ -1,0 +1,31 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WeatherApp.ViewModels"
+             x:Class="WeatherApp.Views.CityView">
+
+    <ContentPage.BindingContext>
+        <vm:LocationViewModel />
+    </ContentPage.BindingContext>
+
+    <StackLayout Padding="10">
+        <!-- Search Entry -->
+        <Entry Text="{Binding SearchQuery}" 
+               Placeholder="Enter city name" 
+               WidthRequest="300" />
+
+        <!-- List of potential matches -->
+        <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="10" Margin="5" BorderColor="Gray" CornerRadius="5">
+                        <StackLayout>
+                            <Label Text="{Binding Name}" FontSize="Medium" />
+                            <Label Text="{Binding Latitude}" FontSize="Small" />
+                            <Label Text="{Binding Longitude}" FontSize="Small" />
+                        </StackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </StackLayout>
+</ContentPage>

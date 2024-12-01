@@ -18,6 +18,7 @@ namespace WeatherApp.ViewModels
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
             WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
+            GeocodingCommand = new Command(async () => await OnGeocodingClick());
 
             IsDay = true;
             SimulateMode = false;
@@ -124,6 +125,25 @@ namespace WeatherApp.ViewModels
             {
                 await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading Accuweather API: {ex.Message}");
+                return;
+            }
+
+            await HandleButtonClick(api);
+        }
+
+        public ICommand GeocodingCommand { get; }
+
+        private async Task OnGeocodingClick()
+        {
+            GeocodingAPI api;
+            try
+            {
+                api = new GeocodingAPI();
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
+                Debug.WriteLine($"Error loading Geocoding API: {ex.Message}");
                 return;
             }
 
