@@ -49,6 +49,9 @@
                                 <Label Text="{Binding Longitude}" FontSize="Small" />
                                 <Label Text="{Binding WeatherData}" FontSize="Small" IsVisible="False" />
                             </StackLayout>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:LocationViewModel}}, Path=RemoveLocationCommand}" CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
