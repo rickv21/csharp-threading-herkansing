@@ -1,39 +1,23 @@
-using System.Collections.ObjectModel;
-using WeatherApp.ViewModels;
-using WeatherApp.Models;
 using Newtonsoft.Json;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
+using WeatherApp.Models;
+using WeatherApp.ViewModels;
 
 namespace WeatherApp.Views
 {
     public partial class CityView : ContentPage
     {
         private LocationViewModel _viewModel;
+        public ObservableCollection<LocationModel> SavedLocations { get; set; } = new ObservableCollection<LocationModel>();
 
         public CityView()
         {
             InitializeComponent();
             _viewModel = new LocationViewModel();
             BindingContext = _viewModel;
-        }
 
-        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
-        {
-            string searchQuery = e.NewTextValue;
-
-            if (!string.IsNullOrWhiteSpace(searchQuery))
-            {
-                var response = await _viewModel.GetLocationAsync(searchQuery);
-
-                if (response.Success)
-                {
-                    _viewModel.SearchResults = new ObservableCollection<LocationModel>(response.Data);
-                }
-                else
-                {
-                    await DisplayAlert("Error", response.ErrorMessage, "OK");
-                }
-            }
+            // Load saved locations when the ViewModel is initialized
+            LoadSavedLocations();
         }
 
         private void OnItemTapped(object sender, EventArgs e)
@@ -71,7 +55,6 @@ namespace WeatherApp.Views
                         }
                         catch (JsonException ex)
                         {
-                            Console.WriteLine($"Error deserializing JSON: {ex.Message}");
                             existingLocations = new List<LocationModel>();
                         }
                     }
@@ -97,10 +80,41 @@ namespace WeatherApp.Views
             }
         }
 
+        private List<LocationModel> LoadLocationsFromFile(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                var json = File.ReadAllText(filePath);
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    try
+                    {
+                        return JsonConvert.DeserializeObject<List<LocationModel>>(json) ?? new List<LocationModel>();
+                    }
+                    catch (JsonException)
+                    {
+                        return new List<LocationModel>();
+                    }
+                }
+            }
+            return new List<LocationModel>();
+        }
 
+        // Load saved locations into SavedLocations
+        public void LoadSavedLocations()
+        {
+            // Ensure you are correctly reading from the file and populating the SavedLocations collection.
+            string testDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TestData");
+            string filePath = Path.Combine(testDataPath, "places.json");
 
+            var savedLocations = LoadLocationsFromFile(filePath);
 
-
-
+            // Clear existing data and add saved locations
+            SavedLocations.Clear();
+            foreach (var location in savedLocations)
+            {
+                SavedLocations.Add(location);
+            }
+        }
     }
 }
