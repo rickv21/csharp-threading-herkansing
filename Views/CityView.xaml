@@ -1,35 +1,58 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:WeatherApp.ViewModels"
+             xmlns:local="clr-namespace:WeatherApp.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              x:Class="WeatherApp.Views.CityView">
 
     <ContentPage.BindingContext>
-        <vm:LocationViewModel />
+        <local:LocationViewModel />
     </ContentPage.BindingContext>
 
-    <StackLayout Padding="10">
-        <!-- Search Entry -->
-        <Entry Text="{Binding SearchQuery}" 
-               Placeholder="Enter city name" 
-               WidthRequest="300" />
+    <ScrollView>
+        <StackLayout Padding="10">
+            <!-- Search Entry -->
+            <Entry Text="{Binding SearchQuery}" 
+                   Placeholder="Enter city name" 
+                   WidthRequest="300" />
 
-        <!-- List of potential matches -->
-        <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Padding="10" Margin="5" BorderColor="Gray" CornerRadius="5">
-                        <StackLayout>
-                            <Label Text="{Binding Name}" FontSize="Medium" />
-                            <Label Text="{Binding Latitude}" FontSize="Small" />
-                            <Label Text="{Binding Longitude}" FontSize="Small" />
-                        </StackLayout>
-                        
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </StackLayout>
+            <!-- Search Results -->
+            <Label Text="Search Results" FontSize="Large" FontAttributes="Bold" Margin="10"/>
+            <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10" Margin="5" BorderColor="Gray" CornerRadius="5">
+                            <StackLayout>
+                                <Label Text="{Binding Name}" FontSize="Medium" />
+                                <Label Text="{Binding Latitude}" FontSize="Small" />
+                                <Label Text="{Binding Longitude}" FontSize="Small" />
+                            </StackLayout>
+
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <BoxView HeightRequest="1" Color="Gray" Margin="10" />
+
+            <!-- Saved Places -->
+            <Label Text="Saved Locations" FontSize="Large" FontAttributes="Bold" Margin="10"/>
+            <CollectionView ItemsSource="{Binding SavedLocations}" Margin="10">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10" Margin="5" BorderColor="Blue" CornerRadius="5">
+                            <StackLayout>
+                                <Label Text="{Binding Name}" FontSize="Medium" />
+                                <Label Text="{Binding Latitude}" FontSize="Small" />
+                                <Label Text="{Binding Longitude}" FontSize="Small" />
+                                <Label Text="{Binding WeatherData}" FontSize="Small" IsVisible="False" />
+                            </StackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

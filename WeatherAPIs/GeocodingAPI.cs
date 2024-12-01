@@ -65,9 +65,9 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var result in jsonResponse.results)
             {
-                string city = result.city.ToString();
-                double latitude = result.lat;
-                double longitude = result.lon;
+                string city = result.city != null ? result.city.ToString() : "Unknown City";
+                double latitude = result.lat != null ? (double)result.lat : 0;
+                double longitude = result.lon != null ? (double)result.lon : 0;
 
                 var location = new LocationModel(city, latitude, longitude);
                 locations.Add(location);

@@ -15,9 +15,6 @@ namespace WeatherApp.Views
             InitializeComponent();
             _viewModel = new LocationViewModel();
             BindingContext = _viewModel;
-
-            // Load saved locations when the ViewModel is initialized
-            LoadSavedLocations();
         }
 
         private void OnItemTapped(object sender, EventArgs e)
@@ -69,6 +66,7 @@ namespace WeatherApp.Views
                     return;
                 }
 
+                _viewModel.SavedLocations.Add(selectedLocation);
                 existingLocations.Add(selectedLocation);
                 string json = JsonConvert.SerializeObject(existingLocations, Formatting.Indented);
                 File.WriteAllText(filePath, json);
@@ -77,43 +75,6 @@ namespace WeatherApp.Views
             catch (Exception ex)
             {
                 DisplayAlert("Error", $"Failed to save location: {ex.Message}", "OK");
-            }
-        }
-
-        private List<LocationModel> LoadLocationsFromFile(string filePath)
-        {
-            if (File.Exists(filePath))
-            {
-                var json = File.ReadAllText(filePath);
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    try
-                    {
-                        return JsonConvert.DeserializeObject<List<LocationModel>>(json) ?? new List<LocationModel>();
-                    }
-                    catch (JsonException)
-                    {
-                        return new List<LocationModel>();
-                    }
-                }
-            }
-            return new List<LocationModel>();
-        }
-
-        // Load saved locations into SavedLocations
-        public void LoadSavedLocations()
-        {
-            // Ensure you are correctly reading from the file and populating the SavedLocations collection.
-            string testDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TestData");
-            string filePath = Path.Combine(testDataPath, "places.json");
-
-            var savedLocations = LoadLocationsFromFile(filePath);
-
-            // Clear existing data and add saved locations
-            SavedLocations.Clear();
-            foreach (var location in savedLocations)
-            {
-                SavedLocations.Add(location);
             }
         }
     }
