@@ -56,6 +56,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\Weather\unknown.png" />
 	  <None Remove="TestData\accu_weather_hour_test.json" />
 	  <None Remove="TestData\accu_weather_location_test.json" />
 	  <None Remove="TestData\accu_weather_week_test.json" />
@@ -65,6 +66,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png" />
 	  <EmbeddedResource Include="TestData\accu_weather_location_test.json" />
 	</ItemGroup>
 

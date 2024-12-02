@@ -25,6 +25,7 @@ namespace WeatherApp.WeatherAPIs
         /// </returns>
         private async Task<APIResponse<string>> GetLocationKey(LocationModel location, bool simulate)
         {
+            Debug.WriteLine($"Requesting location key for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<string>
@@ -97,6 +98,7 @@ namespace WeatherApp.WeatherAPIs
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting day data for {Name}.");
             JsonFileManager jsonFileManager = new();
 
             //Check if locationKey existst in the JSON file, otherwise get it from AccuWeather.
@@ -168,7 +170,7 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JArray weatherArray = JArray.Parse(responseBody);
             var weatherData = new List<WeatherDataModel>();
             bool setTestDay = false; 
@@ -188,7 +190,7 @@ namespace WeatherApp.WeatherAPIs
 
                     if (forecastDate.Date != day.Date)
                     {
-                        Debug.WriteLine("Skipping entry as dates do not match.");
+                        Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
                         continue; // Skip entries not matching the requested day (only when not simulating).
                     }
 
@@ -237,6 +239,7 @@ namespace WeatherApp.WeatherAPIs
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting week data for {Name}.");
             JsonFileManager jsonFileManager = new JsonFileManager();
 
             string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
@@ -309,7 +312,7 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var dailyForecasts = weatherResponse["DailyForecasts"] ?? throw new Exception("Missing DailyForecasts data in API response");
