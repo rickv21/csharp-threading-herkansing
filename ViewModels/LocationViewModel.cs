@@ -32,6 +32,9 @@ namespace WeatherApp.ViewModels
             LoadSavedLocations();
         }
 
+        /// <summary>
+        /// The searchQuery an user enters
+        /// </summary>
         public string SearchQuery
         {
             get => _searchQuery;
@@ -46,6 +49,10 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Remove a location from favorites
+        /// </summary>
+        /// <param name="location">The location to be removed</param>
         private void RemoveLocation(LocationModel location)
         {
             if (SavedLocations.Contains(location))
@@ -55,6 +62,9 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Update the JSON file with favorite places
+        /// </summary>
         private void UpdatePlacesJson()
         {
             try
@@ -71,6 +81,10 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Get the file path of the places.json file
+        /// </summary>
+        /// <returns>The file path</returns>
         private string GetFilePath()
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -81,6 +95,10 @@ namespace WeatherApp.ViewModels
             return filePath;
         }
 
+        /// <summary>
+        /// Perform a search request on the Geocoding API
+        /// </summary>
+        /// <returns>A task representing the async operation</returns>
         private async Task PerformSearch()
         {
             if (_debounceCts != null)
@@ -118,6 +136,9 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load the saved locations from the places.json
+        /// </summary>
         public void LoadSavedLocations()
         {
             var savedLocations = LoadLocationsFromFile(GetFilePath());
@@ -130,6 +151,11 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Load the locations from the places.json
+        /// </summary>
+        /// <param name="filePath">The file path of places.json</param>
+        /// <returns>A list of favorited locations</returns>
         private List<LocationModel> LoadLocationsFromFile(string filePath)
         {
             if (File.Exists(filePath))
@@ -155,6 +181,11 @@ namespace WeatherApp.ViewModels
             return new List<LocationModel>();
         }
 
+        /// <summary>
+        /// Save the selected location to places.json
+        /// </summary>
+        /// <param name="selectedLocation">The selected location</param>
+        /// <returns>True if saved, false if something went wrong</returns>
         public bool SaveSelectedLocation(LocationModel selectedLocation)
         {
             try
