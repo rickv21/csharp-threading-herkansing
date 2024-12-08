@@ -92,21 +92,24 @@ namespace WeatherApp.ViewModels
             _debounceCts = new CancellationTokenSource();
             try
             {
-                await Task.Delay(500, _debounceCts.Token);
+                await Task.Delay(1500, _debounceCts.Token);
                 if (string.IsNullOrWhiteSpace(SearchQuery)) return;
-
-                var response = await _api.GetLocationAsync(SearchQuery);
-                if (response.Success)
+                
+                if (SearchQuery.Length > 2)
                 {
-                    SearchResults.Clear();
-                    foreach (var result in response.Data)
+                    var response = await _api.GetLocationAsync(SearchQuery);
+                    if (response.Success)
                     {
-                        SearchResults.Add(result);
+                        SearchResults.Clear();
+                        foreach (var result in response.Data)
+                        {
+                            SearchResults.Add(result);
+                        }
                     }
-                }
-                else
-                {
-                    await Application.Current.MainPage.DisplayAlert("Error", response.ErrorMessage, "OK");
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Error", response.ErrorMessage, "OK");
+                    }
                 }
             }
             catch (TaskCanceledException)
