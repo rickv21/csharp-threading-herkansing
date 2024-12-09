@@ -11,7 +11,10 @@
     <Grid RowDefinitions="Auto, *, Auto, 2*">
         <!-- Bovenste helft met tabbladen -->
         <ScrollView Orientation="Horizontal" Grid.Row="0">
-            <CollectionView ItemsSource="{Binding TabNames}" SelectionMode="Single" x:Name="TabCollection">
+            <CollectionView ItemsSource="{Binding TabNames}" 
+                    SelectionMode="Single" 
+                    x:Name="TabCollection"
+                    SelectedItem="{Binding SelectedTab}">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" />
                 </CollectionView.ItemsLayout>
@@ -24,9 +27,10 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
+
         <!-- Tab Content Display -->
         <ContentView Grid.Row="1">
-            <Label x:Name="TabContentLabel" Text="Tab content will be displayed here" />
+            <Image Source="{Binding ImageSource}" />
         </ContentView>
         <!-- Onderste helft met bestaande content -->
         <VerticalStackLayout Grid.Row="3">

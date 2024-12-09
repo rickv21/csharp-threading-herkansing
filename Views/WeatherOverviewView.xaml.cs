@@ -1,3 +1,5 @@
+using WeatherApp.ViewModels;
+
 namespace WeatherApp.Views;
 
 public partial class WeatherOverviewView : ContentPage
@@ -6,5 +8,6 @@ public partial class WeatherOverviewView : ContentPage
 	{
 		InitializeComponent();
         MapWebView.Source = "map.html";
+        BindingContext = new WeatherOverviewViewModel();
     }
 }
