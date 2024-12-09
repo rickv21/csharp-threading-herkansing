@@ -11,10 +11,7 @@
     <Grid RowDefinitions="Auto, *, Auto, 2*">
         <!-- Bovenste helft met tabbladen -->
         <ScrollView Orientation="Horizontal" Grid.Row="0">
-            <CollectionView ItemsSource="{Binding TabNames}" 
-                    SelectionMode="Single" 
-                    x:Name="TabCollection"
-                    SelectedItem="{Binding SelectedTab}">
+            <CollectionView ItemsSource="{Binding TabNames}" SelectionMode="Single" x:Name="TabCollection" SelectedItem="{Binding SelectedTab}">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" />
                 </CollectionView.ItemsLayout>
@@ -27,11 +24,18 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
-
         <!-- Tab Content Display -->
         <ContentView Grid.Row="1">
-            <Image Source="{Binding ImageSource}" />
+        <!-- Afbeeldingen in een afzonderlijke rij -->
+        <StackLayout Orientation="Horizontal" Grid.Row="2" HorizontalOptions="FillAndExpand" Spacing="10">
+            <Image Source="{Binding ImageSource1}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+            <Image Source="{Binding ImageSource2}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+            <Image Source="{Binding ImageSource3}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+            <Image Source="{Binding ImageSource4}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+            <Image Source="{Binding ImageSource5}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+        </StackLayout>
         </ContentView>
+
         <!-- Onderste helft met bestaande content -->
         <VerticalStackLayout Grid.Row="3">
             <Label Text="Welcome to .NET MAUI!" VerticalOptions="Center" HorizontalOptions="Center" />
