@@ -155,20 +155,70 @@ namespace WeatherApp.WeatherAPIs
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-            var condition = data.ToString()?.ToLowerInvariant();
-            return condition switch
+            if (data is string strData && int.TryParse(strData, out int id))
             {
-                "sunny" => WeatherCondition.SUNNY,
-                "thunderstorm" => WeatherCondition.THUNDERSTORM,
-                "rain" => WeatherCondition.RAIN,
-                "hail" => WeatherCondition.HAIL,
-                "mist" => WeatherCondition.MIST,
-                "snow" => WeatherCondition.SNOW,
-                "cloudy" => WeatherCondition.CLOUDY,
-                "partly cloudy" => WeatherCondition.PARTLY_CLOUDY,
-                "clear" => WeatherCondition.CLEAR,
-                _ => WeatherCondition.UNKNOWN,
-            };
+                Debug.WriteLine("Weather Icon ID: " + id);
+
+                return id switch
+                {
+                    113 => WeatherCondition.SUNNY,
+                    116 => WeatherCondition.PARTLY_CLOUDY,
+                    119 => WeatherCondition.CLOUDY,
+                    122 => WeatherCondition.CLOUDY, // Overcast wordt CLOUDY
+                    143 => WeatherCondition.MIST,
+                    176 => WeatherCondition.DRIZZLE, // Patchy rain wordt DRIZZLE
+                    179 => WeatherCondition.SNOW, // Patchy snow wordt SNOW
+                    182 => WeatherCondition.SNOW, // Patchy sleet wordt SNOW
+                    185 => WeatherCondition.DRIZZLE, // Patchy freezing drizzle wordt DRIZZLE
+                    200 => WeatherCondition.THUNDERSTORM, // Thundery outbreaks wordt THUNDERSTORM
+                    227 => WeatherCondition.SNOW, // Blowing snow wordt SNOW
+                    230 => WeatherCondition.SNOW, // Blizzard wordt SNOW
+                    248 => WeatherCondition.FOG,
+                    260 => WeatherCondition.FOG, // Freezing fog wordt FOG
+                    263 => WeatherCondition.DRIZZLE, // Patchy light drizzle wordt DRIZZLE
+                    266 => WeatherCondition.DRIZZLE, // Light drizzle wordt DRIZZLE
+                    281 => WeatherCondition.DRIZZLE, // Freezing drizzle wordt DRIZZLE
+                    284 => WeatherCondition.DRIZZLE, // Heavy freezing drizzle wordt DRIZZLE
+                    293 => WeatherCondition.RAIN, // Patchy light rain wordt RAIN
+                    296 => WeatherCondition.RAIN, // Light rain wordt RAIN
+                    299 => WeatherCondition.RAIN, // Moderate rain at times wordt RAIN
+                    302 => WeatherCondition.RAIN, // Moderate rain wordt RAIN
+                    305 => WeatherCondition.RAIN, // Heavy rain at times wordt RAIN
+                    308 => WeatherCondition.RAIN, // Heavy rain wordt RAIN
+                    311 => WeatherCondition.RAIN, // Light freezing rain wordt RAIN
+                    314 => WeatherCondition.RAIN, // Moderate of heavy freezing rain wordt RAIN
+                    317 => WeatherCondition.SNOW, // Light sleet wordt SNOW
+                    320 => WeatherCondition.SNOW, // Moderate or heavy sleet wordt SNOW
+                    323 => WeatherCondition.SNOW, // Patchy light snow wordt SNOW
+                    326 => WeatherCondition.SNOW, // Light snow wordt SNOW
+                    329 => WeatherCondition.SNOW, // Patchy moderate snow wordt SNOW
+                    332 => WeatherCondition.SNOW, // Moderate snow wordt SNOW
+                    335 => WeatherCondition.SNOW, // Patchy heavy snow wordt SNOW
+                    338 => WeatherCondition.SNOW, // Heavy snow wordt SNOW
+                    350 => WeatherCondition.HAIL, // Ice pellets wordt HAIL
+                    353 => WeatherCondition.RAIN, // Light rain shower wordt RAIN
+                    356 => WeatherCondition.RAIN, // Moderate or heavy rain shower wordt RAIN
+                    359 => WeatherCondition.RAIN, // Torrential rain shower wordt RAIN
+                    362 => WeatherCondition.SNOW, // Light sleet showers wordt SNOW
+                    365 => WeatherCondition.SNOW, // Moderate or heavy sleet showers wordt SNOW
+                    368 => WeatherCondition.SNOW, // Light snow showers wordt SNOW
+                    371 => WeatherCondition.SNOW, // Moderate or heavy snow showers wordt SNOW
+                    374 => WeatherCondition.HAIL, // Light showers of ice pellets wordt HAIL
+                    377 => WeatherCondition.HAIL, // Moderate or heavy showers of ice pellets wordt HAIL
+                    386 => WeatherCondition.THUNDERSTORM, // Patchy light rain with thunder wordt THUNDERSTORM
+                    389 => WeatherCondition.THUNDERSTORM, // Moderate or heavy rain with thunder wordt THUNDERSTORM
+                    392 => WeatherCondition.THUNDERSTORM, // Patchy light snow with thunder wordt THUNDERSTORM
+                    395 => WeatherCondition.THUNDERSTORM, // Moderate or heavy snow with thunder wordt THUNDERSTORM
+                    _ => WeatherCondition.UNKNOWN,
+                };
+            }
+            else
+            {
+                Debug.WriteLine("Invalid data type or unable to parse to integer.");
+                return WeatherCondition.UNKNOWN;
+            }
         }
+
+
     }
 }
