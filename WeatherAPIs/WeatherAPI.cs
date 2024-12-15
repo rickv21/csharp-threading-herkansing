@@ -27,7 +27,7 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON("weatherapi_day_test.json");
+                responseBody = GetTestJSON("weather_api_test.json");
             }
             else
             {
