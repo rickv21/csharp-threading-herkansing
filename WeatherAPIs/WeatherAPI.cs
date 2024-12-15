@@ -100,7 +100,7 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON("weatherapi_week_test.json");
+                responseBody = GetTestJSON("weather_api_week_test.json");
             }
             else
             {
@@ -134,14 +134,18 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var day in forecastDays)
             {
+
                 var condition = CalculateWeatherCondition(day["day"]?["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(day["date"]?.ToString()!);
+
+                double humidity = day["day"]?["humidity"] != null ? (double)day["day"]?["humidity"] : 0;
+
                 weatherData.Add(new WeatherDataModel(
                     condition,
                     forecastDate,
                     minTemperature: (double)day["day"]?["mintemp_c"]!,
                     maxTemperature: (double)day["day"]?["maxtemp_c"]!,
-                    humidity: (double)day["day"]?["avghumidity"]!
+                    humidity: humidity
                 ));
             }
 
