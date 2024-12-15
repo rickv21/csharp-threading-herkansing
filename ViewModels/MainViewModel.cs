@@ -19,6 +19,7 @@ namespace WeatherApp.ViewModels
             WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
             WeatherAPICommand = new Command(async () => await OnWeatherAPIClick());
+            WeatherbitCommand = new Command(async () => await OnWeatherbitClick());
 
             IsDay = true;
             SimulateMode = false;
@@ -141,6 +142,65 @@ namespace WeatherApp.ViewModels
                 api = new WeatherAPI();
             }
             catch(Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
+                Debug.WriteLine($"Error loading WeatherAPI: {ex.Message}");
+                return;
+            }
+
+            try
+            {
+                APIResponse<List<WeatherDataModel>> task;
+
+                if (IsDay)
+                {
+                    task = await api.GetWeatherDataAsync(DateTime.Now, testLocationModel, SimulateMode);
+                }
+                else
+                {
+                    task = await api.GetWeatherForAWeekAsync(testLocationModel, SimulateMode);
+                }
+
+                Debug.WriteLine("Is success: " + task.Success);
+                if (task.Success)
+                {
+                    Debug.WriteLine(task.Data);
+                    //An assertion to throw a exception if Data is null when Success is true, which should never happen.
+                    Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
+
+                    foreach (var model in task.Data)
+                    {
+                        Debug.WriteLine("Model loop!");
+                        Debug.WriteLine(model.ToString());
+
+                        // Show a simple alert
+                        await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
+                    }
+                }
+
+                else
+                {
+                    Debug.WriteLine(task.ErrorMessage);
+                    await Shell.Current.DisplayAlert("Error", task.ErrorMessage, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
+            }
+        }
+
+        public ICommand WeatherbitCommand { get; }
+        private async Task OnWeatherbitClick()
+        {
+            WeatherbitAPI api;
+
+            try
+            {
+                api = new WeatherbitAPI();
+            }
+            catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading WeatherAPI: {ex.Message}");
