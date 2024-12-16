@@ -65,10 +65,10 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var result in jsonResponse.results)
             {
-                string city = result.city != null ? result.city.ToString() : "Unknown City";
-                string state = result.state != null ? (string)result.state : "Unknown State";
-                string country = result.country != null ? (string)result.country : "Unknown Country";
-                string placeId = result.place_id != null ? (string)result.place_id : "Unknown Place ID";
+                string city = result.city != null ? result.city.ToString() : "Onbekend";
+                string state = result.state != null ? (string)result.state : "Onbekend";
+                string country = result.country != null ? (string)result.country : "Onbekend";
+                string placeId = result.place_id != null ? (string)result.place_id : "Onbekend";
                 double latitude = result.lat != null ? (double)result.lat : 0;
                 double longitude = result.lon != null ? (double)result.lon : 0;
 

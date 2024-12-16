@@ -27,6 +27,7 @@
                             <StackLayout>
                                 <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
                                 <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
+                                <Label Text="{Binding Country, StringFormat='Land: {0}'}" FontSize="Medium" />
                                 <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
                                 <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
                             </StackLayout>
@@ -50,7 +51,7 @@
                             <StackLayout>
                                 <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
                                 <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
-                               
+                                <Label Text="{Binding Country, StringFormat='Land: {0}'}" FontSize="Medium" />
                                 <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
                                 <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
                                 <Label Text="{Binding WeatherData, StringFormat='Weerdata: {0}'}" FontSize="Small" IsVisible="False" />
