@@ -21,6 +21,13 @@ namespace WeatherApp.WeatherAPIs
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Requests forecast data for a week
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="simulate"></param>
+        /// <returns>7 days of weather data</returns>
+        /// <exception cref="Exception"></exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
@@ -95,10 +102,15 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Calculates the weathercondition
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>Weathercondition</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             string condition = ((string)data).Trim().ToLower(); //Deletes space and lowercase
-            Debug.WriteLine("meep" + condition);
+
             switch (condition)
             {
                 case "clear sky":
