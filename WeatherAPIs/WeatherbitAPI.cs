@@ -44,7 +44,7 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON("weatherbit_api_test.json");
+                responseBody = GetTestJSON("weatherbit_week_test.json");
             }
             else
             {
