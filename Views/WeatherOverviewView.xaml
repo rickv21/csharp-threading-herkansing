@@ -8,7 +8,8 @@
         <local:WeatherOverviewViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="Auto, *, Auto, 2*">
+    <Grid RowDefinitions="Auto, Auto, Auto, 2*">
+
         <!-- Bovenste helft met tabbladen -->
         <ScrollView Orientation="Horizontal" Grid.Row="0">
             <CollectionView ItemsSource="{Binding TabNames}" SelectionMode="Single" x:Name="TabCollection" SelectedItem="{Binding SelectedTab}">
@@ -24,22 +25,56 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
-        <!-- Tab Content Display -->
-        <ContentView Grid.Row="1">
-        <!-- Afbeeldingen in een afzonderlijke rij -->
-        <StackLayout Orientation="Horizontal" Grid.Row="2" HorizontalOptions="FillAndExpand" Spacing="10">
-            <Image Source="{Binding ImageSource1}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
-            <Image Source="{Binding ImageSource2}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
-            <Image Source="{Binding ImageSource3}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
-            <Image Source="{Binding ImageSource4}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
-            <Image Source="{Binding ImageSource5}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
-        </StackLayout>
-        </ContentView>
+
+        <!-- Buttons en tab content -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
+            <Button Text="Exporteer" HorizontalOptions="Start" VerticalOptions="Start" Grid.Column="0"/>
+            <Button Text="{Binding WeekDayString}" HorizontalOptions="End" VerticalOptions="Start" Grid.Column="2"/>
+        </Grid>
+
+        <!-- Afbeeldingen en teksten in een afzonderlijke rij -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" HorizontalOptions="FillAndExpand">
+            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="10">
+                <Image Source="{Binding ImageSource1}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+                <Label Text="{Binding Time1}" HorizontalOptions="Center" />
+                <Label Text="{Binding MinTemp1}" HorizontalOptions="Center" />
+                <Label Text="{Binding MaxTemp1}" HorizontalOptions="Center" />
+                <Label Text="{Binding Humidity1}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="10">
+                <Image Source="{Binding ImageSource2}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+                <Label Text="{Binding Time2}" HorizontalOptions="Center" />
+                <Label Text="{Binding MinTemp2}" HorizontalOptions="Center" />
+                <Label Text="{Binding MaxTemp2}" HorizontalOptions="Center" />
+                <Label Text="{Binding Humidity2}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="10">
+                <Image Source="{Binding ImageSource3}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+                <Label Text="{Binding Time3}" HorizontalOptions="Center" />
+                <Label Text="{Binding MinTemp3}" HorizontalOptions="Center" />
+                <Label Text="{Binding MaxTemp3}" HorizontalOptions="Center" />
+                <Label Text="{Binding Humidity3}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center" Spacing="10">
+                <Image Source="{Binding ImageSource4}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+                <Label Text="{Binding Time4}" HorizontalOptions="Center" />
+                <Label Text="{Binding MinTemp4}" HorizontalOptions="Center" />
+                <Label Text="{Binding MaxTemp4}" HorizontalOptions="Center" />
+                <Label Text="{Binding Humidity4}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="4" HorizontalOptions="Center" Spacing="10">
+                <Image Source="{Binding ImageSource5}" WidthRequest="50" HeightRequest="50" Aspect="AspectFit" />
+                <Label Text="{Binding Time5}" HorizontalOptions="Center" />
+                <Label Text="{Binding MinTemp5}" HorizontalOptions="Center" />
+                <Label Text="{Binding MaxTemp5}" HorizontalOptions="Center" />
+                <Label Text="{Binding Humidity5}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
 
         <!-- Onderste helft met bestaande content -->
         <VerticalStackLayout Grid.Row="3">
-            <Label Text="Welcome to .NET MAUI!" VerticalOptions="Center" HorizontalOptions="Center" />
             <WebView x:Name="MapWebView" HeightRequest="400" WidthRequest="300" HorizontalOptions="Fill" VerticalOptions="FillAndExpand" />
         </VerticalStackLayout>
+
     </Grid>
 </ContentPage>
