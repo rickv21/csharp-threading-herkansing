@@ -15,9 +15,10 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        //not possible with free weatherbit subscription
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
-           throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
@@ -42,7 +43,7 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}?key={_apiKey}&city={location.Name}&days=7";  // 7 days
+                    string url = $"{_baseURL}?key={_apiKey}&city={location.Name}&days=7";  // 7 days forecast
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -96,6 +97,83 @@ namespace WeatherApp.WeatherAPIs
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-        } 
+            string condition = ((string)data).Trim().ToLower(); //Deletes space and lowercase
+            Debug.WriteLine("meep" + condition);
+            switch (condition)
+            {
+                case "clear sky":
+                    return WeatherCondition.CLEAR;
+                case "few clouds":
+                case "scattered clouds":
+                    return WeatherCondition.PARTLY_CLOUDY;
+                case "broken clouds":
+                case "overcast clouds":
+                    return WeatherCondition.CLOUDY;
+                case "light drizzle":
+                case "drizzle":
+                case "heavy drizzle":
+                case "freezing drizzle":
+                case "heavy freezing drizzle":
+                case "patchy light drizzle":
+                    return WeatherCondition.DRIZZLE;
+                case "light rain":
+                case "shower rain":
+                case "moderate rain":
+                case "heavy rain":
+                case "light shower rain":
+                case "moderate or heavy rain shower":
+                case "torrential rain shower":
+                case "patchy light rain with thunder":
+                case "moderate or heavy rain with thunder":
+                    return WeatherCondition.RAIN;
+                case "snow":
+                case "light snow":
+                case "heavy snow":
+                case "snow shower":
+                case "heavy snow shower":
+                case "flurries":
+                case "patchy light snow":
+                case "moderate snow":
+                case "patchy heavy snow":
+                    return WeatherCondition.SNOW;
+                case "thunderstorm with light rain":
+                case "thunderstorm with rain":
+                case "thunderstorm with heavy rain":
+                case "thunderstorm with light drizzle":
+                case "thunderstorm with drizzle":
+                case "thunderstorm with heavy drizzle":
+                case "thunderstorm with hail":
+                case "patchy light snow with thunder":
+                case "moderate or heavy snow with thunder":
+                    return WeatherCondition.THUNDERSTORM;
+                case "hail":
+                case "light snow with hail":
+                case "moderate or heavy snow with hail":
+                case "light showers of ice pellets":
+                case "moderate or heavy showers of ice pellets":
+                    return WeatherCondition.HAIL;
+                case "mist":
+                    return WeatherCondition.MIST;
+                case "smoke":
+                    return WeatherCondition.SMOKE;
+                case "haze":
+                    return WeatherCondition.HAZE;
+                case "sand/dust":
+                    return WeatherCondition.SAND;
+                case "fog":
+                case "freezing fog":
+                    return WeatherCondition.FOG;
+                case "patchy snow possible":
+                case "patchy sleet possible":
+                case "patchy freezing drizzle possible":
+                case "thundery outbreaks possible":
+                case "blowing snow":
+                case "blizzard":
+                    return WeatherCondition.SNOW;
+                case "unknown precipitation":
+                default:
+                    return WeatherCondition.UNKNOWN;
+            }
+        }
     }
 }
