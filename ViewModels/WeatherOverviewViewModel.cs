@@ -37,7 +37,11 @@ namespace WeatherApp.ViewModels
         public string WeekDayString
         {
             get { return weekDayString; }
-            set { weekDayString = value; }
+            set 
+            { 
+                weekDayString = value;
+                OnPropertyChanged(nameof(WeekDayString));
+            }
         }
 
         private string imageSource1;
@@ -375,7 +379,6 @@ namespace WeatherApp.ViewModels
             TabNames = new ObservableCollection<string>();
             Locations = new List<LocationModel>();
 
-            // Sample data
             Locations.Add(new LocationModel("Emmen", new List<WeatherDataModel> {
         new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
         new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
@@ -393,10 +396,8 @@ namespace WeatherApp.ViewModels
 
             SetTabNames();
 
-            // Set the first tab as the selected tab
             SelectedTab = TabNames.FirstOrDefault();
-
-            // Update the image sources to reflect the initial tab
+            WeekDayString = "Week weergave";
         }
         private void SetTabNames()
         {
@@ -488,6 +489,23 @@ namespace WeatherApp.ViewModels
                     break;
             }
         }
+
+        public void OnRightButtonClicked(object sender, EventArgs e)        {
+            if (WeekDayString.Equals("Dag overzicht"))
+            {
+                WeekDayString = "Week overzicht";
+            }
+            else
+            {
+                WeekDayString = "Dag overzicht";
+            }
+        }
+
+        public void OnExportButtonClicked(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
