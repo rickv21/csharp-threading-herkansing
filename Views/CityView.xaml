@@ -10,21 +10,25 @@
 
     <ScrollView>
         <StackLayout Padding="10">
+            <Label Text="Zoek een locatie" FontSize="Large" FontAttributes="Bold" Margin="25, 25 ,25, 10" HorizontalOptions="Center"/>
             <!-- Search Entry -->
             <Entry Text="{Binding SearchQuery}" 
-                   Placeholder="Enter city name" 
+                   Placeholder="Voer een locatie in..." 
                    WidthRequest="300" />
 
+            <BoxView HeightRequest="1" Color="Gray" Margin="25" />
+
             <!-- Search Results -->
-            <Label Text="Search Results" FontSize="Large" FontAttributes="Bold" Margin="10"/>
+            <Label Text="Zoekresultaten" FontSize="Large" FontAttributes="Bold" Margin="25, 0 ,25, 10" HorizontalOptions="Center"/>
             <CollectionView ItemsSource="{Binding SearchResults}" Margin="10">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Padding="10" Margin="5" BorderColor="Gray" CornerRadius="5">
                             <StackLayout>
-                                <Label Text="{Binding Name}" FontSize="Medium" />
-                                <Label Text="{Binding Latitude}" FontSize="Small" />
-                                <Label Text="{Binding Longitude}" FontSize="Small" />
+                                <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
+                                <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
+                                <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
+                                <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
                             </StackLayout>
 
                             <Frame.GestureRecognizers>
@@ -38,16 +42,18 @@
             <BoxView HeightRequest="1" Color="Gray" Margin="10" />
 
             <!-- Saved Places -->
-            <Label Text="Saved Locations" FontSize="Large" FontAttributes="Bold" Margin="10"/>
+            <Label Text="Favoriete locaties" FontSize="Large" FontAttributes="Bold" Margin="25, 0 ,25, 10" HorizontalOptions="Center"/>
             <CollectionView ItemsSource="{Binding SavedLocations}" Margin="10">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Padding="10" Margin="5" BorderColor="Blue" CornerRadius="5">
                             <StackLayout>
-                                <Label Text="{Binding Name}" FontSize="Medium" />
-                                <Label Text="{Binding Latitude}" FontSize="Small" />
-                                <Label Text="{Binding Longitude}" FontSize="Small" />
-                                <Label Text="{Binding WeatherData}" FontSize="Small" IsVisible="False" />
+                                <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
+                                <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
+                               
+                                <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
+                                <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
+                                <Label Text="{Binding WeatherData, StringFormat='Weerdata: {0}'}" FontSize="Small" IsVisible="False" />
                             </StackLayout>
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:LocationViewModel}}, Path=RemoveLocationCommand}" CommandParameter="{Binding .}" />
@@ -56,6 +62,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+
         </StackLayout>
     </ScrollView>
 </ContentPage>

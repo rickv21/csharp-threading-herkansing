@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using WeatherApp.Models;
+using WeatherApp.Utils;
 using WeatherApp.ViewModels;
+using WeatherApp.Views;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
@@ -25,7 +28,7 @@ namespace WeatherApp.ViewModels
         public LocationViewModel()
         {
             _api = new GeocodingAPI();
-            RemoveLocationCommand = new Command<LocationModel>(RemoveLocation);
+            RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
             SavedLocations = new ObservableCollection<LocationModel>();
             SearchResults = new ObservableCollection<LocationModel>();
             SearchCommand = new Command(async () => await PerformSearch());
@@ -53,9 +56,16 @@ namespace WeatherApp.ViewModels
         /// Remove a location from favorites
         /// </summary>
         /// <param name="location">The location to be removed</param>
-        private void RemoveLocation(LocationModel location)
+        private async Task RemoveLocationAsync(LocationModel location)
         {
-            if (SavedLocations.Contains(location))
+            if (location == null)
+                return;
+
+            bool isConfirmed = await Application.Current.MainPage.DisplayAlert("Bevestig verwijdering",
+                $"Weet je zeker dat je de locatie: {location.Name} wilt verwijderen?",
+                "Bevestigen", "Annuleren");
+
+            if (isConfirmed)
             {
                 SavedLocations.Remove(location);
                 UpdatePlacesJson();
@@ -69,15 +79,42 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-                if (File.Exists(GetFilePath()))
+                string filePath = GetFilePath();
+
+                if (File.Exists(filePath))
                 {
-                    string json = JsonConvert.SerializeObject(SavedLocations.ToList(), Formatting.Indented);
-                    File.WriteAllText(GetFilePath(), json);
+                    string json = File.ReadAllText(filePath);
+                    JObject jsonObject = JObject.Parse(json);
+                    JArray geocodingArray = (JArray)jsonObject["Geocoding"] ?? new JArray();
+
+                    JObject locationsObject = new JObject();
+
+                    foreach (var location in SavedLocations)
+                    {
+                        string placeId = location.PlaceId ?? Guid.NewGuid().ToString(); // Ensure a unique place_id
+                        locationsObject[placeId] = JObject.FromObject(new
+                        {
+                            location.Name,
+                            location.Latitude,
+                            location.Longitude,
+                            location.Country,
+                            location.State,
+                            WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : new JArray()
+                        });
+                    }
+
+                    JObject updatedJson = new JObject
+                    {
+                        ["Geocoding"] = geocodingArray,
+                        ["Locations"] = locationsObject
+                    };
+
+                    File.WriteAllText(filePath, updatedJson.ToString(Formatting.Indented));
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to update places.json: {ex.Message}");
+                throw new Exception("An error occurred while updating the favorite places JSON file", ex);
             }
         }
 
@@ -87,10 +124,7 @@ namespace WeatherApp.ViewModels
         /// <returns>The file path</returns>
         private string GetFilePath()
         {
-            string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string solutionDirectory = Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\..\")); // Go up to the solution directory
-            string testDataPath = Path.Combine(solutionDirectory, "TestData");
-            string filePath = Path.Combine(testDataPath, "places.json");
+            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "places.json");
 
             return filePath;
         }
@@ -156,21 +190,33 @@ namespace WeatherApp.ViewModels
         /// </summary>
         /// <param name="filePath">The file path of places.json</param>
         /// <returns>A list of favorited locations</returns>
-        private List<LocationModel> LoadLocationsFromFile(string filePath)
+        private static List<LocationModel> LoadLocationsFromFile(string filePath)
         {
             if (File.Exists(filePath))
             {
-                Debug.WriteLine(filePath);
-                var json = File.ReadAllText(filePath);
-                Debug.WriteLine(json);
+                string json = File.ReadAllText(filePath);
 
                 if (!string.IsNullOrWhiteSpace(json))
                 {
                     try
                     {
-                        // Deserialize the JSON to a List<LocationModel>
-                        var locations = JsonConvert.DeserializeObject<List<LocationModel>>(json);
-                        return locations ?? new List<LocationModel>();
+                        var jsonObject = JObject.Parse(json);
+                        var locationsObject = jsonObject["locations"] as JObject;
+
+                        if (locationsObject != null)
+                        {
+                            var locationsArray = locationsObject.Properties()
+                                                                .Select(prop => prop.Value)
+                                                                .ToArray();
+
+                            var locations = locationsArray.Select(value => value.ToObject<LocationModel>())
+                                                          .Where(location => location != null)
+                                                          .ToList();
+
+                            return locations;
+                        }
+
+                        return new List<LocationModel>();
                     }
                     catch (JsonException ex)
                     {
@@ -178,6 +224,7 @@ namespace WeatherApp.ViewModels
                     }
                 }
             }
+
             return new List<LocationModel>();
         }
 
@@ -185,58 +232,52 @@ namespace WeatherApp.ViewModels
         /// Save the selected location to places.json
         /// </summary>
         /// <param name="selectedLocation">The selected location</param>
-        /// <returns>True if saved, false if something went wrong</returns>
+        /// <returns>True if saved, false if the location already exists</returns>
         public bool SaveSelectedLocation(LocationModel selectedLocation)
         {
             try
             {
-                string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                string solutionDirectory = Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\..\")); // Go up to the solution directory
-                string testDataPath = Path.Combine(solutionDirectory, "TestData");
+                JsonFileManager jsonFileManager = new JsonFileManager(GetFilePath());
+                var root = jsonFileManager.GetAllJson();
+                var locationsToken = root["locations"] as JObject ?? new JObject();
+                string placeId = selectedLocation.PlaceId;
 
-                if (!Directory.Exists(testDataPath))
+                // Check if the location already exists
+                bool locationExists = locationsToken.Properties().Any(prop =>
                 {
-                    Directory.CreateDirectory(testDataPath);
-                }
+                    var loc = prop.Value as JObject;
+                    var latitude = loc?["Latitude"]?.Value<double>();
+                    var longitude = loc?["Longitude"]?.Value<double>();
 
-                string filePath = Path.Combine(testDataPath, "places.json");
-                List<LocationModel> existingLocations = new List<LocationModel>();
-
-                if (File.Exists(filePath))
-                {
-                    string existingJson = File.ReadAllText(filePath);
-
-                    if (!string.IsNullOrEmpty(existingJson))
-                    {
-                        try
-                        {
-                            existingLocations = JsonConvert.DeserializeObject<List<LocationModel>>(existingJson) ?? new List<LocationModel>();
-                        }
-                        catch (JsonException)
-                        {
-                            existingLocations = new List<LocationModel>();
-                        }
-                    }
-                }
-
-                bool locationExists = existingLocations.Any(loc =>
-                    loc.Latitude == selectedLocation.Latitude && loc.Longitude == selectedLocation.Longitude);
+                    return latitude == selectedLocation.Latitude && longitude == selectedLocation.Longitude;
+                });
 
                 if (locationExists)
                 {
                     return false;
                 }
 
+                var locationObject = new JObject
+                {
+                    ["Name"] = selectedLocation.Name,
+                    ["Latitude"] = selectedLocation.Latitude,
+                    ["Longitude"] = selectedLocation.Longitude,
+                    ["Country"] = selectedLocation.Country,
+                    ["State"] = selectedLocation.State,
+                    ["WeatherData"] = JArray.FromObject(selectedLocation.WeatherData)
+                };
+
+                // Add the location with place_id as the key
+                locationsToken[placeId] = locationObject;
+                root["locations"] = locationsToken;
+                jsonFileManager.SaveAllJson(root);
                 SavedLocations.Add(selectedLocation);
-                existingLocations.Add(selectedLocation);
-                string json = JsonConvert.SerializeObject(existingLocations, Formatting.Indented);
-                File.WriteAllText(filePath, json);
 
                 return true;
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception("An error occurred while saving the selected location", ex);
             }
         }
     }

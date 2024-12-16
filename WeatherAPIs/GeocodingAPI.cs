@@ -66,10 +66,13 @@ namespace WeatherApp.WeatherAPIs
             foreach (var result in jsonResponse.results)
             {
                 string city = result.city != null ? result.city.ToString() : "Unknown City";
+                string state = result.state != null ? (string)result.state : "Unknown State";
+                string country = result.country != null ? (string)result.country : "Unknown Country";
+                string placeId = result.place_id != null ? (string)result.place_id : "Unknown Place ID";
                 double latitude = result.lat != null ? (double)result.lat : 0;
                 double longitude = result.lon != null ? (double)result.lon : 0;
 
-                var location = new LocationModel(city, latitude, longitude);
+                var location = new LocationModel(city, state, country, placeId, latitude, longitude);
                 locations.Add(location);
             }
 

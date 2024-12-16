@@ -20,6 +20,11 @@ namespace WeatherApp.Utils
             _filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "weatherAppData.json");
         }
 
+        public JsonFileManager(string filePath)
+        {
+            _filePath = filePath;
+        }
+
         /// <summary>
         /// Gets all JSON data from the file.
         /// </summary>
@@ -29,6 +34,14 @@ namespace WeatherApp.Utils
             if (File.Exists(_filePath))
             {
                 string json = File.ReadAllText(_filePath);
+
+                // Check if the JSON starts with "[" (indicating an array)
+                if (json.TrimStart().StartsWith("["))
+                {
+                    // Wrap the array in an object with a property for consistency
+                    return new JObject { ["Geocoding"] = JArray.Parse(json) };
+                }
+
                 return JObject.Parse(json);
             }
 
