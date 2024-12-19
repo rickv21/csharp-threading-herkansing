@@ -33,7 +33,7 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Name}&dt={day:yyyy-MM-dd}";
+                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Latitude},{location.Longitude}&dt={day:yyyy-MM-dd}";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -67,7 +67,7 @@ namespace WeatherApp.WeatherAPIs
                 var condition = CalculateWeatherCondition(hour["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(hour["time"]?.ToString()!);
 
-                if (!simulate && forecastDate.Date != day.Date) continue; 
+                if (!simulate && forecastDate.Date != day.Date) continue;
 
                 weatherData.Add(new WeatherDataModel(
                     condition,
@@ -108,7 +108,7 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Name}&days=7";
+                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Latitude},{location.Longitude}&days=7";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {

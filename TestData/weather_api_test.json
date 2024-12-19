@@ -61,7 +61,7 @@
         "hour": [
           {
             "time_epoch": 1702665600,
-            "time": "2024-12-15 02:30",
+            "time": "2024-12-15 02:00",
             "temp_c": 3.0,
             "temp_f": 37.4,
             "condition": {
@@ -137,6 +137,66 @@
           {
             "time_epoch": 1702672800,
             "time": "2024-12-15 07:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 08:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 09:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 10:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 11:00",
             "temp_c": 2.0,
             "temp_f": 35.6,
             "condition": {
