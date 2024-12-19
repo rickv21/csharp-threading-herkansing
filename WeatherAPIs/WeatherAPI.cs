@@ -61,11 +61,13 @@ namespace WeatherApp.WeatherAPIs
             if (forecast == null) throw new Exception("Missing forecast data in API response.");
 
             var weatherData = new List<WeatherDataModel>();
+
             foreach (var hour in forecast["hour"] ?? throw new Exception("Missing hourly data in forecast."))
             {
                 var condition = CalculateWeatherCondition(hour["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(hour["time"]?.ToString()!);
-                if (forecastDate.Date != day.Date) continue;
+
+                if (!simulate && forecastDate.Date != day.Date) continue; 
 
                 weatherData.Add(new WeatherDataModel(
                     condition,
