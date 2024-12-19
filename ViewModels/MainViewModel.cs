@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using WeatherApp.Models;
+using WeatherApp.Views;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
@@ -19,6 +20,9 @@ namespace WeatherApp.ViewModels
             WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
             GeocodingCommand = new Command(async () => await OnGeocodingClick());
+
+            NavigateToWeatherOverviewCommand = new Command(async () => await NavigateToWeatherOverview());
+            NavigateToCityCommand = new Command(async () => await NavigateToCity());
 
             IsDay = true;
             SimulateMode = false;
@@ -72,6 +76,18 @@ namespace WeatherApp.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public ICommand NavigateToWeatherOverviewCommand { get; }
+        public ICommand NavigateToCityCommand { get; }
+        public ICommand NavigateToSettingsCommand { get; }
+
+        private async Task NavigateToWeatherOverview() {
+            await Application.Current.MainPage.Navigation.PushAsync(new WeatherOverviewView());
+        }
+
+        private async Task NavigateToCity() {
+            await Application.Current.MainPage.Navigation.PushAsync(new CityView());
         }
 
         public ICommand TestAPICommand { get; }

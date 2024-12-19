@@ -2,11 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
-             x:Class="WeatherApp.Views.WeatherOverviewView">
-
-    <ContentPage.BindingContext>
-        <local:WeatherOverviewViewModel />
-    </ContentPage.BindingContext>
+             x:Class="WeatherApp.Views.WeatherOverviewView"
+             Title="Weather Overview">
 
     <Grid>
         <VerticalStackLayout>
@@ -28,6 +25,11 @@
                      WidthRequest="300"
                      HorizontalOptions="Fill"
                      VerticalOptions="FillAndExpand" />
+
+            <Button
+                Text="Settings"
+                HorizontalOptions="Center"
+                Command="{Binding SettingsCommand}" />
         </VerticalStackLayout>
 
         <!-- Loading Indicator Overlay, there is a weird issue with this, it seems to ignore IsLoading for some reason. -->
