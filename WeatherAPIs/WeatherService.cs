@@ -186,7 +186,6 @@ namespace WeatherApp.WeatherAPIs
         /// <summary>
         /// Reads an embedded JSON resource file and returns its content as a string.
         /// </summary>
-        /// <param name="folderName">The folder where the JSON file is located.</param>
         /// <param name="fileName">The name of the JSON file (include the extension).</param>
         /// <returns>The content of the JSON file as a string.</returns>
         public static string GetTestJSON(string fileName)
