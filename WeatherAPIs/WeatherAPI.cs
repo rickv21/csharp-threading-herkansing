@@ -11,6 +11,14 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        /// <summary>
+        /// Gets weatherdata hourly
+        /// </summary>
+        /// <param name="day"></param>
+        /// <param name="location"></param>
+        /// <param name="simulate"></param>
+        /// <returns>weather data hourly from current day</returns>
+        /// <exception cref="Exception"></exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
@@ -86,6 +94,14 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Gets forecast weather data from the next 3 days
+        /// Only the next 3 days is free with weatherapi free subscription
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="simulate"></param>
+        /// <returns>weatherdata from the next 3 days</returns>
+        /// <exception cref="Exception"></exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
@@ -159,6 +175,15 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Can't base the switch on icon id's
+        /// Weather API doesnt have unique id's for their weather conditions. 
+        /// Only id's for day and night weather combinations 
+        /// 
+        /// see: https://www.weatherapi.com/docs/ - CSV version
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>Weather condition</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             string condition = ((string)data).Trim().ToLower(); //Deletes space and lowercase
