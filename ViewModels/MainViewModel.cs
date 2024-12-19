@@ -141,7 +141,7 @@ namespace WeatherApp.ViewModels
             {
                 api = new WeatherAPI();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading WeatherAPI: {ex.Message}");
@@ -189,6 +189,7 @@ namespace WeatherApp.ViewModels
                 Debug.WriteLine(ex.ToString());
                 await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
             }
+        }
         public ICommand GeocodingCommand { get; }
 
         private async Task OnGeocodingClick()
@@ -230,7 +231,7 @@ namespace WeatherApp.ViewModels
                     //An assertion to throw a exception if Data is null when Success is true, which should never happen.
                     Debug.Assert(task.Data != null, "task.Data should not be null when task.Success is true");
 
-                    if(task.Data.Count == 0)
+                    if (task.Data.Count == 0)
                     {
                         await Shell.Current.DisplayAlert("Error", "WeatherDataModel list is empty!", "OK");
                     }
