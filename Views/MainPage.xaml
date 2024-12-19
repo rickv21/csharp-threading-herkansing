@@ -76,6 +76,18 @@
                 Command="{Binding AccuWeatherCommand}"
                 HorizontalOptions="Center" />
 
+            <!-- <Button
+                x:Name="GeocodingButton"
+                Text="Click to send Geocoding API Request" 
+                SemanticProperties.Hint="Sends a request to the Geocoding api"
+                Command="{Binding GeocodingCommand}"
+                HorizontalOptions="Center" /> -->
+
+            <Button
+                Text="City"
+                HorizontalOptions="Center"
+                Clicked="City_OnClicked" />
+
             <Button
                 x:Name="WeatherApiButton"
                 Text="Click to send WeatherAPI Request" 

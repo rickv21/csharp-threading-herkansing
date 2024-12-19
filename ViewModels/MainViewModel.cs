@@ -10,7 +10,7 @@ namespace WeatherApp.ViewModels
     public class MainViewModel : BindableObject
     {
         public ICommand WeerLiveCommand { get; }
-        private LocationModel testLocationModel = new("Emmen", 52.787701, 6.894810);
+        private LocationModel testLocationModel = new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810);
 
         public MainViewModel()
         {
@@ -19,6 +19,7 @@ namespace WeatherApp.ViewModels
             WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
             AccuWeatherCommand = new Command(async () => await OnAccuWeatherClick());
             WeatherAPICommand = new Command(async () => await OnWeatherAPIClick());
+            GeocodingCommand = new Command(async () => await OnGeocodingClick());
 
             IsDay = true;
             SimulateMode = false;
@@ -188,6 +189,23 @@ namespace WeatherApp.ViewModels
                 Debug.WriteLine(ex.ToString());
                 await Shell.Current.DisplayAlert("Exception", ex.Message, "OK");
             }
+        public ICommand GeocodingCommand { get; }
+
+        private async Task OnGeocodingClick()
+        {
+            GeocodingAPI api;
+            try
+            {
+                api = new GeocodingAPI();
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
+                Debug.WriteLine($"Error loading Geocoding API: {ex.Message}");
+                return;
+            }
+
+            await HandleButtonClick(api);
         }
 
         private async Task HandleButtonClick(WeatherService api)
