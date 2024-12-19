@@ -90,6 +90,7 @@ namespace WeatherApp.ViewModels
                 services.Add(new AccuWeatherAPI());
                 services.Add(new WeerLiveAPI());
                 services.Add(new WeatherAPI());
+                services.Add(new WeatherbitAPI());
             }
             catch (Exception ex)
             {

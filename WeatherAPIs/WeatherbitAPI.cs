@@ -18,8 +18,17 @@ namespace WeatherApp.WeatherAPIs
         //not possible with free weatherbit subscription
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine($"Requesting weather data for {Name} on {day:yyyy-MM-dd}.");
+
+            // Expliciet lege data teruggeven
+            return new APIResponse<List<WeatherDataModel>>
+            {
+                Success = true,
+                ErrorMessage = "No weather data available for the requested date.",
+                Data = new List<WeatherDataModel>() // Lege lijst
+            };
         }
+
 
         /// <summary>
         /// Requests forecast data for a week
@@ -83,7 +92,7 @@ namespace WeatherApp.WeatherAPIs
                 var condition = CalculateWeatherCondition(day["weather"]?["description"]?.ToString());
                 var forecastDate = DateTime.Parse(day["datetime"]?.ToString()!);
 
-                double humidity = day["humidity"] != null ? (double)day["humidity"] : 0;
+                double humidity = day["rh"] != null ? (double)day["rh"] : 0;
 
                 weatherData.Add(new WeatherDataModel(
                     condition,
