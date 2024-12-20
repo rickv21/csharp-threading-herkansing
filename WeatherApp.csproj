@@ -62,6 +62,7 @@
 	  <None Remove="TestData\accu_weather_week_test.json" />
 	  <None Remove="TestData\openweather_test.json" />
 	  <None Remove="TestData\test_api.json" />
+	  <None Remove="TestData\weatherbit_week_test.json" />
 	  <None Remove="TestData\weather_api_test.json" />
 	  <None Remove="TestData\weather_api_week_test.json" />
 	  <None Remove="TestData\weer_live_test.json" />
@@ -80,6 +81,7 @@
 	  <EmbeddedResource Include="TestData\test_api.json" />
 	  <EmbeddedResource Include="TestData\weather_api_week_test.json" />
 	  <EmbeddedResource Include="TestData\weather_api_test.json" />
+	  <EmbeddedResource Include="TestData\weatherbit_week_test.json" />
 	  <EmbeddedResource Include="TestData\weer_live_test.json" />
 	</ItemGroup>
 
