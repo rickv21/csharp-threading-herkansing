@@ -15,12 +15,12 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
-        //not possible with free weatherbit subscription
+        //not possible with free weatherbit subscription, sends empty data 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
             Debug.WriteLine($"Requesting weather data for {Name} on {day:yyyy-MM-dd}.");
 
-            // Expliciet lege data teruggeven
+            // sends empty data, to prevent throwing exception
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
@@ -60,6 +60,7 @@ namespace WeatherApp.WeatherAPIs
                 using (HttpClient client = new HttpClient())
                 {
                     string url = $"{_baseURL}?key={_apiKey}&city={location.Name}&days=7";  // 7 days forecast
+
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -89,7 +90,9 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var day in forecastDays)
             {
-                var condition = CalculateWeatherCondition(day["weather"]?["description"]?.ToString());
+                int conditionCode = (int)(day["weather"]?["code"] ?? throw new Exception("Missing condition code."));
+                var condition = CalculateWeatherCondition(conditionCode);
+
                 var forecastDate = DateTime.Parse(day["datetime"]?.ToString()!);
 
                 double humidity = day["rh"] != null ? (double)day["rh"] : 0;
@@ -118,83 +121,25 @@ namespace WeatherApp.WeatherAPIs
         /// <returns>Weathercondition</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-            string condition = ((string)data).Trim().ToLower(); //Deletes space and lowercase
+            int id = (int)data;
 
-            switch (condition)
+            return id switch
             {
-                case "clear sky":
-                    return WeatherCondition.CLEAR;
-                case "few clouds":
-                case "scattered clouds":
-                    return WeatherCondition.PARTLY_CLOUDY;
-                case "broken clouds":
-                case "overcast clouds":
-                    return WeatherCondition.CLOUDY;
-                case "light drizzle":
-                case "drizzle":
-                case "heavy drizzle":
-                case "freezing drizzle":
-                case "heavy freezing drizzle":
-                case "patchy light drizzle":
-                    return WeatherCondition.DRIZZLE;
-                case "light rain":
-                case "shower rain":
-                case "moderate rain":
-                case "heavy rain":
-                case "light shower rain":
-                case "moderate or heavy rain shower":
-                case "torrential rain shower":
-                case "patchy light rain with thunder":
-                case "moderate or heavy rain with thunder":
-                    return WeatherCondition.RAIN;
-                case "snow":
-                case "light snow":
-                case "heavy snow":
-                case "snow shower":
-                case "heavy snow shower":
-                case "flurries":
-                case "patchy light snow":
-                case "moderate snow":
-                case "patchy heavy snow":
-                    return WeatherCondition.SNOW;
-                case "thunderstorm with light rain":
-                case "thunderstorm with rain":
-                case "thunderstorm with heavy rain":
-                case "thunderstorm with light drizzle":
-                case "thunderstorm with drizzle":
-                case "thunderstorm with heavy drizzle":
-                case "thunderstorm with hail":
-                case "patchy light snow with thunder":
-                case "moderate or heavy snow with thunder":
-                    return WeatherCondition.THUNDERSTORM;
-                case "hail":
-                case "light snow with hail":
-                case "moderate or heavy snow with hail":
-                case "light showers of ice pellets":
-                case "moderate or heavy showers of ice pellets":
-                    return WeatherCondition.HAIL;
-                case "mist":
-                    return WeatherCondition.MIST;
-                case "smoke":
-                    return WeatherCondition.SMOKE;
-                case "haze":
-                    return WeatherCondition.HAZE;
-                case "sand/dust":
-                    return WeatherCondition.SAND;
-                case "fog":
-                case "freezing fog":
-                    return WeatherCondition.FOG;
-                case "patchy snow possible":
-                case "patchy sleet possible":
-                case "patchy freezing drizzle possible":
-                case "thundery outbreaks possible":
-                case "blowing snow":
-                case "blizzard":
-                    return WeatherCondition.SNOW;
-                case "unknown precipitation":
-                default:
-                    return WeatherCondition.UNKNOWN;
-            }
+                800 => WeatherCondition.CLEAR, // Clear sky
+                801 or 802 => WeatherCondition.PARTLY_CLOUDY, // Few clouds, scattered clouds
+                803 or 804 => WeatherCondition.CLOUDY, // Broken clouds, overcast clouds
+                700 => WeatherCondition.MIST, // Mist
+                711 => WeatherCondition.SMOKE, // Smoke
+                721 => WeatherCondition.HAZE, // Haze
+                731 => WeatherCondition.SAND, // Sand
+                741 or 751 => WeatherCondition.FOG, // Fog
+                >= 600 and <= 623 => WeatherCondition.SNOW, // Snow conditions
+                >= 500 and <= 522 => WeatherCondition.RAIN, // Rain conditions
+                >= 300 and <= 302 => WeatherCondition.DRIZZLE, // Drizzle conditions
+                >= 200 and <= 233 => WeatherCondition.THUNDERSTORM, // Thunderstorm conditions
+                900 => WeatherCondition.UNKNOWN, // Unknown condition
+                _ => WeatherCondition.UNKNOWN // Default case
+            };
         }
     }
 }
