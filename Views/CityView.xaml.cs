@@ -15,12 +15,15 @@ namespace WeatherApp.Views
         public CityView()
         {
             InitializeComponent();
-            BindingContext = new LocationViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
-            if (BindingContext is LocationViewModel viewModel)
-            {
-                //TEMP
-                SavedLocations = _viewModel.SavedLocations;
-            }
+            _viewModel = new LocationViewModel();
+            BindingContext = _viewModel;
+            SavedLocations = _viewModel.SavedLocations;
+            //BindingContext = new LocationViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
+            //if (BindingContext is LocationViewModel viewModel)
+            //{
+            //    //TEMP
+            //    SavedLocations = _viewModel.SavedLocations;
+            //}
         }
 
         private void OnItemTapped(object sender, EventArgs e)

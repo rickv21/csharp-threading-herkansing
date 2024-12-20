@@ -13,7 +13,7 @@ namespace WeatherApp.ViewModels
 {
     public class LocationViewModel
     {
-        private readonly WeatherAppData _weatherAppData;
+        //private readonly WeatherAppData _weatherAppData;
         private readonly GeocodingAPI _api;
         private string _searchQuery;
         private Action<string> _onSearchQueryChanged;
@@ -26,9 +26,9 @@ namespace WeatherApp.ViewModels
 
         public ICommand RemoveLocationCommand { get; }
 
-        public LocationViewModel(WeatherAppData weatherAppData)
+        public LocationViewModel()
         {
-            _weatherAppData = weatherAppData;
+            //_weatherAppData = weatherAppData;
             _api = new GeocodingAPI();
             RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
             SavedLocations = new ObservableCollection<LocationModel>();

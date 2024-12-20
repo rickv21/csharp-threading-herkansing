@@ -103,6 +103,7 @@ namespace WeatherApp.WeatherAPIs
                 double humidity = day["rh"] != null ? (double)day["rh"] : 0;
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)day["min_temp"]!,

@@ -78,6 +78,7 @@ namespace WeatherApp.WeatherAPIs
                 if (!simulate && forecastDate.Date != day.Date) continue;
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)hour["temp_c"]!,
@@ -159,6 +160,7 @@ namespace WeatherApp.WeatherAPIs
                 double humidity = day["day"]?["humidity"] != null ? (double)day["day"]?["humidity"] : 0;
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)day["day"]?["mintemp_c"]!,

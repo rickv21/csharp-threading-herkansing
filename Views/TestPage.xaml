@@ -2,12 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
-             x:Class="WeatherApp.Views.MainPage"
+             x:Class="WeatherApp.Views.TestPage"
              Title="Test page">
-
-    <ContentPage.BindingContext>
-        <local:MainViewModel />
-    </ContentPage.BindingContext>
 
     <ScrollView>
         <VerticalStackLayout

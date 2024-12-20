@@ -125,7 +125,6 @@ namespace WeatherApp.ViewModels
                     if (result.Data.Count == 0)
                     {
                         Debug.WriteLine("Data is empty!");
-                        await Shell.Current.DisplayAlert("Error", "Data is empty!", "OK");
                     }
                     foreach (WeatherDataModel apiData in result.Data)
                     {

@@ -56,6 +56,9 @@ namespace WeatherApp
                 appData.WeatherServices.Add("Open Weather Map", new OpenWeatherMapAPI());
                 appData.WeatherServices.Add("AccuWeather", new AccuWeatherAPI());
                 appData.WeatherServices.Add("WeerLive", new WeerLiveAPI());
+                appData.WeatherServices.Add("WeatherAPI", new WeatherAPI());
+                appData.WeatherServices.Add("Weatherbit", new WeatherbitAPI());
+                appData.WeatherServices.Add("Visual Crossing", new VisualCrossingAPI());
             }
             catch (Exception ex)
             {
