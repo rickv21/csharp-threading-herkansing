@@ -26,6 +26,7 @@
         SMOKE,
         CLEAR,
         COLD,
+        ICE,
         UNKNOWN
     }
 }

@@ -89,6 +89,7 @@ namespace WeatherApp.ViewModels
                 services.Add(new OpenWeatherMapAPI());
                 services.Add(new AccuWeatherAPI());
                 services.Add(new WeerLiveAPI());
+                services.Add(new VisualCrossingAPI());
                 services.Add(new WeatherAPI());
                 services.Add(new WeatherbitAPI());
             }
