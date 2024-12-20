@@ -221,7 +221,6 @@ namespace WeatherApp.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
                 Debug.WriteLine($"Error loading WeatherAPI: {ex.Message}");
                 return;
             }
@@ -255,7 +254,6 @@ namespace WeatherApp.ViewModels
                         await Shell.Current.DisplayAlert("Weather Condition", model.ToString(), "OK");
                     }
                 }
-
                 else
                 {
                     Debug.WriteLine(task.ErrorMessage);

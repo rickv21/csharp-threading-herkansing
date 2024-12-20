@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using WeatherApp.Models;
+using System.Globalization;
 
 namespace WeatherApp.WeatherAPIs
 {
@@ -59,9 +60,13 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}?key={_apiKey}&city={location.Name}&days=7";  // 7 days forecast
+                    string latitude = location.Latitude.ToString(CultureInfo.InvariantCulture);
+                    string longitude = location.Longitude.ToString(CultureInfo.InvariantCulture);
+
+                    string url = $"{_baseURL}?key={_apiKey}&lat={latitude}&lon={longitude}&days=7";
 
                     HttpResponseMessage response = await client.GetAsync(url);
+
                     if (!response.IsSuccessStatusCode)
                     {
                         responseBody = await response.Content.ReadAsStringAsync();
