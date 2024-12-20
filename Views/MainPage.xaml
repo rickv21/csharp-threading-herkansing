@@ -90,6 +90,20 @@
                 Command="{Binding NavigateToCityCommand}" />
 
             <Button
+                x:Name="WeatherApiButton"
+                Text="Click to send WeatherAPI Request" 
+                SemanticProperties.Hint="Sends a request to the WeatherAPI"
+                Command="{Binding WeatherAPICommand}"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="WeatherbitButton"
+                Text="Click to send Weatherbit API Request" 
+                SemanticProperties.Hint="Sends a request to the Weatherbit API"
+                Command="{Binding WeatherbitCommand}"
+                HorizontalOptions="Center" />
+
+            <Button
                 Text="Overview"
                 HorizontalOptions="Center"
                 Command="{Binding NavigateToWeatherOverviewCommand}" />
