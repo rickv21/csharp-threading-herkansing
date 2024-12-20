@@ -4,10 +4,6 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              x:Class="WeatherApp.Views.CityView">
 
-    <ContentPage.BindingContext>
-        <local:LocationViewModel />
-    </ContentPage.BindingContext>
-
     <ScrollView>
         <StackLayout Padding="10">
             <Label Text="Zoek een locatie" FontSize="Large" FontAttributes="Bold" Margin="25, 25 ,25, 10" HorizontalOptions="Center"/>

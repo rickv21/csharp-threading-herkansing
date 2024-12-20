@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Xml.Linq;
 using WeatherApp.Models;
 using WeatherApp.Utils;
 using WeatherApp.Views;
@@ -19,11 +18,8 @@ namespace WeatherApp.ViewModels
         private readonly WeatherAppData _weatherAppData;
 
         private DateTime currentDate; // Tracks the current date for fetching weather data.
-        private List<LocationModel> locations; // List of locations to fetch weather data for.
-        private List<WeatherService> services; // List of weather API services.
-        private bool SimulateMode = true; // Simulate mode for testing purposes.\
 
-        private Dictionary<int, List<WeatherDataModel>> HourlyData = new();
+        public Dictionary<int, List<WeatherDataModel>> HourlyData { get; set; } = new Dictionary<int, List<WeatherDataModel>>();
 
         private ObservableCollection<WeatherDisplayItem> _weatherItems;
         /// <summary>
@@ -43,80 +39,26 @@ namespace WeatherApp.ViewModels
         public ICommand ExportCommand { get; }
         public ICommand SettingsCommand { get; }
 
+        /// <summary>
+        /// Initializes the ViewModel, sets default values, and starts loading data.
+        /// </summary>
+        public WeatherOverviewViewModel(WeatherAppData weatherAppData)
+        {
+            _weatherAppData = weatherAppData;
+            this.currentDate = DateTime.Now;
+            this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
+
+            ExportCommand = new Command(Export);
+            SettingsCommand = new Command(OpenSettings);
+            
+        }
+
         // Event for notifying UI of property changes
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             Debug.WriteLine($"Property {propertyName} changed.");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        /// <summary>
-        /// Initializes the ViewModel, sets default values, and starts loading data.
-        /// </summary>
-        public WeatherOverviewViewModel(WeatherAppData weatherAppData) 
-        {
-            _weatherAppData = weatherAppData;
-            this.currentDate = DateTime.Now;
-            this.services = [];
-            this.locations = [];
-            this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
-
-            ExportCommand = new Command(Export);
-            SettingsCommand = new Command(OpenSettings);
-
-            JsonFileManager jsonManager = new JsonFileManager();
-
-            // Retrieve the simulateData boolean.
-            var data = jsonManager.GetData("data", "simulateMode") as string;
-
-            if (bool.TryParse(data, out bool isEnabled))
-            {
-                SimulateMode = isEnabled;
-            }
-
-            try
-            {
-                // Add supported weather services
-                services.Add(new OpenWeatherMapAPI());
-                services.Add(new AccuWeatherAPI());
-                services.Add(new WeerLiveAPI());
-            }
-            catch (Exception ex)
-            {
-                Shell.Current.DisplayAlert("Error loading API", ex.Message, "OK");
-                Debug.WriteLine($"Error loading API: {ex}");
-            }
-        }
-
-        //public WeatherOverviewViewModel(List<WeatherService> weatherServices, Dictionary<int, List<WeatherDataModel>> hourlyData, bool simulateMode)
-        //{
-        //    this.currentDate = DateTime.Now;
-        //    this.services = weatherServices;
-        //    this.HourlyData = hourlyData;
-        //    this.SimulateMode = simulateMode;
-        //    this.locations = [];
-        //    this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
-
-        //    ExportCommand = new Command(Export);
-        //    SettingsCommand = new Command(OpenSettings);
-        //}
-
-        /// <summary>
-        /// Starts loading services, locations, and updating the UI.
-        /// </summary>
-        public async void Start()
-        {
-            // MainThread.BeginInvokeOnMainThread(() => IsLoading = true);
-
-            // Add a default location for testing purposes
-            locations.Add(new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810)); //TODO: Needs to be obtained from location manager.
-
-
-
-            // Update the GUI and setup the map
-            await UpdateGUI();
-          //  MainThread.BeginInvokeOnMainThread(() => IsLoading = false);
         }
 
         /// <summary>
@@ -144,7 +86,7 @@ namespace WeatherApp.ViewModels
         public async Task<APIResponse<List<WeatherDataModel>>[]> FetchWeatherDataAsync(LocationModel location, DateTime date)
         {
             Debug.WriteLine($"Fetching weather data for {location.Name} on {date}");
-            if (services == null || services.Count == 0)
+            if (_weatherAppData.WeatherServices == null || _weatherAppData.WeatherServices.Count == 0)
             {
                 Debug.WriteLine("No services available.");
                 return Array.Empty<APIResponse<List<WeatherDataModel>>>(); // Return an empty array
@@ -153,8 +95,8 @@ namespace WeatherApp.ViewModels
             try
             {
                 // Fetch weather data from all services concurrently
-                var tasks = services.Select(service =>
-                    service.GetWeatherDataAsync(date, location, SimulateMode)
+                var tasks = _weatherAppData.WeatherServices.Values.Select(service =>
+                    service.GetWeatherDataAsync(date, location, _weatherAppData.SimulateMode)
                 );
 
                 Debug.WriteLine("Fetching weather data from services...");
@@ -174,38 +116,42 @@ namespace WeatherApp.ViewModels
         /// <returns>Dictionary of aggregated weather data indexed by hour.</returns>
         private async Task<Dictionary<int, WeatherDataModel>> UpdateHourlyData()
         {
-            if (HourlyData.Count == 0)
+            LocationModel location = _weatherAppData.Locations[0]; //Temp hardcoded.
+            var results = await FetchWeatherDataAsync(location, currentDate);
+            foreach (var result in results)
             {
-                LocationModel location = locations[0]; //Temp hardcoded.
-                var results = await FetchWeatherDataAsync(location, currentDate);
-                foreach (var result in results)
+                if (result.Success)
                 {
-                    if (result.Success)
+                    if (result.Data.Count == 0)
                     {
-                        if (result.Data.Count == 0)
-                        {
-                            Debug.WriteLine("Data is empty!");
-                            await Shell.Current.DisplayAlert("Error", "Data is empty!", "OK");
-                        }
-                        foreach (WeatherDataModel apiData in result.Data)
-                        {
-                            Debug.WriteLine(apiData.ToString());
-                            int hour = apiData.TimeStamp.Hour;
-                            if (!HourlyData.ContainsKey(hour))
-                            {
-                                HourlyData[hour] = new List<WeatherDataModel>();
-                            }
-
-                            HourlyData[hour].Add(apiData);
-                        }
+                        Debug.WriteLine("Data is empty!");
+                        await Shell.Current.DisplayAlert("Error", "Data is empty!", "OK");
                     }
-                    else
+                    foreach (WeatherDataModel apiData in result.Data)
                     {
-                        Debug.WriteLine(result.ErrorMessage);
-                        await Shell.Current.DisplayAlert("Error", result.ErrorMessage, "OK");
+                        var service = _weatherAppData.WeatherServices[apiData.APISource];
+                        Debug.WriteLine(service.Name + " - " + service.IsEnabled);
+                        if (!service.IsEnabled)
+                        {
+                            continue;
+                        }
+                        Debug.WriteLine(apiData.ToString());
+                        int hour = apiData.TimeStamp.Hour;
+                        if (!HourlyData.ContainsKey(hour))
+                        {
+                            HourlyData[hour] = new List<WeatherDataModel>();
+                        }
+
+                        HourlyData[hour].Add(apiData);
                     }
                 }
-            }
+                else
+                {
+                    Debug.WriteLine(result.ErrorMessage);
+                    await Shell.Current.DisplayAlert("Error", result.ErrorMessage, "OK");
+                }
+            } 
+      
             var aggregatedData = HourlyData.ToDictionary(hourEntry => hourEntry.Key, hourEntry =>
             {
                 int hour = hourEntry.Key;
@@ -239,6 +185,7 @@ namespace WeatherApp.ViewModels
                 double averageHumidity = validHumidityCount > 0 ? totalHumidity / validHumidityCount : 0;
 
                 return new WeatherDataModel(
+                    "",
                     aggregatedCondition,
                     new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, hour, 0, 0), // Set the hour.
                     minTemperature,
@@ -258,14 +205,19 @@ namespace WeatherApp.ViewModels
         public async Task UpdateGUI()
         {
             var data = await UpdateHourlyData();
-            WeatherItems.Clear();
-            foreach (var entry in data)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                var model = entry.Value;
-                var weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}");
-                Debug.WriteLine("GUI - " + model.ToString());
-                WeatherItems.Add(weatherItem);
-            }
+                WeatherItems.Clear();
+                foreach (var entry in data)
+                {
+                    Debug.WriteLine("Entry: " + entry);
+
+                    var model = entry.Value;
+                    var weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}");
+                    Debug.WriteLine("GUI - " + model.ToString());
+                    WeatherItems.Add(weatherItem);
+                }
+            });
 
             await SetupMap();
         }
@@ -322,7 +274,7 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public async void OpenSettings()
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage(services, HourlyData, SimulateMode));
+            await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
         }
 
     }

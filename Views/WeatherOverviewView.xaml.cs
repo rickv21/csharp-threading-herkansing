@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using WeatherApp.Utils;
 using WeatherApp.ViewModels;
 using WeatherApp.WeatherAPIs;
 
@@ -9,23 +10,16 @@ public partial class WeatherOverviewView : ContentPage
 	public WeatherOverviewView()
 	{
 		InitializeComponent();
-        BindingContext = new WeatherOverviewViewModel();
+        BindingContext = new WeatherOverviewViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
         MapWebView.Source = "map.html";
     }
 
-    public WeatherOverviewView(List<WeatherService> weatherServices, Dictionary<int, List<Models.WeatherDataModel>> hourlyData, bool simulateMode)
-    {
-        InitializeComponent();
-        BindingContext = new WeatherOverviewViewModel(weatherServices, hourlyData, simulateMode);
-        MapWebView.Source = "map.html";
-    }
-
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         Debug.WriteLine("Appear");
         base.OnAppearing();
         if (BindingContext is WeatherOverviewViewModel viewModel) {
-            viewModel.UpdateGUI(); 
+            viewModel.UpdateGUI();
         }
     }
 

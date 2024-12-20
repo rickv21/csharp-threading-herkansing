@@ -26,8 +26,6 @@ namespace WeatherApp.WeatherAPIs
         /// </summary>
         public string Name { get; private set; }
 
-
-        private bool _isEnabled;
         /// <summary>
         /// If this API is enabled and should be used.
         /// </summary>
@@ -163,11 +161,10 @@ namespace WeatherApp.WeatherAPIs
             JsonFileManager jsonManager = new JsonFileManager();
 
             // Retrieve the data
-            var data = jsonManager.GetData("status", Name, "enabled") as string;
+            var data = jsonManager.GetData("status", Name, "enabled");
 
-            if (bool.TryParse(data, out bool isEnabled))
-            {
-                return isEnabled;
+            if (data != null && data is bool isEnabled) {
+                return isEnabled; 
             }
             else
             {

@@ -82,6 +82,7 @@ namespace WeatherApp.WeatherAPIs
                 var maxTemp = hour["temp"];
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                    condition,
                    forecastDate,
                    minTemperature: (double)minTemp,
@@ -158,6 +159,7 @@ namespace WeatherApp.WeatherAPIs
                 var maxTemp = day["max_temp"];
 
                 weatherData.Add(new WeatherDataModel(
+                   Name,
                    condition,
                    forecastDate,
                    minTemperature: (double)minTemp,

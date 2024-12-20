@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WeatherApp.Models;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.Utils
 {
+    /// <summary>
+    /// Contains data of the application that can be accessed from any page (singleton).
+    /// </summary>
     public class WeatherAppData
     {
-        public List<WeatherService> WeatherServices { get; set; }
-        public Dictionary<int, List<Models.WeatherDataModel>> HourlyData { get; set; }
-        public bool SimulateMode { get; set; }
-
-        public WeatherAppData()
-        {
-            WeatherServices = new List<WeatherService>();
-            HourlyData = new Dictionary<int, List<Models.WeatherDataModel>>();
-            SimulateMode = false;
-        }
+        public Dictionary<string, WeatherService> WeatherServices { get; set; } = [];
+        public Dictionary<int, List<WeatherDataModel>> WeatherCache { get; set; } = [];
+        public List<LocationModel> Locations { get; set; } = [];
+        public bool SimulateMode { get; set; } = true;
     }
 
 }

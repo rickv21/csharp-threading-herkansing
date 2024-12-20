@@ -10,17 +10,19 @@ namespace WeatherApp.ViewModels
 {
     public class SettingsPageViewModel : BindableObject
     {
-
+        private readonly WeatherAppData _weatherAppData;
         public ObservableCollection<WeatherService> WeatherServices { get; set; }
 
-        public SettingsPageViewModel(List<WeatherService> weatherServices, Dictionary<int, List<Models.WeatherDataModel>> hourlyData, bool simulateMode)
+        public SettingsPageViewModel(WeatherAppData weatherAppData)
         {
-            WeatherServices = new ObservableCollection<WeatherService>(weatherServices);
-            foreach (WeatherService service in weatherServices)
+            _weatherAppData = weatherAppData;
+            WeatherServices = new ObservableCollection<WeatherService>(_weatherAppData.WeatherServices.Values);
+            //Test code.
+            foreach (WeatherService service in WeatherServices)
             {
                 Debug.WriteLine(service.Name);
             }
-            SimulateMode = simulateMode;
+            SimulateMode = _weatherAppData.SimulateMode;
             NavigateToTestPageCommand = new Command(async () => await NavigateToTestPage());
             SaveCommand = new Command(SaveSettings);
         }
@@ -39,6 +41,9 @@ namespace WeatherApp.ViewModels
         public ICommand SaveCommand { get; }
         private async void SaveSettings()
         {
+            _weatherAppData.SimulateMode = SimulateMode;
+            _weatherAppData.WeatherServices = WeatherServices.ToDictionary(item => item.Name);
+
             JsonFileManager jsonManager = new JsonFileManager();
             jsonManager.SetData(SimulateMode, "data", "simulateMode");
 

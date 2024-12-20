@@ -205,6 +205,7 @@ namespace WeatherApp.WeatherAPIs
                     WeatherCondition condition = CalculateWeatherCondition(weatherIcon);
 
                     weatherData.Add(new WeatherDataModel(
+                        apiSource: Name,
                         condition: condition,
                         timeStamp: forecastDate,
                         minTemperature: temperature,
@@ -334,6 +335,7 @@ namespace WeatherApp.WeatherAPIs
                     //WeatherCondition nightCondition = CalculateWeatherCondition((int)forecast["Night"]["Icon"]!);
 
                     weatherData.Add(new WeatherDataModel(
+                        apiSource: Name,
                         condition: dayCondition,
                         timeStamp: forecastDate,
                         minTemperature: minTemperature,
