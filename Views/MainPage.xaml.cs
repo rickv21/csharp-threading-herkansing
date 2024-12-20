@@ -15,5 +15,10 @@ namespace WeatherApp.Views
             // Navigeer naar overview
             await Navigation.PushAsync(new WeatherOverviewView());
         }
+
+        private async void City_OnClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new CityView());
+        }
     }
 }

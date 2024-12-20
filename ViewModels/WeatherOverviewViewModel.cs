@@ -81,7 +81,7 @@ namespace WeatherApp.ViewModels
             MainThread.BeginInvokeOnMainThread(() => IsLoading = true);
 
             // Add a default location for testing purposes
-            locations.Add(new("Emmen", 52.787701, 6.894810)); //TODO: Needs to be obtained from location manager.
+            locations.Add(new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810)); //TODO: Needs to be obtained from location manager.
 
             try
             {
@@ -90,6 +90,8 @@ namespace WeatherApp.ViewModels
                 services.Add(new AccuWeatherAPI());
                 services.Add(new WeerLiveAPI());
                 services.Add(new VisualCrossingAPI());
+                services.Add(new WeatherAPI());
+                services.Add(new WeatherbitAPI());
             }
             catch (Exception ex)
             {

@@ -63,6 +63,9 @@
 	  <None Remove="TestData\openweather_test.json" />
 	  <None Remove="TestData\test_api.json" />
 	  <None Remove="TestData\visual_crossing_test.json" />
+	  <None Remove="TestData\weatherbit_week_test.json" />
+	  <None Remove="TestData\weather_api_test.json" />
+	  <None Remove="TestData\weather_api_week_test.json" />
 	  <None Remove="TestData\weer_live_test.json" />
 	</ItemGroup>
 
@@ -73,10 +76,14 @@
 
 	<ItemGroup>
 	  <EmbeddedResource Include="TestData\accu_weather_hour_test.json" />
+	  <EmbeddedResource Include="TestData\geocoding_location_test.json" />
 	  <EmbeddedResource Include="TestData\accu_weather_week_test.json" />
 	  <EmbeddedResource Include="TestData\openweather_test.json" />
 	  <EmbeddedResource Include="TestData\test_api.json" />
 	  <EmbeddedResource Include="TestData\visual_crossing_test.json" />
+	  <EmbeddedResource Include="TestData\weather_api_week_test.json" />
+	  <EmbeddedResource Include="TestData\weather_api_test.json" />
+	  <EmbeddedResource Include="TestData\weatherbit_week_test.json" />
 	  <EmbeddedResource Include="TestData\weer_live_test.json" />
 	</ItemGroup>
 
@@ -93,6 +100,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\CityView.xaml.cs">
+      <DependentUpon>CityView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="Views\CityView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\WeatherOverviewView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
