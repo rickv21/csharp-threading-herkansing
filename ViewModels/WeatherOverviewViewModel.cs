@@ -386,7 +386,7 @@ namespace WeatherApp.ViewModels
         new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
         new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0)
     }));
-            Locations.Add(new LocationModel("Damsko", new List<WeatherDataModel> {
+            Locations.Add(new LocationModel("Amsterdam", new List<WeatherDataModel> {
         new WeatherDataModel(WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
         new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
         new WeatherDataModel(WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
