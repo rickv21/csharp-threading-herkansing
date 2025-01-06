@@ -3,17 +3,21 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using WeatherApp.Models;
+using WeatherApp.Utils;
+using WeatherApp.Views;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
 {
-    public class MainViewModel : BindableObject
+    public class TestViewModel : BindableObject
     {
         public ICommand WeerLiveCommand { get; }
         private LocationModel testLocationModel = new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810);
+        private readonly WeatherAppData _weatherAppData;
 
-        public MainViewModel()
+        public TestViewModel(WeatherAppData weatherAppData)
         {
+            _weatherAppData = weatherAppData;
             TestAPICommand = new Command(async () => await OnTestButtonClick());
             OpenWeatherMapCommand = new Command(async () => await OnOpenWeatherMapClick());
             WeerLiveCommand = new Command(async () => await ExecuteWeerLiveCommand());
@@ -21,6 +25,9 @@ namespace WeatherApp.ViewModels
             WeatherAPICommand = new Command(async () => await OnWeatherAPIClick());
             WeatherbitCommand = new Command(async () => await OnWeatherbitClick());
             GeocodingCommand = new Command(async () => await OnGeocodingClick());
+
+            NavigateToWeatherOverviewCommand = new Command(async () => await NavigateToWeatherOverview());
+            NavigateToCityCommand = new Command(async () => await NavigateToCity());
 
             IsDay = true;
             SimulateMode = false;
@@ -74,6 +81,18 @@ namespace WeatherApp.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public ICommand NavigateToWeatherOverviewCommand { get; }
+        public ICommand NavigateToCityCommand { get; }
+        public ICommand NavigateToSettingsCommand { get; }
+
+        private async Task NavigateToWeatherOverview() {
+            await Application.Current.MainPage.Navigation.PushAsync(new WeatherOverviewView());
+        }
+
+        private async Task NavigateToCity() {
+            await Application.Current.MainPage.Navigation.PushAsync(new CityView());
         }
 
         public ICommand TestAPICommand { get; }

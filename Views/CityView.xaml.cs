@@ -2,6 +2,7 @@ using Microsoft.Maui.Controls;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using WeatherApp.Models;
+using WeatherApp.Utils;
 using WeatherApp.ViewModels;
 
 namespace WeatherApp.Views
@@ -16,7 +17,13 @@ namespace WeatherApp.Views
             InitializeComponent();
             _viewModel = new LocationViewModel();
             BindingContext = _viewModel;
-            SavedLocations =  _viewModel.SavedLocations;
+            SavedLocations = _viewModel.SavedLocations;
+            //BindingContext = new LocationViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
+            //if (BindingContext is LocationViewModel viewModel)
+            //{
+            //    //TEMP
+            //    SavedLocations = _viewModel.SavedLocations;
+            //}
         }
 
         private void OnItemTapped(object sender, EventArgs e)

@@ -1,7 +1,7 @@
 ﻿using WeatherApp.Models;
-using Newtonsoft.Json.Linq;
 using WeatherApp.Utils;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace WeatherApp.WeatherAPIs
 {
@@ -27,6 +27,11 @@ namespace WeatherApp.WeatherAPIs
         public string Name { get; private set; }
 
         /// <summary>
+        /// If this API is enabled and should be used.
+        /// </summary>
+        public bool IsEnabled { get; set;}
+
+        /// <summary>
         /// The request limit and current request data for the current day.
         /// </summary>
         public ServiceRequestLimit RequestLimitDay { get; private set; }
@@ -39,6 +44,7 @@ namespace WeatherApp.WeatherAPIs
         public WeatherService(string name, string baseURL, int requestLimitDay, int requestLimitMonth)
         {
             Name = name;
+            IsEnabled = GetEnabled();
             _baseURL = baseURL;
             _apiKey = GetAPIKeyFromEnv();
 
@@ -149,6 +155,23 @@ namespace WeatherApp.WeatherAPIs
             );
         }
 
+
+        protected bool GetEnabled()
+        {
+            JsonFileManager jsonManager = new JsonFileManager();
+
+            // Retrieve the data
+            var data = jsonManager.GetData("status", Name, "enabled");
+
+            if (data != null && data is bool isEnabled) {
+                return isEnabled; 
+            }
+            else
+            {
+                Debug.WriteLine("Data is null, empty or not a valid boolean");
+                return true;
+            }
+        }
 
         /// <summary>
         /// Checks if the API has reached one of the request limits.

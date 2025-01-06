@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:WeatherApp.ViewModels"
+             x:Class="WeatherApp.Views.SettingsPage"
+
+             Title="Settings">
+
+    <ScrollView>
+        <StackLayout Padding="10">
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="Simulate requests:" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding SimulateMode, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
+            <Label HorizontalOptions="Center" Text="API Sources" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding WeatherServices}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="0" ColumnDefinitions="*,Auto" MaximumWidthRequest="400">
+                            <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"/>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding IsEnabled}" VerticalOptions="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+
+
+
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                <Button Text="Go to Test Page"  HorizontalOptions="Center" Command="{Binding NavigateToTestPageCommand}" Margin="0,20,0,0" />
+
+                <Button Text="Save"  HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
+            </HorizontalStackLayout>
+            
+      
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

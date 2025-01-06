@@ -27,6 +27,7 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
+                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -57,6 +58,7 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
+                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -113,6 +115,7 @@ namespace WeatherApp.WeatherAPIs
             for (int i = 0; i < 7; i++)
             {
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     WeatherCondition.SUNNY,
                     DateTime.Now.AddDays(i),
                     minTemperature: 15.0,

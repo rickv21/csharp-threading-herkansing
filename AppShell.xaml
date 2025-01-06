@@ -9,8 +9,13 @@
 
     <!-- Rick: Change this to change the view that will be loaded. -->
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="WeatherOverview"
+        ContentTemplate="{DataTemplate local:WeatherOverviewView}"
+        Route="Main" />
 
+    <ShellContent Route="WeatherOverview" ContentTemplate="{DataTemplate local:WeatherOverviewView}" />
+    <ShellContent Route="City" ContentTemplate="{DataTemplate local:CityView}" />
+    <ShellContent Route="Settings" ContentTemplate="{DataTemplate local:SettingsPage}" />
+    <ShellContent Route="TestPage" ContentTemplate="{DataTemplate local:TestPage}" />
+    
 </Shell>

@@ -81,6 +81,7 @@ namespace WeatherApp.WeatherAPIs
                 WeatherCondition condition = CalculateWeatherCondition(weatherId);
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)main["temp_min"]!,
@@ -186,6 +187,7 @@ namespace WeatherApp.WeatherAPIs
                 WeatherCondition condition = CalculateWeatherCondition(firstWeatherId);
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     day,
                     minTemperature: dayData.Min(d => (double)d["main"]!["temp_min"]!),
