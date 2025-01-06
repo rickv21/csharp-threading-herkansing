@@ -62,6 +62,35 @@
 	  <None Remove="Resources\Images\Weather_Icons\snow.png" />
 	  <None Remove="Resources\Images\Weather_Icons\sunny.png" />
 	  <None Remove="Resources\Images\Weather_Icons\thunder.png" />
+	  <None Remove="Resources\Images\Weather\unknown.png" />
+	  <None Remove="TestData\accu_weather_hour_test.json" />
+	  <None Remove="TestData\accu_weather_location_test.json" />
+	  <None Remove="TestData\accu_weather_week_test.json" />
+	  <None Remove="TestData\openweather_test.json" />
+	  <None Remove="TestData\test_api.json" />
+	  <None Remove="TestData\visual_crossing_test.json" />
+	  <None Remove="TestData\weatherbit_week_test.json" />
+	  <None Remove="TestData\weather_api_test.json" />
+	  <None Remove="TestData\weather_api_week_test.json" />
+	  <None Remove="TestData\weer_live_test.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png" />
+	  <EmbeddedResource Include="TestData\accu_weather_location_test.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="TestData\accu_weather_hour_test.json" />
+	  <EmbeddedResource Include="TestData\geocoding_location_test.json" />
+	  <EmbeddedResource Include="TestData\accu_weather_week_test.json" />
+	  <EmbeddedResource Include="TestData\openweather_test.json" />
+	  <EmbeddedResource Include="TestData\test_api.json" />
+	  <EmbeddedResource Include="TestData\visual_crossing_test.json" />
+	  <EmbeddedResource Include="TestData\weather_api_week_test.json" />
+	  <EmbeddedResource Include="TestData\weather_api_test.json" />
+	  <EmbeddedResource Include="TestData\weatherbit_week_test.json" />
+	  <EmbeddedResource Include="TestData\weer_live_test.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -85,6 +114,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\CityView.xaml.cs">
+      <DependentUpon>CityView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\TestPage.xaml.cs">
+      <DependentUpon>TestPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="Views\CityView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Views\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\WeatherOverviewView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -98,5 +145,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties testdata_4openweather_3test_1json__JsonSchema="https://alec016.github.io/Custom-Machinery/Json%20Schema/src/main/resources/schemas/custom_machinery_machine.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

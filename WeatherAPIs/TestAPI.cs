@@ -9,8 +9,9 @@ namespace WeatherApp.WeatherAPIs
         public TestAPI() : base("Test", "https://jsonplaceholder.typicode.com", 5, 10)
         {
         }
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -26,6 +27,7 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
+                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -48,7 +50,7 @@ namespace WeatherApp.WeatherAPIs
                 CountRequest(); // Important: this counts the requests for the limit.
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Write(responseBody);
+                Debug.WriteLine(responseBody);
                 JObject post = JObject.Parse(responseBody);
                 int id = (int?)post["id"] ?? -1; //Fallback to -1 if not found in response.
 
@@ -56,6 +58,7 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
+                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -73,8 +76,9 @@ namespace WeatherApp.WeatherAPIs
             }
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -84,64 +88,53 @@ namespace WeatherApp.WeatherAPIs
                     Data = null
                 };
             }
+            string responseBody;
             if (simulate)
             {
+                responseBody = GetTestJSON("test_api.json");
                 CountRequest(); // TODO: Do we want to count if we are simulating??
-                var weatherData = new List<WeatherDataModel>(); for (int i = 0; i < 7; i++) { weatherData.Add(new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now.AddDays(i), minTemperature: 15.0, maxTemperature: 25.0, humidity: 50.0)); }
-                return new APIResponse<List<WeatherDataModel>>
-                {
-                    Success = true,
-                    ErrorMessage = null,
-                    Data = weatherData
-                };
+
             }
-            using (HttpClient client = new HttpClient())
+            else
             {
-                HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts/1");
-                response.EnsureSuccessStatusCode();
-                CountRequest(); // Important: this counts the requests for the limit.
-
-                string responseBody = await response.Content.ReadAsStringAsync();
-                Debug.Write(responseBody);
-                JObject post = JObject.Parse(responseBody);
-
-                // Creating dummy weather data for a week
-                var weatherData = new List<WeatherDataModel>();
-                for (int i = 0; i < 7; i++)
+                using (HttpClient client = new HttpClient())
                 {
-                    weatherData.Add(new WeatherDataModel(
-                        WeatherCondition.SUNNY,
-                        DateTime.Now.AddDays(i),
-                        minTemperature: 15.0,
-                        maxTemperature: 25.0,
-                        humidity: 50.0
-                    ));
+                    HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts/1");
+                    response.EnsureSuccessStatusCode();
+                    CountRequest(); // Important: this counts the requests for the limit.
+
+                    responseBody = await response.Content.ReadAsStringAsync();
+
                 }
-
-                return new APIResponse<List<WeatherDataModel>>
-                {
-                    Success = true,
-                    ErrorMessage = null,
-                    Data = weatherData
-                };
             }
-    }
+            Debug.WriteLine(responseBody);
+            JObject post = JObject.Parse(responseBody);
+
+            // Creating dummy weather data for a week
+            var weatherData = new List<WeatherDataModel>();
+            for (int i = 0; i < 7; i++)
+            {
+                weatherData.Add(new WeatherDataModel(
+                    Name,
+                    WeatherCondition.SUNNY,
+                    DateTime.Now.AddDays(i),
+                    minTemperature: 15.0,
+                    maxTemperature: 25.0,
+                    humidity: 50.0
+                ));
+            }
+
+            return new APIResponse<List<WeatherDataModel>>
+            {
+                Success = true,
+                ErrorMessage = null,
+                Data = weatherData
+            };
+        }
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             return WeatherCondition.SUNNY;
-        }
-
-        protected override string GetTestJSON()
-        {
-            return @"
-                {
-                  id: 1,
-                  title: 'Test',
-                  body: 'Test body',
-                  userId: 1
-                }
-                ";
         }
     }
 }

@@ -24,7 +24,9 @@
         TORNADO,
         SAND,
         SMOKE,
-        
+        CLEAR,
+        COLD,
+        ICE,
         UNKNOWN
     }
 }

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:WeatherApp.ViewModels"
+             x:Class="WeatherApp.Views.TestPage"
+             Title="Test page">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="weather_icon.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a race car number eight" />
+
+            <Label
+                Text="Hello, World!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                <RadioButton Content="Day" GroupName="APIToggleGroup" IsChecked="{Binding IsDay, Mode=TwoWay}" />
+                <RadioButton Content="Week" GroupName="APIToggleGroup" IsChecked="{Binding IsWeek, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="Simulate requests:" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding SimulateMode, Mode=TwoWay}" />
+            </HorizontalStackLayout>
+
+            <Label
+                Text="Test API:"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Click to send Test API request" />
+
+            <Button
+                x:Name="TestButton"
+                Text="Click to send Test API Request" 
+                SemanticProperties.Hint="Sends a request to the test api"
+                Command="{Binding TestAPICommand}"
+                HorizontalOptions="Center" />
+            <Label
+                Text="API's:"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="API's" />
+
+            <Button
+                x:Name="OpenWeatherMapButton"
+                Text="Click to send Weather Map API Request" 
+                SemanticProperties.Hint="Sends a request to the Open Weather Map api"
+                Command="{Binding OpenWeatherMapCommand}"
+                HorizontalOptions="Center" />
+            <Button
+                 x:Name="WeerLive_Button"
+                 Text="WeerLiveTest" 
+                 SemanticProperties.Hint="Sends a request to the WeerLive api"
+                 Command="{Binding WeerLiveCommand}"
+                 HorizontalOptions="Center" />
+            
+            <Label
+                Text="AccuWeather:"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Open Weather Map" />
+
+            <Button
+                x:Name="AccuWeatherButton"
+                Text="Click to send AccuWeather API Request" 
+                SemanticProperties.Hint="Sends a request to the AccuWeather api"
+                Command="{Binding AccuWeatherCommand}"
+                HorizontalOptions="Center" />
+
+            <!-- <Button
+                x:Name="GeocodingButton"
+                Text="Click to send Geocoding API Request" 
+                SemanticProperties.Hint="Sends a request to the Geocoding api"
+                Command="{Binding GeocodingCommand}"
+                HorizontalOptions="Center" /> -->
+
+            <Button
+                Text="City"
+                HorizontalOptions="Center"
+                Command="{Binding NavigateToCityCommand}" />
+
+            <Button
+                x:Name="WeatherApiButton"
+                Text="Click to send WeatherAPI Request" 
+                SemanticProperties.Hint="Sends a request to the WeatherAPI"
+                Command="{Binding WeatherAPICommand}"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="WeatherbitButton"
+                Text="Click to send Weatherbit API Request" 
+                SemanticProperties.Hint="Sends a request to the Weatherbit API"
+                Command="{Binding WeatherbitCommand}"
+                HorizontalOptions="Center" />
+
+            <Button
+                Text="Overview"
+                HorizontalOptions="Center"
+                Command="{Binding NavigateToWeatherOverviewCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

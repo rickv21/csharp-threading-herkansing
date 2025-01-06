@@ -1,15 +1,24 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using WeatherApp.Models;
+using System.Diagnostics;
+using WeatherApp.Utils;
+using WeatherApp.Views;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
 {
     internal class WeatherOverviewViewModel : INotifyPropertyChanged
     {
+        private readonly WeatherAppData _weatherAppData;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ObservableCollection<string> TabNames { get; set; }
+
+        private DateTime currentDate; // Tracks the current date for fetching weather data.
+
+        public Dictionary<int, List<WeatherDataModel>> HourlyData { get; set; } = new Dictionary<int, List<WeatherDataModel>>();
 
         private string selectedTab;
         public string SelectedTab
@@ -374,25 +383,26 @@ namespace WeatherApp.ViewModels
                 }
             }
         }
+
         public WeatherOverviewViewModel()
         {
             TabNames = new ObservableCollection<string>();
             Locations = new List<LocationModel>();
 
-            Locations.Add(new LocationModel("Emmen", new List<WeatherDataModel> {
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0)
-    }));
-            Locations.Add(new LocationModel("Amsterdam", new List<WeatherDataModel> {
-        new WeatherDataModel(WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
-        new WeatherDataModel(WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0)
-    }));
+            Locations.Add(new LocationModel("Emmen", "alabama", "Netherlands", "1", 1.1, 1.1, new List<WeatherDataModel> {
+                new WeatherDataModel("trust me bro", WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro",WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro",WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro",WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro", WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0)
+            }));
+            Locations.Add(new LocationModel("Amsterdam", "alabama", "Netherlands", "1", 1.1, 1.1, new List<WeatherDataModel> {
+                new WeatherDataModel("trust me bro",WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro", WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro", WeatherCondition.CLOUDY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro", WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0),
+                new WeatherDataModel("trust me bro", WeatherCondition.SUNNY, DateTime.Now, 1.1, 1.1, 2.0)
+            }));
 
             SetTabNames();
 
@@ -499,9 +509,191 @@ namespace WeatherApp.ViewModels
             {
                 WeekDayString = "Dag overzicht";
             }
+        }  
+    
+        
+
+        /// <summary>
+        /// Fetches weather data asynchronously from all available weather services for a specified location and date.
+        /// </summary>
+        /// <param name="location">The location for which weather data is to be fetched.</param>
+        /// <param name="date">The date for which weather data is required.</param>
+        /// <returns>
+        /// An array of <see cref="APIResponse{T}"/> objects, each containing weather data from one of the available services.
+        /// Returns an empty array if no services are available or an error occurs.
+        /// </returns>
+        /// <remarks>
+        /// ### **Task Parallel Library (TPL) Overview**
+        /// The TPL is a .NET framework for managing and executing parallel and asynchronous code using the **Task** abstraction.  
+        /// It enables developers to perform concurrent operations efficiently by leveraging:
+        /// 1. **Thread Pool Management**: Tasks are queued to the thread pool, avoiding the overhead of manually creating and destroying threads.  
+        /// 2. **Concurrency Without Blocking**: Tasks allow asynchronous execution, keeping threads free for other operations.  
+        /// 3. **Simplified Syntax and Error Handling**: TPL simplifies managing complex asynchronous workflows using features like continuations, `Task.WhenAll`, and `Task.WhenAny`.  
+        ///
+        /// #### **Why TPL is Used in This Method**
+        /// In this method, TPL is used to concurrently fetch weather data from multiple weather services:
+        /// - Each weather service implements an asynchronous method (`GetWeatherDataAsync`).
+        /// - These methods are invoked concurrently using TPL, ensuring efficient resource utilization and reduced response time compared to sequential processing.  
+        ///</remarks>
+        public async Task<APIResponse<List<WeatherDataModel>>[]> FetchWeatherDataAsync(LocationModel location, DateTime date)
+        {
+            Debug.WriteLine($"Fetching weather data for {location.Name} on {date}");
+            if (_weatherAppData.WeatherServices == null || _weatherAppData.WeatherServices.Count == 0)
+            {
+                Debug.WriteLine("No services available.");
+                return Array.Empty<APIResponse<List<WeatherDataModel>>>(); // Return an empty array
+            }
+
+            try
+            {
+                // Fetch weather data from all services concurrently
+                var tasks = _weatherAppData.WeatherServices.Values.Select(service =>
+                    service.GetWeatherDataAsync(date, location, _weatherAppData.SimulateMode)
+                );
+
+                Debug.WriteLine("Fetching weather data from services...");
+                var results = await Task.WhenAll(tasks);
+                return results; // Return results for further processing
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching weather data: {ex.Message}");
+                return Array.Empty<APIResponse<List<WeatherDataModel>>>(); // Return an empty array on error
+            }
         }
 
-        public void OnExportButtonClicked(object sender, EventArgs e)
+        /// <summary>
+        /// Aggregates weather data by hour and processes it for display.
+        /// </summary>
+        /// <returns>Dictionary of aggregated weather data indexed by hour.</returns>
+        private async Task<Dictionary<int, WeatherDataModel>> UpdateHourlyData()
+        {
+            LocationModel location = _weatherAppData.Locations[0]; //Temp hardcoded.
+            var results = await FetchWeatherDataAsync(location, currentDate);
+            foreach (var result in results)
+            {
+                if (result.Success)
+                {
+                    if (result.Data.Count == 0)
+                    {
+                        Debug.WriteLine("Data is empty!");
+                    }
+                    foreach (WeatherDataModel apiData in result.Data)
+                    {
+                        var service = _weatherAppData.WeatherServices[apiData.APISource];
+                        Debug.WriteLine(service.Name + " - " + service.IsEnabled);
+                        if (!service.IsEnabled)
+                        {
+                            continue;
+                        }
+                        Debug.WriteLine(apiData.ToString());
+                        int hour = apiData.TimeStamp.Hour;
+                        if (!HourlyData.ContainsKey(hour))
+                        {
+                            HourlyData[hour] = new List<WeatherDataModel>();
+                        }
+
+                        HourlyData[hour].Add(apiData);
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine(result.ErrorMessage);
+                    await Shell.Current.DisplayAlert("Error", result.ErrorMessage, "OK");
+                }
+            } 
+      
+            var aggregatedData = HourlyData.ToDictionary(hourEntry => hourEntry.Key, hourEntry =>
+            {
+                int hour = hourEntry.Key;
+                var dataList = hourEntry.Value;
+
+                double totalHumidity = -1;
+                double minTemperature = double.MaxValue; 
+                double maxTemperature = double.MinValue;
+                int validHumidityCount = 0;
+                WeatherCondition aggregatedCondition = WeatherCondition.UNKNOWN; // Default value
+
+                foreach (var data in dataList)
+                {
+                    // Aggregate humidity, excluding -1 values.
+                    if (data.Humidity != -1)
+                    {
+                        totalHumidity += data.Humidity;
+                        validHumidityCount++;
+                    }
+
+                    // Aggregate temperatures.
+                    minTemperature = Math.Min(minTemperature, data.MinTemperature);
+                    maxTemperature = Math.Max(maxTemperature, data.MaxTemperature);
+
+                    if (aggregatedCondition == WeatherCondition.UNKNOWN)
+                    {
+                        aggregatedCondition = data.Condition;
+                    }
+                }
+
+                double averageHumidity = validHumidityCount > 0 ? totalHumidity / validHumidityCount : 0;
+
+                return new WeatherDataModel(
+                    "",
+                    aggregatedCondition,
+                    new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, hour, 0, 0), // Set the hour.
+                    minTemperature,
+                    maxTemperature,
+                    averageHumidity
+                );
+            }
+         );
+
+            var sortedAggregatedData = aggregatedData.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            return sortedAggregatedData;
+        }
+
+
+        /// <summary>
+        /// Fetches the appropriate weather icon for a condition.
+        /// </summary>
+        /// <param name="condition">The weather condition.</param>
+        /// <returns>An ImageSource for the icon.</returns>
+        public ImageSource GetWeatherIcon(WeatherCondition condition)
+        {
+            string iconName = condition.ToString().ToLower();
+            string iconPath = $"WeatherApp.Resources.Images.Weather.{iconName}.png";
+            var assembly = GetType().Assembly;
+
+            try
+            {
+                using (var stream = assembly.GetManifestResourceStream(iconPath))
+                {
+                    if (stream == null)
+                    {
+                        Debug.WriteLine("Icon not found, using fallback.");
+                        return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
+                    }
+
+                    return ImageSource.FromStream(() => stream);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception occurred while fetching the icon: {ex.Message}. Using fallback image.");
+                return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
+            }
+        }
+
+        /// <summary>
+        /// Sets up the map interface.
+        /// </summary>
+        public async Task SetupMap()
+        {
+            //TODO
+        }
+
+        /// <summary>
+        /// Handles exporting data.
+        /// </summary>
+        public void Export()
         {
             throw new NotImplementedException();
         }
@@ -511,5 +703,14 @@ namespace WeatherApp.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        /// <summary>
+        /// Opens the settings page.
+        /// </summary>
+        public async void OpenSettings()
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
+        }
+
     }
 }

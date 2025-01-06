@@ -1,0 +1,216 @@
+{
+  "location": {
+    "name": "Amsterdam",
+    "region": "North Holland",
+    "country": "Netherlands",
+    "lat": 52.37,
+    "lon": 4.89,
+    "tz_id": "Europe/Amsterdam",
+    "localtime_epoch": 1702665600,
+    "localtime": "2024-12-15 12:00"
+  },
+  "current": {
+    "temp_c": 6.0,
+    "temp_f": 42.8,
+    "condition": {
+      "text": "Partly Cloudy",
+      "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png",
+      "code": 1003
+    },
+    "wind_mph": 8.1,
+    "wind_kph": 13.0,
+    "wind_degree": 240,
+    "wind_dir": "WSW",
+    "pressure_mb": 1020,
+    "pressure_in": 30.12,
+    "precip_mm": 0.0,
+    "precip_in": 0.0,
+    "humidity": 76,
+    "cloud": 50,
+    "feelslike_c": 3.0,
+    "feelslike_f": 37.4,
+    "uv": 1.0
+  },
+  "forecast": {
+    "forecastday": [
+      {
+        "date": "2024-12-15",
+        "day": {
+          "maxtemp_c": 8.0,
+          "maxtemp_f": 46.4,
+          "mintemp_c": 3.0,
+          "mintemp_f": 37.4,
+          "avgtemp_c": 5.5,
+          "avgtemp_f": 41.9,
+          "condition": {
+            "text": "Partly Cloudy",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png",
+            "code": 1003
+          },
+          "maxwind_mph": 10.5,
+          "maxwind_kph": 17.0,
+          "totalprecip_mm": 0.0,
+          "totalprecip_in": 0.0
+        },
+        "astro": {
+          "sunrise": "08:34 AM",
+          "sunset": "04:26 PM",
+          "moonrise": "07:21 PM",
+          "moonset": "09:10 AM"
+        },
+        "hour": [
+          {
+            "time_epoch": 1702665600,
+            "time": "2024-12-15 02:00",
+            "temp_c": 3.0,
+            "temp_f": 37.4,
+            "condition": {
+              "text": "Clear",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/113.png",
+              "code": 1000
+            },
+            "wind_mph": 5.8,
+            "wind_kph": 9.4,
+            "humidity": 85,
+            "cloud": 10
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 03:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Patchy rain nearby",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 04:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 05:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Mist",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 06:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Clear",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 07:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 08:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 09:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 10:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          },
+          {
+            "time_epoch": 1702672800,
+            "time": "2024-12-15 11:00",
+            "temp_c": 2.0,
+            "temp_f": 35.6,
+            "condition": {
+              "text": "Sunny",
+              "icon": "//cdn.weatherapi.com/weather/64x64/night/176.png",
+              "code": 1063
+            },
+            "wind_mph": 4.7,
+            "wind_kph": 7.6,
+            "humidity": 90,
+            "cloud": 75
+          }
+        ]
+      }
+    ]
+  }
+}

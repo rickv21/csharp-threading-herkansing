@@ -9,8 +9,9 @@ namespace WeatherApp.WeatherAPIs
         public OpenWeatherMapAPI() : base("Open Weather Map", "https://api.openweathermap.org/data/2.5/", 1000, -1)
         {
         }
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -23,14 +24,14 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON();
+                responseBody = GetTestJSON("openweather_test.json");
                 CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast?q={location}&appid={_apiKey}&units=metric";
+                    string url = $"{_baseURL}forecast?lat={location.Latitude}&lon={location.Longitude}&appid={_apiKey}&units=metric";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -50,33 +51,43 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
             var list = weatherResponse["list"] ?? throw new Exception("Missing list data in API response");
             var weatherData = new List<WeatherDataModel>();
+            bool setTestDay = false;
 
             foreach (var item in list)
             {
                 JToken? main = item["main"];
                 JToken? weather = item["weather"]?.FirstOrDefault();
                 if (item["dt_txt"] == null || main == null || main["temp_min"] == null || main["temp_max"] == null || main["humidity"] == null || weather == null || weather["id"] == null)
-                { 
-                    throw new Exception($"Missing data in API response at {item}"); 
+                {
+                    throw new Exception($"Missing data in API response at {item}");
                 }
                 DateTime forecastDate = DateTime.Parse((string)item["dt_txt"]!);
-                if(forecastDate.Date == day.Date)
+                if (simulate && !setTestDay)
                 {
-                    int weatherId = (int)weather["id"]!;
-                    WeatherCondition condition = CalculateWeatherCondition(weatherId);
-
-                    weatherData.Add(new WeatherDataModel(
-                        condition,
-                        forecastDate,
-                        minTemperature: (double)main["temp_min"]!,
-                        maxTemperature: (double)main["temp_max"]!,
-                        humidity: (double)main["humidity"]!
-                        ));
+                    day = forecastDate;
+                    setTestDay = true;
                 }
+                if (forecastDate.Date != day.Date)
+                {
+                    Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
+                    continue; // Skip entries not matching the requested day (only when not simulating).
+                }
+    
+                int weatherId = (int)weather["id"]!;
+                WeatherCondition condition = CalculateWeatherCondition(weatherId);
+
+                weatherData.Add(new WeatherDataModel(
+                    Name,
+                    condition,
+                    forecastDate,
+                    minTemperature: (double)main["temp_min"]!,
+                    maxTemperature: (double)main["temp_max"]!,
+                    humidity: (double)main["humidity"]!
+                    ));
             }
 
             return new APIResponse<List<WeatherDataModel>>
@@ -88,8 +99,9 @@ namespace WeatherApp.WeatherAPIs
 
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(string location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
         {
+            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -103,14 +115,19 @@ namespace WeatherApp.WeatherAPIs
             string responseBody;
             if (simulate)
             {
-                responseBody = GetTestJSON();
+                responseBody = GetTestJSON("openweather_test.json");
+                DateTime date = DateTime.Now;
+                responseBody = responseBody.Replace("2022-08-30", date.ToString("yyyy-MM-dd"));
+
+                date = DateTime.Now.AddDays(2);
+                responseBody = responseBody.Replace("2022-09-04", date.ToString("yyyy-MM-dd"));
                 CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast?q={location}&appid={_apiKey}&units=metric";
+                    string url = $"{_baseURL}forecast?lat={location.Latitude}&lon={location.Longitude}&appid={_apiKey}&units=metric";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -131,7 +148,7 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.Write(responseBody);
+            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Check if weatherResponse["list"] exists and is not null
@@ -166,10 +183,11 @@ namespace WeatherApp.WeatherAPIs
             {
                 var dayData = dailyData[day];
                 // Calculate the weather condition for the day based on the first weather_id
-                var firstWeatherId = (int)dayData.First()["weather"]!.First()["id"]!; 
+                var firstWeatherId = (int)dayData.First()["weather"]!.First()["id"]!;
                 WeatherCondition condition = CalculateWeatherCondition(firstWeatherId);
 
                 weatherData.Add(new WeatherDataModel(
+                    Name,
                     condition,
                     day,
                     minTemperature: dayData.Min(d => (double)d["main"]!["temp_min"]!),
@@ -189,7 +207,7 @@ namespace WeatherApp.WeatherAPIs
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             int id = (int)data;
-            char firstDigitChar = id.ToString()[0]; 
+            char firstDigitChar = id.ToString()[0];
             int firstDigit = int.Parse(firstDigitChar.ToString());
 
             switch (firstDigit)
@@ -198,13 +216,13 @@ namespace WeatherApp.WeatherAPIs
                     return WeatherCondition.THUNDERSTORM;
                 case 3:
                     return WeatherCondition.DRIZZLE;
-                case 5: 
+                case 5:
                     return WeatherCondition.RAIN;
                 case 6:
                     return WeatherCondition.SNOW;
                 case 7:
                     {
-                        if(id == 701)
+                        if (id == 701)
                         {
                             return WeatherCondition.MIST;
                         }
@@ -216,7 +234,7 @@ namespace WeatherApp.WeatherAPIs
                         {
                             return WeatherCondition.HAZE;
                         }
-                        if(id == 731)
+                        if (id == 731)
                         {
                             return WeatherCondition.DUST;
                         }
@@ -244,7 +262,7 @@ namespace WeatherApp.WeatherAPIs
                         {
                             return WeatherCondition.TORNADO;
                         }
-                        Debug.WriteLine("Unknown weather code: " +  id);
+                        Debug.WriteLine("Unknown weather code: " + id);
                         return WeatherCondition.UNKNOWN;
                     }
                 case 8:
@@ -252,12 +270,12 @@ namespace WeatherApp.WeatherAPIs
                         if (id == 800)
                         {
                             return WeatherCondition.SUNNY;
-                        } 
+                        }
                         else
                         {
                             return WeatherCondition.CLOUDY;
                         }
-                        
+
                     }
                 default:
                     Debug.WriteLine("Unknown weather code: " + id);
@@ -266,192 +284,5 @@ namespace WeatherApp.WeatherAPIs
 
         }
 
-        protected override string GetTestJSON()
-        {
-            //TODO: This is very long, might put this in a external file later.
-
-            //The temperature is given in Kelvin in this example code.
-            //This will be replaced with actual query data once the API key is working correctly.
-            string json =  @"
-    {
-      ""cod"": ""200"",
-      ""message"": 0,
-      ""cnt"": 40,
-      ""list"": [
-        {
-          ""dt"": 1661871600,
-          ""main"": {
-            ""temp"": 296.76,
-            ""feels_like"": 296.98,
-            ""temp_min"": 296.76,
-            ""temp_max"": 297.87,
-            ""pressure"": 1015,
-            ""sea_level"": 1015,
-            ""grnd_level"": 933,
-            ""humidity"": 69,
-            ""temp_kf"": -1.11
-          },
-          ""weather"": [
-            {
-              ""id"": 500,
-              ""main"": ""Rain"",
-              ""description"": ""light rain"",
-              ""icon"": ""10d""
-            }
-          ],
-          ""clouds"": {
-            ""all"": 100
-          },
-          ""wind"": {
-            ""speed"": 0.62,
-            ""deg"": 349,
-            ""gust"": 1.18
-          },
-          ""visibility"": 10000,
-          ""pop"": 0.32,
-          ""rain"": {
-            ""3h"": 0.26
-          },
-          ""sys"": {
-            ""pod"": ""d""
-          },
-          ""dt_txt"": ""2022-08-30 15:00:00""
-        },
-        {
-          ""dt"": 1661882400,
-          ""main"": {
-            ""temp"": 295.45,
-            ""feels_like"": 295.59,
-            ""temp_min"": 292.84,
-            ""temp_max"": 295.45,
-            ""pressure"": 1015,
-            ""sea_level"": 1015,
-            ""grnd_level"": 931,
-            ""humidity"": 71,
-            ""temp_kf"": 2.61
-          },
-          ""weather"": [
-            {
-              ""id"": 500,
-              ""main"": ""Rain"",
-              ""description"": ""light rain"",
-              ""icon"": ""10n""
-            }
-          ],
-          ""clouds"": {
-            ""all"": 96
-          },
-          ""wind"": {
-            ""speed"": 1.97,
-            ""deg"": 157,
-            ""gust"": 3.39
-          },
-          ""visibility"": 10000,
-          ""pop"": 0.33,
-          ""rain"": {
-            ""3h"": 0.57
-          },
-          ""sys"": {
-            ""pod"": ""n""
-          },
-          ""dt_txt"": ""2022-08-30 18:00:00""
-        },
-        {
-          ""dt"": 1661893200,
-          ""main"": {
-            ""temp"": 292.46,
-            ""feels_like"": 292.54,
-            ""temp_min"": 290.31,
-            ""temp_max"": 292.46,
-            ""pressure"": 1015,
-            ""sea_level"": 1015,
-            ""grnd_level"": 931,
-            ""humidity"": 80,
-            ""temp_kf"": 2.15
-          },
-          ""weather"": [
-            {
-              ""id"": 500,
-              ""main"": ""Rain"",
-              ""description"": ""light rain"",
-              ""icon"": ""10n""
-            }
-          ],
-          ""clouds"": {
-            ""all"": 68
-          },
-          ""wind"": {
-            ""speed"": 2.66,
-            ""deg"": 210,
-            ""gust"": 3.58
-          },
-          ""visibility"": 10000,
-          ""pop"": 0.7,
-          ""rain"": {
-            ""3h"": 0.49
-          },
-          ""sys"": {
-            ""pod"": ""n""
-          },
-          ""dt_txt"": ""2022-08-30 21:00:00""
-        },
-        {
-          ""dt"": 1662292800,
-          ""main"": {
-            ""temp"": 294.93,
-            ""feels_like"": 294.83,
-            ""temp_min"": 294.93,
-            ""temp_max"": 294.93,
-            ""pressure"": 1018,
-            ""sea_level"": 1018,
-            ""grnd_level"": 935,
-            ""humidity"": 64,
-            ""temp_kf"": 0
-          },
-          ""weather"": [
-            {
-              ""id"": 804,
-              ""main"": ""Clouds"",
-              ""description"": ""overcast clouds"",
-              ""icon"": ""04d""
-            }
-          ],
-          ""clouds"": {
-            ""all"": 88
-          },
-          ""wind"": {
-            ""speed"": 1.14,
-            ""deg"": 17,
-            ""gust"": 1.57
-          },
-          ""visibility"": 10000,
-          ""pop"": 0,
-          ""sys"": {
-            ""pod"": ""d""
-          },
-          ""dt_txt"": ""2022-09-04 12:00:00""
-        }
-      ],
-      ""city"": {
-        ""id"": 3163858,
-        ""name"": ""Zocca"",
-        ""coord"": {
-          ""lat"": 44.34,
-          ""lon"": 10.99
-        },
-        ""country"": ""IT"",
-        ""population"": 4593,
-        ""timezone"": 7200,
-        ""sunrise"": 1661834187,
-        ""sunset"": 1661882248
-      }
-    }";
-            DateTime date = DateTime.Now;
-            json = json.Replace("2022-08-30", date.ToString("yyyy-MM-dd"));
-
-            date = DateTime.Now.AddDays(2);
-            json = json.Replace("2022-09-04", date.ToString("yyyy-MM-dd"));
-            return json;
-        }
     }
 }

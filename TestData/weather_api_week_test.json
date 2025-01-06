@@ -1,0 +1,156 @@
+{
+  "location": {
+    "name": "Amsterdam",
+    "region": "Noord-Holland",
+    "country": "Netherlands",
+    "lat": 52.3676,
+    "lon": 4.9041,
+    "tz_id": "Europe/Amsterdam",
+    "localtime_epoch": 1673883705,
+    "localtime": "2024-12-15 12:15"
+  },
+  "forecast": {
+    "forecastday": [
+      {
+        "date": "2024-12-15",
+        "day": {
+          "maxtemp_c": 7.5,
+          "mintemp_c": 3.0,
+          "avgtemp_c": 5.0,
+          "humidity": 85,
+          "condition": {
+            "text": "Clear",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/113.png",
+            "code": 1000
+          },
+          "maxwind_kph": 22.0,
+          "totalprecip_mm": 0.0
+        },
+        "astro": {
+          "sunrise": "07:00 AM",
+          "sunset": "04:45 PM"
+        }
+      },
+      {
+        "date": "2024-12-16",
+        "day": {
+          "maxtemp_c": 6.0,
+          "mintemp_c": 2.0,
+          "avgtemp_c": 4.0,
+          "humidity": 80,
+          "condition": {
+            "text": "Partly Cloudy",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png",
+            "code": 1003
+          },
+          "maxwind_kph": 18.0,
+          "totalprecip_mm": 0.1
+        },
+        "astro": {
+          "sunrise": "07:01 AM",
+          "sunset": "04:44 PM"
+        }
+      },
+      {
+        "date": "2024-12-17",
+        "day": {
+          "maxtemp_c": 4.5,
+          "mintemp_c": 1.0,
+          "avgtemp_c": 3.0,
+          "humidity": 90,
+          "condition": {
+            "text": "Overcast",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/119.png",
+            "code": 1006
+          },
+          "maxwind_kph": 15.0,
+          "totalprecip_mm": 1.0
+        },
+        "astro": {
+          "sunrise": "07:02 AM",
+          "sunset": "04:43 PM"
+        }
+      },
+      {
+        "date": "2024-12-18",
+        "day": {
+          "maxtemp_c": 5.5,
+          "mintemp_c": 1.0,
+          "avgtemp_c": 3.0,
+          "humidity": 80,
+          "condition": {
+            "text": "Overcast",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/119.png",
+            "code": 1006
+          },
+          "maxwind_kph": 15.0,
+          "totalprecip_mm": 1.0
+        },
+        "astro": {
+          "sunrise": "07:02 AM",
+          "sunset": "04:43 PM"
+        }
+      },
+      {
+        "date": "2024-12-19",
+        "day": {
+          "maxtemp_c": 5.5,
+          "mintemp_c": 2.0,
+          "avgtemp_c": 3.0,
+          "humidity": 95,
+          "condition": {
+            "text": "Clear",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/119.png",
+            "code": 1006
+          },
+          "maxwind_kph": 15.0,
+          "totalprecip_mm": 1.0
+        },
+        "astro": {
+          "sunrise": "07:02 AM",
+          "sunset": "04:43 PM"
+        }
+      },
+      {
+        "date": "2024-12-20",
+        "day": {
+          "maxtemp_c": 6.5,
+          "mintemp_c": 1.0,
+          "avgtemp_c": 3.0,
+          "humidity": 60,
+          "condition": {
+            "text": "Sunny",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/119.png",
+            "code": 1006
+          },
+          "maxwind_kph": 15.0,
+          "totalprecip_mm": 1.0
+        },
+        "astro": {
+          "sunrise": "07:02 AM",
+          "sunset": "04:43 PM"
+        }
+      },
+      {
+        "date": "2024-12-21",
+        "day": {
+          "maxtemp_c": 7.5,
+          "mintemp_c": 1.4,
+          "avgtemp_c": 3.0,
+          "humidity": 95,
+          "condition": {
+            "text": "Mist",
+            "icon": "//cdn.weatherapi.com/weather/64x64/day/119.png",
+            "code": 1006
+          },
+          "maxwind_kph": 15.0,
+          "totalprecip_mm": 1.0
+        },
+        "astro": {
+          "sunrise": "07:02 AM",
+          "sunset": "04:43 PM"
+        }
+      }
+    ]
+  }
+}
