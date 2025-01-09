@@ -23,8 +23,6 @@ namespace WeatherApp.ViewModels
 
         public ObservableCollection<LocationModel> Locations { get; set; }
 
-        public ICommand SelectionChangedCommand { get; }
-
 
         private LocationModel _selectedTab;
         public LocationModel SelectedTab
@@ -35,8 +33,7 @@ namespace WeatherApp.ViewModels
                 if (_selectedTab != value)
                 {
                     _selectedTab = value;
-                    Debug.WriteLine($"SelectedTab updated: {_selectedTab?.Name}");
-                    OnPropertyChanged(); // Notify UI of the change
+                    OnPropertyChanged();
                 }
             }
         }
@@ -77,8 +74,6 @@ namespace WeatherApp.ViewModels
 
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
-            SelectionChangedCommand = new Command<object>(OnCollectionViewSelectionChanged);
-
         }
 
         // Event for notifying UI of property changes
@@ -302,18 +297,6 @@ namespace WeatherApp.ViewModels
         public async void OpenSettings()
         {
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
-        }
-        private void OnCollectionViewSelectionChanged(object parameter)
-        {
-            var e = parameter as SelectionChangedEventArgs;
-            if (e != null && e.CurrentSelection != null && e.CurrentSelection.Count > 0)
-            {
-                var selectedLocation = e.CurrentSelection[0] as LocationModel;
-                if (selectedLocation != null)
-                {
-                    SelectedTab = selectedLocation;
-                }
-            }
         }
     }
 }
