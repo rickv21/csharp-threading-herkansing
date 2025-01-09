@@ -79,7 +79,15 @@
         </ScrollView>
 
         <VerticalStackLayout Grid.Row="3">
-            <WebView x:Name="MapWebView" HeightRequest="400" WidthRequest="300" HorizontalOptions="Fill" VerticalOptions="FillAndExpand" />
+            <Button
+                Text="Settings"
+                HorizontalOptions="Center"
+                Command="{Binding SettingsCommand}" />
+            <WebView x:Name="MapWebView"
+                     HeightRequest="400"
+                     WidthRequest="300"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="FillAndExpand" />
         </VerticalStackLayout>
 
     </Grid>
