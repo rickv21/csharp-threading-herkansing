@@ -13,13 +13,33 @@ namespace WeatherApp.ViewModels
     /// <summary>
     /// ViewModel for the Weather Overview screen. 
     /// </summary>
-    public class WeatherOverviewViewModel
+    public class WeatherOverviewViewModel : INotifyPropertyChanged
     {
         private readonly WeatherAppData _weatherAppData;
 
         private DateTime currentDate; // Tracks the current date for fetching weather data.
 
         public Dictionary<int, List<WeatherDataModel>> HourlyData { get; set; } = new Dictionary<int, List<WeatherDataModel>>();
+
+        public ObservableCollection<LocationModel> Locations { get; set; }
+
+        public ICommand SelectionChangedCommand { get; }
+
+
+        private LocationModel _selectedTab;
+        public LocationModel SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (_selectedTab != value)
+                {
+                    _selectedTab = value;
+                    Debug.WriteLine($"SelectedTab updated: {_selectedTab?.Name}");
+                    OnPropertyChanged(); // Notify UI of the change
+                }
+            }
+        }
 
         private ObservableCollection<WeatherDisplayItem> _weatherItems;
         /// <summary>
@@ -46,11 +66,19 @@ namespace WeatherApp.ViewModels
         {
             _weatherAppData = weatherAppData;
             this.currentDate = DateTime.Now;
+            this.Locations = new ObservableCollection<LocationModel>();
+            foreach(var location in weatherAppData.Locations)
+            {
+                this.Locations.Add(location);
+            }
+
+            this.SelectedTab = this.Locations.First();
             this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
 
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
-            
+            SelectionChangedCommand = new Command<object>(OnCollectionViewSelectionChanged);
+
         }
 
         // Event for notifying UI of property changes
@@ -275,6 +303,17 @@ namespace WeatherApp.ViewModels
         {
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
         }
-
+        private void OnCollectionViewSelectionChanged(object parameter)
+        {
+            var e = parameter as SelectionChangedEventArgs;
+            if (e != null && e.CurrentSelection != null && e.CurrentSelection.Count > 0)
+            {
+                var selectedLocation = e.CurrentSelection[0] as LocationModel;
+                if (selectedLocation != null)
+                {
+                    SelectedTab = selectedLocation;
+                }
+            }
+        }
     }
 }
