@@ -6,6 +6,8 @@ namespace WeatherApp.WeatherAPIs
 {
     public class OpenWeatherMapAPI : WeatherService
     {
+        public string OpenWeatherApiKey => _apiKey;
+
         public OpenWeatherMapAPI() : base("Open Weather Map", "https://api.openweathermap.org/data/2.5/", 1000, -1)
         {
         }
