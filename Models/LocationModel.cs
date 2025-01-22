@@ -46,5 +46,10 @@
         /// This either represents multiple hours of a day or multiple days of a week.
         /// </summary>
         public List<WeatherDataModel> WeatherData { get; set; } = weatherData ?? [];
+
+        public string ToString()
+        {
+            return Name;
+        }
     }
 }

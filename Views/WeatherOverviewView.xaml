@@ -2,41 +2,94 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
-             x:Class="WeatherApp.Views.WeatherOverviewView"
-             Title="Weather Overview">
+             x:Class="WeatherApp.Views.WeatherOverviewView">
 
-    <Grid>
-        <ScrollView>
-            <VerticalStackLayout>
-                <CollectionView ItemsSource="{Binding WeatherItems}" VerticalOptions="FillAndExpand">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <HorizontalStackLayout>
-                                <!-- Display the weather icon -->
-                                <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
-                                <!-- Display the weather information -->
-                                <Label Text="{Binding WeatherInfo}" />
-                            </HorizontalStackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
 
-                <WebView x:Name="MapWebView"
+    <Grid RowDefinitions="Auto, Auto, Auto, 2*">
+
+        <ScrollView Orientation="Horizontal" Grid.Row="1">
+            <CollectionView ItemsSource="{Binding Locations}" 
+            SelectionMode="Single"
+            x:Name="TabCollection"
+            SelectedItem="{Binding SelectedTab}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10" Margin="5" BorderColor="LightGray" CornerRadius="10">
+                            <Label Text="{Binding Name}" />
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
+            <Button Text="Exporteer" 
+            HorizontalOptions="Start" 
+            VerticalOptions="Start" 
+            Grid.Column="0" 
+            WidthRequest="110" 
+            HeightRequest="40" 
+            BorderWidth="1" 
+            Margin="0"
+            Padding="0"
+            CornerRadius="5" 
+            Clicked="OnExportButtonClicked" />
+
+            <Button Text="Week Overzicht" 
+            HorizontalOptions="End" 
+            VerticalOptions="Start" 
+            Grid.Column="2" 
+            WidthRequest="110" 
+            HeightRequest="40" 
+            BorderWidth="1" 
+            CornerRadius="5" 
+            Margin="0"
+            Padding="0"
+            Clicked="OnDayWeekButtonClicked" />
+        </Grid>
+
+        <ScrollView Orientation="Horizontal" Grid.Row="2">
+            <CollectionView ItemsSource="{Binding WeatherItems}" BackgroundColor="#3A3A3A" 
+                    x:Name="WeatherItemsCollection"
+                    HorizontalOptions="FillAndExpand">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="0,0,0,10">
+                            <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
+                            <Label Text="{Binding Condition}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding TimeStamp}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding MinTemp}" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding MaxTemp}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding Humidity}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <VerticalStackLayout Grid.Row="3">
+            <Button
+                Text="Settings"
+                HorizontalOptions="Start"
+                 WidthRequest="110" 
+                 HeightRequest="40" 
+                 BorderWidth="1" 
+                 CornerRadius="5" 
+                 Margin="0"
+                 Padding="0"
+                Command="{Binding SettingsCommand}" />
+            <WebView x:Name="MapWebView"
                      HeightRequest="400"
                      WidthRequest="300"
                      HorizontalOptions="Fill"
                      VerticalOptions="FillAndExpand" />
+        </VerticalStackLayout>
 
-                <Button
-                Text="Settings"
-                HorizontalOptions="Center"
-                Command="{Binding SettingsCommand}" />
-            </VerticalStackLayout>
-        </ScrollView>
-        <!-- Loading Indicator Overlay, there is a weird issue with this, it seems to ignore IsLoading for some reason. -->
-        <!--<Grid IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity="0.7">
-            <ActivityIndicator IsRunning="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center"/>
-            <Label Text="Loading..." HorizontalOptions="Center" VerticalOptions="Center" TextColor="White"/>
-        </Grid>-->
     </Grid>
 </ContentPage>

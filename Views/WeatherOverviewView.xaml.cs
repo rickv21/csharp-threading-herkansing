@@ -28,4 +28,15 @@ public partial class WeatherOverviewView : ContentPage
         Debug.WriteLine("Disappear");
         base.OnDisappearing();
     }
+
+    public void OnExportButtonClicked(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnDayWeekButtonClicked(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
 }
