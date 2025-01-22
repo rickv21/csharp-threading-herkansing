@@ -7,7 +7,7 @@
 
     <Grid RowDefinitions="Auto, Auto, Auto, 2*">
 
-        <ScrollView Orientation="Horizontal" Grid.Row="0">
+        <ScrollView Orientation="Horizontal" Grid.Row="1">
             <CollectionView ItemsSource="{Binding Locations}" 
             SelectionMode="Single"
             x:Name="TabCollection"
@@ -25,14 +25,13 @@
             </CollectionView>
         </ScrollView>
 
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
             <Button Text="Exporteer" 
             HorizontalOptions="Start" 
             VerticalOptions="Start" 
             Grid.Column="0" 
             WidthRequest="110" 
             HeightRequest="40" 
-            BorderColor="LightGray" 
             BorderWidth="1" 
             Margin="0"
             Padding="0"
@@ -45,7 +44,6 @@
             Grid.Column="2" 
             WidthRequest="110" 
             HeightRequest="40" 
-            BorderColor="LightGray" 
             BorderWidth="1" 
             CornerRadius="5" 
             Margin="0"
@@ -54,7 +52,7 @@
         </Grid>
 
         <ScrollView Orientation="Horizontal" Grid.Row="2">
-            <CollectionView ItemsSource="{Binding WeatherItems}" 
+            <CollectionView ItemsSource="{Binding WeatherItems}" BackgroundColor="#3A3A3A" 
                     x:Name="WeatherItemsCollection"
                     HorizontalOptions="FillAndExpand">
                 <CollectionView.ItemsLayout>
@@ -64,6 +62,7 @@
                     <DataTemplate>
                         <VerticalStackLayout Padding="0,0,0,10">
                             <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
+                            <Label Text="{Binding Condition}" HorizontalTextAlignment="Center" />
                             <Label Text="{Binding TimeStamp}" HorizontalTextAlignment="Center" />
                             <Label Text="{Binding MinTemp}" HorizontalTextAlignment="Center"/>
                             <Label Text="{Binding MaxTemp}" HorizontalTextAlignment="Center" />
@@ -80,7 +79,6 @@
                 HorizontalOptions="Start"
                  WidthRequest="110" 
                  HeightRequest="40" 
-                 BorderColor="LightGray" 
                  BorderWidth="1" 
                  CornerRadius="5" 
                  Margin="0"

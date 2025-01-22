@@ -10,6 +10,7 @@
         public string MinTemp { get; set; }
         public string MaxTemp { get; set; }
         public string Humidity { get; set; }
+        public string Condition { get; set; }
 
         public WeatherDisplayItem(ImageSource image, string weatherInfo)
         {
@@ -38,6 +39,84 @@
                     else if (part.Contains("Humidity:"))
                     {
                         Humidity = "Humidity: " + part.Split(':')[1].Trim();
+                    }
+                    else if (part.Contains("Condition:"))
+                    {
+                        switch (part.Split(':')[1].Trim())
+                        {
+                            case "SUNNY":
+                                Condition = "Zonnig";
+                                break;
+                            case "RAIN":
+                                Condition = "Regen";
+                                break;
+                            case "CLOUDY":
+                                Condition = "Bewolkt";
+                                break;
+                            case "THUNDERSTORM":
+                                Condition = "Onweer";
+                                break;
+                            case "SNOW":
+                                Condition = "Sneeuw";
+                                break;
+                            case "PARTLY_CLOUDY":
+                                Condition = "Gedeeltelijk bewolkt";
+                                break;
+                            case "HAIL":
+                                Condition = "Hagel";
+                                break;
+                            case "MIST":
+                                Condition = "Mist";
+                                break;
+                            case "STORMY":
+                                Condition = "Stormachtig";
+                                break;
+                            case "WINDY":
+                                Condition = "Winderig";
+                                break;
+                            case "DRIZZLE":
+                                Condition = "Motregen";
+                                break;
+                            case "FOG":
+                                Condition = "Dichte mist";
+                                break;
+                            case "HAZE":
+                                Condition = "Wazig";
+                                break;
+                            case "DUST":
+                                Condition = "Stof";
+                                break;
+                            case "ASH":
+                                Condition = "As";
+                                break;
+                            case "SQUALL":
+                                Condition = "Vlaag";
+                                break;
+                            case "TORNADO":
+                                Condition = "Tornado";
+                                break;
+                            case "SAND":
+                                Condition = "Zand";
+                                break;
+                            case "SMOKE":
+                                Condition = "Rook";
+                                break;
+                            case "CLEAR":
+                                Condition = "Helder";
+                                break;
+                            case "COLD":
+                                Condition = "Koud";
+                                break;
+                            case "ICE":
+                                Condition = "IJs";
+                                break;
+                            case "UNKNOWN":
+                                Condition = "Onbekend";
+                                break;
+                            default:
+                                Condition = "Onbekende conditie";
+                                break;
+                        }
                     }
                 }
             }
