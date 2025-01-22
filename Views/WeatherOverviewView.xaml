@@ -32,8 +32,6 @@
             Grid.Column="0" 
             WidthRequest="110" 
             HeightRequest="40" 
-            BackgroundColor="Transparent" 
-            TextColor="Black" 
             BorderColor="LightGray" 
             BorderWidth="1" 
             Margin="0"
@@ -41,14 +39,12 @@
             CornerRadius="5" 
             Clicked="OnExportButtonClicked" />
 
-            <Button Text="Dag" 
+            <Button Text="Week Overzicht" 
             HorizontalOptions="End" 
             VerticalOptions="Start" 
             Grid.Column="2" 
             WidthRequest="110" 
             HeightRequest="40" 
-            BackgroundColor="Transparent" 
-            TextColor="Black" 
             BorderColor="LightGray" 
             BorderWidth="1" 
             CornerRadius="5" 
@@ -59,14 +55,14 @@
 
         <ScrollView Orientation="Horizontal" Grid.Row="2">
             <CollectionView ItemsSource="{Binding WeatherItems}" 
-            x:Name="WeatherItemsCollection"
-            HorizontalOptions="FillAndExpand">
+                    x:Name="WeatherItemsCollection"
+                    HorizontalOptions="FillAndExpand">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <VerticalStackLayout>
+                        <VerticalStackLayout Padding="0,0,0,10">
                             <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
                             <Label Text="{Binding TimeStamp}" HorizontalTextAlignment="Center" />
                             <Label Text="{Binding MinTemp}" HorizontalTextAlignment="Center"/>
@@ -81,7 +77,14 @@
         <VerticalStackLayout Grid.Row="3">
             <Button
                 Text="Settings"
-                HorizontalOptions="Center"
+                HorizontalOptions="Start"
+                 WidthRequest="110" 
+                 HeightRequest="40" 
+                 BorderColor="LightGray" 
+                 BorderWidth="1" 
+                 CornerRadius="5" 
+                 Margin="0"
+                 Padding="0"
                 Command="{Binding SettingsCommand}" />
             <WebView x:Name="MapWebView"
                      HeightRequest="400"

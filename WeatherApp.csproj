@@ -56,6 +56,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\Weather\cloudy.png" />
+	  <None Remove="Resources\Images\Weather\rain.png" />
 	  <None Remove="Resources\Images\Weather\unknown.png" />
 	  <None Remove="TestData\accu_weather_hour_test.json" />
 	  <None Remove="TestData\accu_weather_location_test.json" />
@@ -70,7 +72,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png" />
+	  <EmbeddedResource Include="Resources\Images\Weather\cloudy.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	  <EmbeddedResource Include="TestData\accu_weather_location_test.json" />
 	</ItemGroup>
 
@@ -97,6 +104,12 @@
 
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\Weather\rain.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

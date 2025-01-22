@@ -61,6 +61,7 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
+            WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
             this.currentDate = DateTime.Now;
             this.Locations = new ObservableCollection<LocationModel>();
@@ -70,8 +71,6 @@ namespace WeatherApp.ViewModels
             }
 
             this.SelectedTab = this.Locations.First();
-            this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
-
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
         }
@@ -265,7 +264,7 @@ namespace WeatherApp.ViewModels
                         return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
                     }
 
-                    return ImageSource.FromStream(() => stream);
+                    return ImageSource.FromResource(iconPath, assembly);
                 }
             }
             catch (Exception ex)
