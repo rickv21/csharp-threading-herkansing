@@ -55,12 +55,28 @@ namespace WeatherApp.ViewModels
         // Commands for UI interaction
         public ICommand ExportCommand { get; }
         public ICommand SettingsCommand { get; }
+        public ICommand DayWeekCommand { get; }
+
+        private string _dayWeekButtonText;
+        public string DayWeekButtonText
+        {
+            get => _dayWeekButtonText;
+            set
+            {
+                if(value.Equals("Week Overzicht") || value.Equals("Dag Overzicht"))
+                {
+                    _dayWeekButtonText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes the ViewModel, sets default values, and starts loading data.
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
+            DayWeekButtonText = "Week Overzicht";
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
             this.currentDate = DateTime.Now;
@@ -73,6 +89,7 @@ namespace WeatherApp.ViewModels
             this.SelectedTab = this.Locations.First();
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
+            DayWeekCommand = new Command(SwitchDayWeek);
         }
 
         // Event for notifying UI of property changes
@@ -296,6 +313,18 @@ namespace WeatherApp.ViewModels
         public async void OpenSettings()
         {
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
+        }
+
+        public async void SwitchDayWeek()
+        {
+            if(DayWeekButtonText.Equals("Week Overzicht"))
+            {
+                DayWeekButtonText = "Dag Overzicht";
+            }
+            else
+            {
+                DayWeekButtonText = "Week Overzicht";
+            }
         }
     }
 }
