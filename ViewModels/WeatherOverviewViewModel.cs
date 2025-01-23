@@ -13,13 +13,30 @@ namespace WeatherApp.ViewModels
     /// <summary>
     /// ViewModel for the Weather Overview screen. 
     /// </summary>
-    public class WeatherOverviewViewModel
+    public class WeatherOverviewViewModel : INotifyPropertyChanged
     {
         private readonly WeatherAppData _weatherAppData;
 
         private DateTime currentDate; // Tracks the current date for fetching weather data.
 
         public Dictionary<int, List<WeatherDataModel>> HourlyData { get; set; } = new Dictionary<int, List<WeatherDataModel>>();
+
+        public ObservableCollection<LocationModel> Locations { get; set; }
+
+
+        private LocationModel _selectedTab;
+        public LocationModel SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (_selectedTab != value)
+                {
+                    _selectedTab = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         private ObservableCollection<WeatherDisplayItem> _weatherItems;
         /// <summary>
@@ -44,13 +61,18 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
+            WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
             this.currentDate = DateTime.Now;
-            this.WeatherItems = new ObservableCollection<WeatherDisplayItem>();
+            this.Locations = new ObservableCollection<LocationModel>();
+            foreach(var location in weatherAppData.Locations)
+            {
+                this.Locations.Add(location);
+            }
 
+            this.SelectedTab = this.Locations.First();
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
-            
         }
 
         // Event for notifying UI of property changes
@@ -242,7 +264,7 @@ namespace WeatherApp.ViewModels
                         return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
                     }
 
-                    return ImageSource.FromStream(() => stream);
+                    return ImageSource.FromResource(iconPath, assembly);
                 }
             }
             catch (Exception ex)
@@ -275,6 +297,5 @@ namespace WeatherApp.ViewModels
         {
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
         }
-
     }
 }

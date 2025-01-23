@@ -56,7 +56,29 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\Weather\ash.png" />
+	  <None Remove="Resources\Images\Weather\clear.png" />
+	  <None Remove="Resources\Images\Weather\cloudy.png" />
+	  <None Remove="Resources\Images\Weather\cold.png" />
+	  <None Remove="Resources\Images\Weather\drizzle.png" />
+	  <None Remove="Resources\Images\Weather\dust.png" />
+	  <None Remove="Resources\Images\Weather\fog.png" />
+	  <None Remove="Resources\Images\Weather\hail.png" />
+	  <None Remove="Resources\Images\Weather\haze.png" />
+	  <None Remove="Resources\Images\Weather\ice.png" />
+	  <None Remove="Resources\Images\Weather\mist.png" />
+	  <None Remove="Resources\Images\Weather\partly_cloudy.png" />
+	  <None Remove="Resources\Images\Weather\rain.png" />
+	  <None Remove="Resources\Images\Weather\sand.png" />
+	  <None Remove="Resources\Images\Weather\smoke.png" />
+	  <None Remove="Resources\Images\Weather\snow.png" />
+	  <None Remove="Resources\Images\Weather\squall.png" />
+	  <None Remove="Resources\Images\Weather\stormy.png" />
+	  <None Remove="Resources\Images\Weather\sunny.png" />
+	  <None Remove="Resources\Images\Weather\thunderstorm.png" />
+	  <None Remove="Resources\Images\Weather\tornado.png" />
 	  <None Remove="Resources\Images\Weather\unknown.png" />
+	  <None Remove="Resources\Images\Weather\windy.png" />
 	  <None Remove="TestData\accu_weather_hour_test.json" />
 	  <None Remove="TestData\accu_weather_location_test.json" />
 	  <None Remove="TestData\accu_weather_week_test.json" />
@@ -70,7 +92,72 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png" />
+	  <EmbeddedResource Include="Resources\Images\Weather\ash.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\clear.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\cloudy.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\cold.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\drizzle.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\dust.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\fog.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\hail.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\haze.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\ice.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\mist.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\partly_cloudy.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\sand.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\smoke.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\snow.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\squall.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\stormy.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\sunny.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\thunderstorm.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\tornado.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\unknown.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Images\Weather\windy.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	  <EmbeddedResource Include="TestData\accu_weather_location_test.json" />
 	</ItemGroup>
 
@@ -97,6 +184,12 @@
 
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Images\Weather\rain.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

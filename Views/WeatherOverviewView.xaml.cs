@@ -30,12 +30,12 @@ public partial class WeatherOverviewView : ContentPage
                 var map = L.map('map').setView([52.1326, 5.2913], 7);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: 'Map data © <a href=""https://www.openstreetmap.org/"">OpenStreetMap</a> contributors',
+                    attribution: 'Map data ï¿½ <a href=""https://www.openstreetmap.org/"">OpenStreetMap</a> contributors',
                     maxZoom: 19,
                 }).addTo(map);
 
                 L.tileLayer('https://tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png?appid=8c68dd6ad84040c07b526c2be1059600', {
-                    attribution: 'Cloud data © <a href=""https://openweathermap.org/"">OpenWeatherMap</a>',
+                    attribution: 'Cloud data ï¿½ <a href=""https://openweathermap.org/"">OpenWeatherMap</a>',
                     maxZoom: 19,
                 }).addTo(map);
             </script>
@@ -63,4 +63,15 @@ public partial class WeatherOverviewView : ContentPage
         Debug.WriteLine("Disappear");
         base.OnDisappearing();
     }
+
+    public void OnExportButtonClicked(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnDayWeekButtonClicked(object sender, EventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
 }

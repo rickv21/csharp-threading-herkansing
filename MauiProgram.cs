@@ -49,6 +49,7 @@ namespace WeatherApp
 
             //TEMP
             appData.Locations.Add(new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810));
+            appData.Locations.Add(new("Amsterdam", "Noord-Holland", "NL", "Test", 52.377956, 4.897070));
 
             try
             {
