@@ -12,7 +12,7 @@
         public string Humidity { get; set; }
         public string Condition { get; set; }
 
-        public WeatherDisplayItem(ImageSource image, string weatherInfo)
+        public WeatherDisplayItem(ImageSource image, string weatherInfo, bool isDayItem)
         {
             Image = image;
             WeatherInfo = weatherInfo;
@@ -21,12 +21,18 @@
             if (!string.IsNullOrEmpty(weatherInfo))
             {
                 var parts = weatherInfo.Split(',');
-
+                if (!isDayItem)
+                {
+                    TimeStamp = WeatherInfo.Split(' ')[0];
+                }
                 foreach (var part in parts)
                 {
                     if (part.Contains("Time:"))
                     {
-                        TimeStamp = part.Substring(part.Length - 8, 5);
+                        if (isDayItem)
+                        {
+                            TimeStamp = part.Substring(part.Length - 8, 5);
+                        }
                     }
                     else if (part.Contains("Min Temp:"))
                     {
