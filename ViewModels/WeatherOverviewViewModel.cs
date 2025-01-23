@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows.Input;
 using WeatherApp.Models;
 using WeatherApp.Utils;
@@ -287,7 +289,40 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public void Export()
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Checks if there is weatherdata
+                if (WeatherItems == null || WeatherItems.Count == 0)
+                {
+                    Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
+                    return;
+                }
+
+                string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
+
+                // Creates folder 'ExportWeatherData if it doesnt exists'
+                if (!Directory.Exists(exportFolder))
+                {
+                    Directory.CreateDirectory(exportFolder);
+                }
+
+                // filename based on date
+                string filePath = Path.Combine(exportFolder, $"WeatherData_{DateTime.Now:ddMMyyyy_HHmmss}.json");
+
+                // Serialize WeatherItems to JSON
+                string jsonData = JsonSerializer.Serialize(WeatherItems, new JsonSerializerOptions { WriteIndented = true });
+
+                File.WriteAllText(filePath, jsonData);
+
+                Debug.WriteLine($"Weather data exported to: {filePath}");
+                Shell.Current.DisplayAlert("Export Succesvol", $"Bestand opgeslagen in: {filePath}", "OK");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error exporting data: {ex}");
+                Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
+            }
         }
 
         /// <summary>

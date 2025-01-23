@@ -1,7 +1,10 @@
-﻿namespace WeatherApp.WeatherAPIs
+﻿using System.Text.Json.Serialization;
+namespace WeatherApp.WeatherAPIs
+
 {
     public class WeatherDisplayItem
     {
+        [JsonIgnore] //To ignore imagesource for json export
         public ImageSource Image { get; set; }
 
         public string WeatherInfo { get; set; }
@@ -122,6 +125,9 @@
             }
         }
 
+        public override string ToString()
+        {
+            return $"Time: {TimeStamp}, Min Temp: {MinTemp}, Max Temp: {MaxTemp}, Humidity: {Humidity}, Condition: {Condition}";
+        }
     }
-
 }

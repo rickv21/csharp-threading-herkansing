@@ -31,7 +31,10 @@ public partial class WeatherOverviewView : ContentPage
 
     public void OnExportButtonClicked(object sender, EventArgs e)
     {
-        throw new NotImplementedException();
+        if (BindingContext is WeatherOverviewViewModel viewModel)
+        {
+            viewModel.Export();
+        }
     }
 
     public void OnDayWeekButtonClicked(object sender, EventArgs e)
