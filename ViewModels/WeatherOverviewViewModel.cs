@@ -305,7 +305,7 @@ namespace WeatherApp.ViewModels
         /// 
         /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
-        public void Export()
+        public async void Export()
         {
             try
             {
@@ -314,7 +314,7 @@ namespace WeatherApp.ViewModels
                 //Checks if there is weatherdata
                 if (string.IsNullOrEmpty(jsonData))
                 {
-                    Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
+                    await Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
                     return;
                 }
 
@@ -331,20 +331,18 @@ namespace WeatherApp.ViewModels
                 string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
 
                 // Start export threads 
-                Thread jsonThread = new Thread(() => ExportToJson(jsonData, exportFolder, timestamp));
-                Thread csvThread = new Thread(() => ExportToCsv(jsonData, exportFolder, timestamp));
-                Thread txtThread = new Thread(() => ExportToTxt(jsonData, exportFolder, timestamp));
+                await Task.WhenAll(
+                    Task.Run(() => ExportToJson(jsonData, exportFolder, timestamp)),
+                    Task.Run(() => ExportToCsv(jsonData, exportFolder, timestamp)),
+                    Task.Run(() => ExportToTxt(jsonData, exportFolder, timestamp))
+                );
 
-                jsonThread.Start();
-                csvThread.Start();
-                txtThread.Start();
-
-                Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
+                await Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error exporting data: {ex}");
-                Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
         }
 
