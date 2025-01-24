@@ -285,14 +285,29 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
+        /// Converts weatherdata to JSON
+        /// </summary>
+        public string GetWeatherDataAsJson()
+        {
+            if (WeatherItems == null || WeatherItems.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return JsonSerializer.Serialize(WeatherItems, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        /// <summary>
         /// Handles exporting data.
         /// </summary>
         public void Export()
         {
             try
             {
+                string jsonData = GetWeatherDataAsJson();
+
                 //Checks if there is weatherdata
-                if (WeatherItems == null || WeatherItems.Count == 0)
+                if (string.IsNullOrEmpty(jsonData))
                 {
                     Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
                     return;
@@ -301,7 +316,7 @@ namespace WeatherApp.ViewModels
                 string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
 
-                // Creates folder 'ExportWeatherData if it doesnt exists'
+                // Creates folder 'ExportWeatherData' if it doesnt exists
                 if (!Directory.Exists(exportFolder))
                 {
                     Directory.CreateDirectory(exportFolder);
@@ -309,9 +324,6 @@ namespace WeatherApp.ViewModels
 
                 // filename based on date
                 string filePath = Path.Combine(exportFolder, $"WeatherData_{DateTime.Now:ddMMyyyy_HHmmss}.json");
-
-                // Serialize WeatherItems to JSON
-                string jsonData = JsonSerializer.Serialize(WeatherItems, new JsonSerializerOptions { WriteIndented = true });
 
                 File.WriteAllText(filePath, jsonData);
 
