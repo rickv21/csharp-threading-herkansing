@@ -14,6 +14,7 @@ namespace WeatherApp.WeatherAPIs
         public string MaxTemp { get; set; }
         public string Humidity { get; set; }
         public string Condition { get; set; }
+        public string DisplayText => ToString();
 
         public WeatherDisplayItem(ImageSource image, string weatherInfo)
         {
