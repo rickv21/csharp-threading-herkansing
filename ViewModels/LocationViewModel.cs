@@ -12,6 +12,7 @@ namespace WeatherApp.ViewModels
     public class LocationViewModel
     {
         private readonly GeocodingAPI _api;
+        private readonly OpenWeatherMapAPI _weatherAPI;
         private string _searchQuery;
         private Action<string> _onSearchQueryChanged;
         private CancellationTokenSource _debounceCts;
@@ -26,11 +27,13 @@ namespace WeatherApp.ViewModels
         public LocationViewModel()
         {
             _api = new GeocodingAPI();
+            _weatherAPI = new OpenWeatherMapAPI();
             RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
             SavedLocations = new ObservableCollection<LocationModel>();
             SearchResults = new ObservableCollection<LocationModel>();
             SearchCommand = new Command(async () => await PerformSearch());
             LoadSavedLocations();
+            GetWeatherForSavedLocationsAsync();
         }
 
         /// <summary>
@@ -144,7 +147,7 @@ namespace WeatherApp.ViewModels
             {
                 await Task.Delay(1500, _debounceCts.Token);
                 if (string.IsNullOrWhiteSpace(SearchQuery)) return;
-                
+
                 if (SearchQuery.Length > 2)
                 {
                     var response = await _api.GetLocationAsync(SearchQuery);
@@ -251,7 +254,7 @@ namespace WeatherApp.ViewModels
         public bool HasReachedFavoriteLimit()
         {
             List<LocationModel> array = LoadLocationsFromFile(GetFilePath());
-            Debug.WriteLine(array.Count);
+
             if (array.Count == 5)
             {
                 return true;
@@ -306,6 +309,48 @@ namespace WeatherApp.ViewModels
             catch (Exception ex)
             {
                 throw new Exception("An error occurred while saving the selected location", ex);
+            }
+        }
+
+        // Fetch weather data for all saved locations concurrently
+        public async Task GetWeatherForSavedLocationsAsync()
+        {
+            try
+            {
+                // Limit to a maximum of 5 locations
+                var locationsToFetch = SavedLocations.ToList();
+
+                // Create a list of tasks to fetch weather data for each location concurrently
+                var weatherTasks = locationsToFetch.Select(location => FetchWeatherForLocationAsync(location)).ToList();
+
+                // Wait for all tasks to complete
+                await Task.WhenAll(weatherTasks);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching weather for saved locations: {ex.Message}");
+            }
+        }
+
+        // Fetch weather for a single location
+        private async Task FetchWeatherForLocationAsync(LocationModel location)
+        {
+            try
+            {
+                var response = await _weatherAPI.GetCurrentWeatherAsync(location);
+                if (response.Success)
+                {
+                    location.WeatherData = new List<WeatherDataModel> { response.Data };
+                }
+                else
+                {
+                    location.WeatherData = new List<WeatherDataModel>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
+                location.WeatherData = new List<WeatherDataModel>();
             }
         }
     }

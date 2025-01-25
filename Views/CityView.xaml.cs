@@ -16,6 +16,8 @@ namespace WeatherApp.Views
             _viewModel = new LocationViewModel();
             BindingContext = _viewModel;
             SavedLocations = _viewModel.SavedLocations;
+
+            Appearing += async (sender, e) => await _viewModel.GetWeatherForSavedLocationsAsync();
         }
 
         private async void OnItemTapped(object sender, EventArgs e)

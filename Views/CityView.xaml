@@ -45,13 +45,31 @@
                     <DataTemplate>
                         <Frame Padding="10" Margin="5" BorderColor="Blue" CornerRadius="5">
                             <StackLayout>
-                                <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
-                                <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
-                                <Label Text="{Binding Country, StringFormat='Land: {0}'}" FontSize="Medium" />
-                                <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
-                                <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
-                                <Label Text="{Binding WeatherData, StringFormat='Weerdata: {0}'}" FontSize="Small" IsVisible="False" />
+                                <Grid Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left column for location data -->
+                                    <StackLayout Grid.Column="0">
+                                        <Label Text="{Binding Name, StringFormat='Plaats: {0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding State, StringFormat='Provincie: {0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding Country, StringFormat='Land: {0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding Latitude, StringFormat='Latitude: {0}'}" FontSize="Small" />
+                                        <Label Text="{Binding Longitude, StringFormat='Longitude: {0}'}" FontSize="Small" />
+                                    </StackLayout>
+
+                                    <!-- Right column for weather data -->
+                                    <StackLayout Grid.Column="1" Padding="10">
+                                        <Label Text="{Binding WeatherData[0].Condition, StringFormat='Huidige weer: {0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MinTemperature, StringFormat='Min Temp: {0}�C'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MaxTemperature, StringFormat='Max Temp: {0}�C'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].Humidity, StringFormat='Luchtvochtigheid: {0}%'}" FontSize="Medium" />
+                                    </StackLayout>
+                                </Grid>
                             </StackLayout>
+                            
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:LocationViewModel}}, Path=RemoveLocationCommand}" CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
