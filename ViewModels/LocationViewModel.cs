@@ -11,7 +11,6 @@ namespace WeatherApp.ViewModels
 {
     public class LocationViewModel
     {
-        //private readonly WeatherAppData _weatherAppData;
         private readonly GeocodingAPI _api;
         private string _searchQuery;
         private Action<string> _onSearchQueryChanged;
@@ -26,7 +25,6 @@ namespace WeatherApp.ViewModels
 
         public LocationViewModel()
         {
-            //_weatherAppData = weatherAppData;
             _api = new GeocodingAPI();
             RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
             SavedLocations = new ObservableCollection<LocationModel>();
@@ -228,6 +226,12 @@ namespace WeatherApp.ViewModels
             return new List<LocationModel>();
         }
 
+        /// <summary>
+        /// Check if a location has already been added as a favorite
+        /// </summary>
+        /// <param name="locationsToken">The locations token containing all saved locations</param>
+        /// <param name="selectedLocation">The location to be added</param>
+        /// <returns></returns>
         private bool IsLocationDuplicate(JObject locationsToken, LocationModel selectedLocation)
         {
             return locationsToken.Properties().Any(prop =>
@@ -240,6 +244,10 @@ namespace WeatherApp.ViewModels
             });
         }
 
+        /// <summary>
+        /// Check if the favorites limit has been reached
+        /// </summary>
+        /// <returns>True if reached, false if not reached</returns>
         public bool HasReachedFavoriteLimit()
         {
             List<LocationModel> array = LoadLocationsFromFile(GetFilePath());
