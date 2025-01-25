@@ -5,8 +5,6 @@ using System.Diagnostics;
 using System.Windows.Input;
 using WeatherApp.Models;
 using WeatherApp.Utils;
-using WeatherApp.ViewModels;
-using WeatherApp.Views;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
@@ -230,33 +228,53 @@ namespace WeatherApp.ViewModels
             return new List<LocationModel>();
         }
 
+        private bool IsLocationDuplicate(JObject locationsToken, LocationModel selectedLocation)
+        {
+            return locationsToken.Properties().Any(prop =>
+            {
+                var loc = prop.Value as JObject;
+                var latitude = loc?["Latitude"]?.Value<double>();
+                var longitude = loc?["Longitude"]?.Value<double>();
+
+                return latitude == selectedLocation.Latitude && longitude == selectedLocation.Longitude;
+            });
+        }
+
+        public bool HasReachedFavoriteLimit()
+        {
+            List<LocationModel> array = LoadLocationsFromFile(GetFilePath());
+            Debug.WriteLine(array.Count);
+            if (array.Count == 5)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Save the selected location to places.json
         /// </summary>
         /// <param name="selectedLocation">The selected location</param>
         /// <returns>True if saved, false if the location already exists</returns>
-        public bool SaveSelectedLocation(LocationModel selectedLocation)
+        public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
         {
             try
             {
+                if (HasReachedFavoriteLimit())
+                {
+                    return SaveLocationResult.FavoriteLimitReached;
+                }
+
                 JsonFileManager jsonFileManager = new JsonFileManager(GetFilePath());
                 var root = jsonFileManager.GetAllJson();
                 var locationsToken = root["locations"] as JObject ?? new JObject();
                 string placeId = selectedLocation.PlaceId;
 
                 // Check if the location already exists
-                bool locationExists = locationsToken.Properties().Any(prop =>
+                if (IsLocationDuplicate(locationsToken, selectedLocation))
                 {
-                    var loc = prop.Value as JObject;
-                    var latitude = loc?["Latitude"]?.Value<double>();
-                    var longitude = loc?["Longitude"]?.Value<double>();
-
-                    return latitude == selectedLocation.Latitude && longitude == selectedLocation.Longitude;
-                });
-
-                if (locationExists)
-                {
-                    return false;
+                    return SaveLocationResult.DuplicateLocation;
                 }
 
                 var locationObject = new JObject
@@ -275,7 +293,7 @@ namespace WeatherApp.ViewModels
                 jsonFileManager.SaveAllJson(root);
                 SavedLocations.Add(selectedLocation);
 
-                return true;
+                return SaveLocationResult.Success;
             }
             catch (Exception ex)
             {
