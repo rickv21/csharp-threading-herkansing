@@ -33,7 +33,6 @@ namespace WeatherApp.ViewModels
             SearchResults = new ObservableCollection<LocationModel>();
             SearchCommand = new Command(async () => await PerformSearch());
             LoadSavedLocations();
-            GetWeatherForSavedLocationsAsync();
         }
 
         /// <summary>
@@ -86,7 +85,7 @@ namespace WeatherApp.ViewModels
                 {
                     string json = File.ReadAllText(filePath);
                     JObject jsonObject = JObject.Parse(json);
-                    JArray geocodingArray = (JArray)jsonObject["Geocoding"] ?? new JArray();
+                    JArray geocodingArray = (JArray)jsonObject["Geocoding"] ?? [];
 
                     JObject locationsObject = new JObject();
 
@@ -100,11 +99,11 @@ namespace WeatherApp.ViewModels
                             location.Longitude,
                             location.Country,
                             location.State,
-                            WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : new JArray()
+                            WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : []
                         });
                     }
 
-                    JObject updatedJson = new JObject
+                    JObject updatedJson = new()
                     {
                         ["Geocoding"] = geocodingArray,
                         ["Locations"] = locationsObject
@@ -217,16 +216,16 @@ namespace WeatherApp.ViewModels
                             return locations;
                         }
 
-                        return new List<LocationModel>();
+                        return [];
                     }
                     catch (JsonException ex)
                     {
-                        return new List<LocationModel>();
+                        return [];
                     }
                 }
             }
 
-            return new List<LocationModel>();
+            return [];
         }
 
         /// <summary>
@@ -268,7 +267,7 @@ namespace WeatherApp.ViewModels
         /// </summary>
         /// <param name="selectedLocation">The selected location</param>
         /// <returns>True if saved, false if the location already exists</returns>
-        public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
+        public async Task<SaveLocationResult> SaveSelectedLocation(LocationModel selectedLocation)
         {
             try
             {
@@ -287,6 +286,9 @@ namespace WeatherApp.ViewModels
                 {
                     return SaveLocationResult.DuplicateLocation;
                 }
+
+                // Fetch the weather data for the location before saving
+                await FetchWeatherForLocationAsync(selectedLocation);
 
                 var locationObject = new JObject
                 {
@@ -312,45 +314,75 @@ namespace WeatherApp.ViewModels
             }
         }
 
-        // Fetch weather data for all saved locations concurrently
-        public async Task GetWeatherForSavedLocationsAsync()
+        /// <summary>
+        /// Retrieve the weatherdata of a location
+        /// </summary>
+        /// <param name="location">The specified location</param>
+        /// <returns>A completed <see cref="Task"/></returns>
+        public Task GetWeatherForSavedLocationAsync(LocationModel location)
         {
             try
             {
-                // Limit to a maximum of 5 locations
-                var locationsToFetch = SavedLocations.ToList();
+                // Create a list to hold the tasks of the Threadpool
+                var fetchTasks = new List<Task>();
 
-                // Create a list of tasks to fetch weather data for each location concurrently
-                var weatherTasks = locationsToFetch.Select(location => FetchWeatherForLocationAsync(location)).ToList();
+                var fetchTask = new Task(async () =>
+                {
+                    try
+                    {
+                        // Fetch weather data for the location
+                        await FetchWeatherForLocationAsync(location);
+                    }
+                    catch (Exception ex)
+                    {
+                        location.WeatherData = [];
+                    }
+                });
 
-                // Wait for all tasks to complete
-                await Task.WhenAll(weatherTasks);
+                // Queue the task to the ThreadPool
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    fetchTask.Start();
+                    fetchTask.Wait();  // Wait for the task to finish before proceeding
+                });
+
+                fetchTasks.Add(fetchTask);
+
+                // Wait for all fetch tasks to complete
+                Task.WaitAll([.. fetchTasks]);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather for saved locations: {ex.Message}");
             }
+
+            return Task.CompletedTask;
         }
 
-        // Fetch weather for a single location
+        /// <summary>
+        /// Execute the API call to retrieve the weatherdata of a location
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns>This does not actually return anything, it is used to retrieve the weatherData of a location</returns>
         private async Task FetchWeatherForLocationAsync(LocationModel location)
         {
             try
             {
                 var response = await _weatherAPI.GetCurrentWeatherAsync(location);
+
                 if (response.Success)
                 {
-                    location.WeatherData = new List<WeatherDataModel> { response.Data };
+                    location.WeatherData = [response.Data];
                 }
                 else
                 {
-                    location.WeatherData = new List<WeatherDataModel>();
+                    location.WeatherData = [];
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
-                location.WeatherData = new List<WeatherDataModel>();
+                location.WeatherData = [];
             }
         }
     }

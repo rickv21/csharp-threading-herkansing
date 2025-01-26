@@ -72,7 +72,7 @@ namespace WeatherApp.WeatherAPIs
                 double latitude = result.lat != null ? (double)result.lat : 0;
                 double longitude = result.lon != null ? (double)result.lon : 0;
 
-                var location = new LocationModel(city, state, country, placeId, latitude, longitude);
+                var location = new LocationModel(city, state, country, placeId, latitude, longitude, null);
                 locations.Add(location);
             }
 

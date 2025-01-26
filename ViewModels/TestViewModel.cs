@@ -12,7 +12,7 @@ namespace WeatherApp.ViewModels
     public class TestViewModel : BindableObject
     {
         public ICommand WeerLiveCommand { get; }
-        private LocationModel testLocationModel = new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810);
+        private LocationModel testLocationModel = new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810, null);
         private readonly WeatherAppData _weatherAppData;
 
         public TestViewModel(WeatherAppData weatherAppData)

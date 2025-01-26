@@ -284,30 +284,36 @@ namespace WeatherApp.WeatherAPIs
             }
 
         }
+
+        /// <summary>
+        /// Retrieve the current weather of a location
+        /// </summary>
+        /// <param name="location">A specified location</param>
+        /// <param name="simulate">True to simulate data, false to retrieve actual data</param>
+        /// <returns>Returns an API response containing a WeatherDataModel depending on the outcome of the executed method</returns>
         public async Task<APIResponse<WeatherDataModel>> GetCurrentWeatherAsync(LocationModel location, bool simulate = false)
         {
-            Debug.WriteLine($"Requesting current weather data for {Name}.");
-
-            if (HasReachedRequestLimit())
+            try
             {
-                return new APIResponse<WeatherDataModel>
+                if (HasReachedRequestLimit())
                 {
-                    Success = false,
-                    ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
-                };
-            }
+                    return new APIResponse<WeatherDataModel>
+                    {
+                        Success = false,
+                        ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
+                        Data = null
+                    };
+                }
 
-            string responseBody;
-            if (simulate)
-            {
-                responseBody = GetTestJSON("openweather_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string responseBody;
+                if (simulate)
                 {
+                    responseBody = GetTestJSON("openweather_test.json");
+                    CountRequest(); // Important: this counts the requests for the limit.
+                }
+                else
+                {
+                    using HttpClient client = new();
                     string url = $"{_baseURL}weather?lat={location.Latitude}&lon={location.Longitude}&appid={_apiKey}&units=metric";
                     Debug.WriteLine(url);
                     HttpResponseMessage response = await client.GetAsync(url);
@@ -330,43 +336,52 @@ namespace WeatherApp.WeatherAPIs
                     CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
+
+                JObject weatherResponse = JObject.Parse(responseBody);
+
+                // Check if the necessary data exists in the response
+                JToken? main = weatherResponse["main"];
+                JToken? weather = weatherResponse["weather"]?.FirstOrDefault();
+
+                if (main == null || weather == null || weather["id"] == null)
+                {
+                    return new APIResponse<WeatherDataModel>
+                    {
+                        Success = false,
+                        ErrorMessage = "Missing weather data in API response",
+                        Data = null
+                    };
+                }
+
+                // Parse the current weather data
+                int weatherId = (int)weather["id"]!;
+                WeatherCondition condition = CalculateWeatherCondition(weatherId);
+
+                WeatherDataModel currentWeather = new(
+                    Name,
+                    condition,
+                    DateTime.Now, // Use current date for the weather data
+                    minTemperature: (double)main["temp_min"]!,
+                    maxTemperature: (double)main["temp_max"]!,
+                    humidity: (double)main["humidity"]!
+                );
+
+                return new APIResponse<WeatherDataModel>
+                {
+                    Success = true,
+                    ErrorMessage = null,
+                    Data = currentWeather
+                };
             }
-
-            JObject weatherResponse = JObject.Parse(responseBody);
-
-            // Check if the necessary data exists in the response
-            JToken? main = weatherResponse["main"];
-            JToken? weather = weatherResponse["weather"]?.FirstOrDefault();
-
-            if (main == null || weather == null || weather["id"] == null)
+            catch (Exception ex)
             {
                 return new APIResponse<WeatherDataModel>
                 {
                     Success = false,
-                    ErrorMessage = "Missing weather data in API response",
+                    ErrorMessage = "An error occurred: " + ex.Message,
                     Data = null
                 };
             }
-
-            // Parse the current weather data
-            int weatherId = (int)weather["id"]!;
-            WeatherCondition condition = CalculateWeatherCondition(weatherId);
-
-            WeatherDataModel currentWeather = new WeatherDataModel(
-                Name,
-                condition,
-                DateTime.Now, // Use current date for the weather data
-                minTemperature: (double)main["temp_min"]!,
-                maxTemperature: (double)main["temp_max"]!,
-                humidity: (double)main["humidity"]!
-            );
-
-            return new APIResponse<WeatherDataModel>
-            {
-                Success = true,
-                ErrorMessage = null,
-                Data = currentWeather
-            };
         }
     }
 }

@@ -12,22 +12,22 @@
     {
 
         /// <summary>
-        /// The name of the location.
+        /// The name of the location
         /// </summary>
         public string Name { get; set; } = name;
 
         /// <summary>
-        /// The state of the location.
+        /// The state of the location
         /// </summary>
         public string? State { get; set; } = state;
 
         /// <summary>
-        /// The country of the location.
+        /// The country of the location
         /// </summary>
         public string? Country { get; set; } = country;
 
         /// <summary>
-        /// The place id of the location.
+        /// The place id of the location
         /// </summary>
         public string? PlaceId { get; set; } = placeId;
 
@@ -37,7 +37,7 @@
         public double Latitude { get; set; } = latitude;
 
         /// <summary>
-        /// The longitude of the location.
+        /// The longitude of the location
         /// </summary>
         public double Longitude { get; set; } = longitude;
 
@@ -45,9 +45,9 @@
         /// A list of WeatherDataModels.
         /// This either represents multiple hours of a day or multiple days of a week.
         /// </summary>
-        public List<WeatherDataModel> WeatherData { get; set; } = weatherData ?? [];
+        public List<WeatherDataModel> WeatherData { get; set; } = weatherData;
 
-        public string ToString()
+        public override string ToString()
         {
             return Name;
         }

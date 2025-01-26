@@ -63,8 +63,8 @@
                                     <!-- Right column for weather data -->
                                     <StackLayout Grid.Column="1" Padding="10">
                                         <Label Text="{Binding WeatherData[0].Condition, StringFormat='Huidige weer: {0}'}" FontSize="Medium" />
-                                        <Label Text="{Binding WeatherData[0].MinTemperature, StringFormat='Min Temp: {0}�C'}" FontSize="Medium" />
-                                        <Label Text="{Binding WeatherData[0].MaxTemperature, StringFormat='Max Temp: {0}�C'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MinTemperature, StringFormat='Min Temp: {0}°C'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MaxTemperature, StringFormat='Max Temp: {0}°C'}" FontSize="Medium" />
                                         <Label Text="{Binding WeatherData[0].Humidity, StringFormat='Luchtvochtigheid: {0}%'}" FontSize="Medium" />
                                     </StackLayout>
                                 </Grid>
