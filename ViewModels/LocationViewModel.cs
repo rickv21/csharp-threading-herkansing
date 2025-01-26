@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Input;
 using WeatherApp.Models;
 using WeatherApp.Utils;
@@ -9,7 +11,7 @@ using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
 {
-    public class LocationViewModel
+    public class LocationViewModel : INotifyPropertyChanged
     {
         private readonly GeocodingAPI _api;
         private readonly OpenWeatherMapAPI _weatherAPI;
@@ -18,11 +20,33 @@ namespace WeatherApp.ViewModels
         private CancellationTokenSource _debounceCts;
 
         public ObservableCollection<LocationModel> SearchResults { get; set; }
-        public ObservableCollection<LocationModel> SavedLocations { get; set; } = new ObservableCollection<LocationModel>();
+
+        private ObservableCollection<LocationModel> _savedLocations;
+
+        public ObservableCollection<LocationModel> SavedLocations
+        {
+            get { return _savedLocations; }
+            set
+            {
+                if (_savedLocations != value)
+                {
+                    _savedLocations = value;
+                    OnPropertyChanged(nameof(SavedLocations));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public ICommand SearchCommand { get; }
 
         public ICommand RemoveLocationCommand { get; }
+        public ICommand FetchWeatherDataCommand { get; }
 
         public LocationViewModel()
         {
@@ -32,6 +56,7 @@ namespace WeatherApp.ViewModels
             SavedLocations = [];
             SearchResults = [];
             SearchCommand = new Command(async () => await PerformSearch());
+            FetchWeatherDataCommand = new Command(FetchWeatherDataForAllLocations);
             LoadSavedLocations();
         }
 
@@ -187,8 +212,8 @@ namespace WeatherApp.ViewModels
         /// Load the locations from the places.json
         /// </summary>
         /// <param name="filePath">The file path of places.json</param>
-        /// <returns>A list of favorited locations</returns>
-        private static List<LocationModel> LoadLocationsFromFile(string filePath)
+        /// <returns>An observable collection of favorited locations</returns>
+        private static ObservableCollection<LocationModel> LoadLocationsFromFile(string filePath)
         {
             if (File.Exists(filePath))
             {
@@ -210,7 +235,7 @@ namespace WeatherApp.ViewModels
                                                           .Where(location => location != null)
                                                           .ToList();
 
-                            return locations;
+                            return new ObservableCollection<LocationModel>(locations);
                         }
 
                         return [];
@@ -249,7 +274,7 @@ namespace WeatherApp.ViewModels
         /// <returns>True if reached, false if not reached</returns>
         public bool HasReachedFavoriteLimit()
         {
-            List<LocationModel> array = LoadLocationsFromFile(GetFilePath());
+            ObservableCollection<LocationModel> array = LoadLocationsFromFile(GetFilePath());
 
             if (array.Count == 5)
             {
@@ -273,9 +298,9 @@ namespace WeatherApp.ViewModels
                     return SaveLocationResult.FavoriteLimitReached;
                 }
 
-                JsonFileManager jsonFileManager = new JsonFileManager(GetFilePath());
+                JsonFileManager jsonFileManager = new(GetFilePath());
                 var root = jsonFileManager.GetAllJson();
-                var locationsToken = root["Locations"] as JObject ?? new JObject();
+                var locationsToken = root["Locations"] as JObject ?? [];
                 string placeId = selectedLocation.PlaceId;
 
                 // Check if the location already exists
@@ -284,9 +309,6 @@ namespace WeatherApp.ViewModels
                     return SaveLocationResult.DuplicateLocation;
                 }
 
-                // Fetch the weather data for the location before saving
-                GetWeatherForSavedLocationAsync(selectedLocation);
-
                 var locationObject = new JObject
                 {
                     ["Name"] = selectedLocation.Name,
@@ -294,7 +316,7 @@ namespace WeatherApp.ViewModels
                     ["Longitude"] = selectedLocation.Longitude,
                     ["Country"] = selectedLocation.Country,
                     ["State"] = selectedLocation.State,
-                    ["WeatherData"] = JArray.FromObject(selectedLocation.WeatherData)
+                    ["WeatherData"] = null
                 };
 
                 // Add the location with place_id as the key
@@ -311,32 +333,45 @@ namespace WeatherApp.ViewModels
             }
         }
 
-        /// <summary>
-        /// Threadpool
-        /// ==========
-        /// Threadpool is used here to retrieve the weather data for all the favorited locations
-        /// Each location has it's own UserWorkitem, which then get executed 1 by 1
-        /// When a task is finished, a signal is sent so the next task can get started
-        /// At the end, it waits for all tasks to finish before exiting the method
-        /// ====================================================================================
-        /// Retrieve the weatherdata of a location
-        /// </summary>
-        /// <param name="location">The specified location</param>
-        /// <returns>A completed <see cref="Task"/></returns>
-        public void GetWeatherForSavedLocationAsync(LocationModel location)
+        private async Task FetchWeatherForLocationAsync(LocationModel location)
         {
-            var countdown = new CountdownEvent(1);
-
             try
             {
+                var response = await _weatherAPI.GetCurrentWeatherAsync(location);
+
+                if (response.Success)
+                {
+                    location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data }; // Set WeatherData
+                    location.IsWeatherDataAvailable = true;
+                    Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
+                }
+                else
+                {
+                    location.WeatherData = [];
+                    location.IsWeatherDataAvailable = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
+                location.WeatherData = [];
+            }
+        }
+
+        private void FetchWeatherDataForAllLocations()
+        {
+            var countdown = new CountdownEvent(SavedLocations.Count);
+
+            foreach (var location in SavedLocations)
+            {
+                // Queue work to the ThreadPool to match the original method's behavior
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     try
                     {
-                        // Fetch the weather data asynchronously
-                        var task = FetchWeatherForLocationAsync(location);
+                        var fetchTask = FetchWeatherForLocationAsync(location);
 
-                        task.ContinueWith(t =>
+                        fetchTask.ContinueWith(t =>
                         {
                             if (t.IsFaulted)
                             {
@@ -348,39 +383,15 @@ namespace WeatherApp.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Error queuing work for {location.Name}: {ex.Message}");
+                        Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
                         countdown.Signal();
                     }
                 });
+            }
 
-                countdown.Wait();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error fetching weather for saved locations: {ex.Message}");
-            }
-        }
-
-        private async Task FetchWeatherForLocationAsync(LocationModel location)
-        {
-            try
-            {
-                var response = await _weatherAPI.GetCurrentWeatherAsync(location);
-
-                if (response.Success)
-                {
-                    location.WeatherData = [response.Data];
-                }
-                else
-                {
-                    location.WeatherData = [];
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
-                location.WeatherData = [];
-            }
+            countdown.Wait();
+            UpdatePlacesJson();
+            //LoadLocationsFromFile(GetFilePath());
         }
     }
 }

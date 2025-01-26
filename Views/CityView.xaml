@@ -7,6 +7,7 @@
     <ScrollView>
         <StackLayout Padding="10">
             <Label Text="Zoek een locatie" FontSize="Large" FontAttributes="Bold" Margin="25, 25 ,25, 10" HorizontalOptions="Center"/>
+
             <!-- Search Entry -->
             <Entry Text="{Binding SearchQuery}" 
                    Placeholder="Voer een locatie in..." 
@@ -40,6 +41,16 @@
 
             <!-- Saved Places -->
             <Label Text="Favoriete locaties" FontSize="Large" FontAttributes="Bold" Margin="25, 0 ,25, 10" HorizontalOptions="Center"/>
+
+            <!-- Button to fetch weather data -->
+            <Button Text="Haal weerdata op" 
+                    Command="{Binding FetchWeatherDataCommand}" 
+                    BackgroundColor="Black" 
+                    TextColor="White" 
+                    BorderColor="White"
+                    BorderWidth="1"
+                    Margin="10" />
+
             <CollectionView ItemsSource="{Binding SavedLocations}" Margin="10">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
@@ -69,7 +80,7 @@
                                     </StackLayout>
                                 </Grid>
                             </StackLayout>
-                            
+
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:LocationViewModel}}, Path=RemoveLocationCommand}" CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>

@@ -1,4 +1,7 @@
-﻿namespace WeatherApp.Models
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+
+namespace WeatherApp.Models
 {
     /// <summary>
     /// This class represents a location with its name and associated weather data.
@@ -8,9 +11,9 @@
     /// <param name="latitude">The latitude of the location.</param>
     /// <param name="longitude">The longitude of the location.</param>
     /// <param name="weatherData">A list of WeatherDataModels, optional.</param>
-    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, List<WeatherDataModel>? weatherData = null)
+    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, ObservableCollection<WeatherDataModel>? weatherData = null) : INotifyPropertyChanged
     {
-
+        private bool _isWeatherDataAvailable = false;
         /// <summary>
         /// The name of the location
         /// </summary>
@@ -41,11 +44,41 @@
         /// </summary>
         public double Longitude { get; set; } = longitude;
 
+        private ObservableCollection<WeatherDataModel> _weatherData;
+
         /// <summary>
         /// A list of WeatherDataModels.
         /// This either represents multiple hours of a day or multiple days of a week.
         /// </summary>
-        public List<WeatherDataModel> WeatherData { get; set; } = weatherData;
+        public ObservableCollection<WeatherDataModel> WeatherData
+        {
+            get => _weatherData;
+            set
+            {
+                if (_weatherData != value)
+                {
+                    _weatherData = value;
+                    OnPropertyChanged(nameof(WeatherData));
+                }
+            }
+        }
+
+        public bool IsWeatherDataAvailable
+        {
+            get => _isWeatherDataAvailable;
+            set
+            {
+                _isWeatherDataAvailable = value;
+                OnPropertyChanged(nameof(IsWeatherDataAvailable));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public override string ToString()
         {
