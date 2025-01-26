@@ -201,7 +201,7 @@ namespace WeatherApp.ViewModels
                     try
                     {
                         var jsonObject = JObject.Parse(json);
-                        var locationsObject = jsonObject["locations"] as JObject;
+                        var locationsObject = jsonObject["Locations"] as JObject;
 
                         if (locationsObject != null)
                         {
@@ -278,7 +278,7 @@ namespace WeatherApp.ViewModels
 
                 JsonFileManager jsonFileManager = new JsonFileManager(GetFilePath());
                 var root = jsonFileManager.GetAllJson();
-                var locationsToken = root["locations"] as JObject ?? new JObject();
+                var locationsToken = root["Locations"] as JObject ?? new JObject();
                 string placeId = selectedLocation.PlaceId;
 
                 // Check if the location already exists
@@ -302,7 +302,7 @@ namespace WeatherApp.ViewModels
 
                 // Add the location with place_id as the key
                 locationsToken[placeId] = locationObject;
-                root["locations"] = locationsToken;
+                root["Locations"] = locationsToken;
                 jsonFileManager.SaveAllJson(root);
                 SavedLocations.Add(selectedLocation);
 
