@@ -15,6 +15,12 @@
             attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
             maxZoom: 19,
         }).addTo(map);
+
+        // Voeg de OpenWeatherMap wolklaag toe
+        L.tileLayer('https://tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png?appid=YOUR_API_KEY', {
+            attribution: 'Cloud data © <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+            maxZoom: 19,
+        }).addTo(map);
     </script>
 </body>
 </html>
