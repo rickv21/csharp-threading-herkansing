@@ -176,12 +176,15 @@ namespace WeatherApp.ViewModels
         public void LoadSavedLocations()
         {
             var savedLocations = LoadLocationsFromFile(GetFilePath());
-
             // Clear existing data and add new saved locations
             SavedLocations.Clear();
             foreach (var location in savedLocations)
             {
+                // Update the current weather data for each location
+                GetWeatherForSavedLocationAsync(location);
                 SavedLocations.Add(location);
+                // Update the JSON file with the new weather data
+                UpdatePlacesJson();
             }
         }
 
@@ -288,7 +291,7 @@ namespace WeatherApp.ViewModels
                 }
 
                 // Fetch the weather data for the location before saving
-                await GetWeatherForSavedLocationAsync(selectedLocation);
+                GetWeatherForSavedLocationAsync(selectedLocation);
 
                 var locationObject = new JObject
                 {
@@ -317,79 +320,56 @@ namespace WeatherApp.ViewModels
         /// <summary>
         /// Threadpool
         /// ==========
-        /// Threadpool is used here to retrieve the weather data for all the favorited locations. 
-        /// Each location will have its own task, which gets added to the fetchTasks list. 
-        /// After this, the tasks are queued in the Threadpool and the next task starts whenever the previous one has fully finished.
-        /// The method then waits for all tasks to finish, before returning the completed Task.
-        /// =========================================================================================================================
+        /// Threadpool is used here to retrieve the weather data for all the favorited locations
+        /// Each location has it's own UserWorkitem, which then get executed 1 by 1
+        /// When a task is finished, a signal is sent so the next task can get started
+        /// At the end, it waits for all tasks to finish before exiting the method
+        /// ====================================================================================
         /// Retrieve the weatherdata of a location
         /// </summary>
         /// <param name="location">The specified location</param>
         /// <returns>A completed <see cref="Task"/></returns>
-        public Task GetWeatherForSavedLocationAsync(LocationModel location)
+        public void GetWeatherForSavedLocationAsync(LocationModel location)
         {
+            // Create a CountdownEvent to signal when all tasks are completed
+            var countdown = new CountdownEvent(SavedLocations.Count());
+
             try
             {
-                // Create a list to hold the tasks for the ThreadPool
-                var fetchTasks = new List<Task>();
-
-                // Queue the task to the ThreadPool
-                var fetchTask = new Task(() =>
+                // Queue a work item to the ThreadPool
+                ThreadPool.QueueUserWorkItem(async _ =>
                 {
                     try
                     {
-                        Task.Run(async () =>
-                        {
-                            try
-                            {
-                                // Fetch weather data for the location
-                                await FetchWeatherForLocationAsync(location);
-                            }
-                            catch (Exception ex)
-                            {
-                                location.WeatherData = [];
-                            }
-                        }).Wait();
-
+                        // Fetch weather data for the location
+                        await FetchWeatherForLocationAsync(location);
                     }
                     catch (Exception ex)
                     {
-                        location.WeatherData = [];
-                        Debug.WriteLine($"Error fetching weather in ThreadPool for {location.Name}: {ex.Message}");
+                        Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
+                    }
+                    finally
+                    {
+                        // Signal when the work is done
+                        countdown.Signal();
                     }
                 });
 
-                fetchTasks.Add(fetchTask);
-
-                // Queue the task to the Threadpool
-                ThreadPool.QueueUserWorkItem(_ =>
-                {
-                    fetchTask.Start();
-                    fetchTask.Wait();  // Wait for the task to finish before proceeding
-                });
-
-                // Wait for all fetch tasks to complete
-                Task.WaitAll([.. fetchTasks]);
+                // Wait for all tasks to complete
+                countdown.Wait();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather for saved locations: {ex.Message}");
             }
-
-            return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Execute the API call to retrieve the weatherdata of a location
-        /// </summary>
-        /// <param name="location"></param>
-        /// <returns>This does not actually return anything, it is used to retrieve the weatherData of a location</returns>
         private async Task FetchWeatherForLocationAsync(LocationModel location)
         {
             try
             {
                 var response = await _weatherAPI.GetCurrentWeatherAsync(location);
-                
+
                 if (response.Success)
                 {
                     location.WeatherData = [response.Data];
