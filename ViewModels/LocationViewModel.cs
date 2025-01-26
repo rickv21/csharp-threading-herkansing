@@ -332,7 +332,7 @@ namespace WeatherApp.ViewModels
         public void GetWeatherForSavedLocationAsync(LocationModel location)
         {
             // Create a CountdownEvent to signal when all tasks are completed
-            var countdown = new CountdownEvent(SavedLocations.Count());
+            var countdown = new CountdownEvent(1);
 
             try
             {
