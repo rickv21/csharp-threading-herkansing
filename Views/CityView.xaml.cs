@@ -21,7 +21,7 @@ namespace WeatherApp.Views
         private async void OnItemTapped(object sender, EventArgs e)
         {
             var tappedLocation = ((TappedEventArgs)e).Parameter as LocationModel;
-            var result = await _viewModel.SaveSelectedLocation(tappedLocation);
+            var result = _viewModel.SaveSelectedLocation(tappedLocation);
 
             switch (result)
             {

@@ -29,8 +29,8 @@ namespace WeatherApp.ViewModels
             _api = new GeocodingAPI();
             _weatherAPI = new OpenWeatherMapAPI();
             RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
-            SavedLocations = new ObservableCollection<LocationModel>();
-            SearchResults = new ObservableCollection<LocationModel>();
+            SavedLocations = [];
+            SearchResults = [];
             SearchCommand = new Command(async () => await PerformSearch());
             LoadSavedLocations();
         }
@@ -87,7 +87,7 @@ namespace WeatherApp.ViewModels
                     JObject jsonObject = JObject.Parse(json);
                     JArray geocodingArray = (JArray)jsonObject["Geocoding"] ?? [];
 
-                    JObject locationsObject = new JObject();
+                    JObject locationsObject = [];
 
                     foreach (var location in SavedLocations)
                     {
@@ -176,15 +176,10 @@ namespace WeatherApp.ViewModels
         public void LoadSavedLocations()
         {
             var savedLocations = LoadLocationsFromFile(GetFilePath());
-            // Clear existing data and add new saved locations
             SavedLocations.Clear();
             foreach (var location in savedLocations)
             {
-                // Update the current weather data for each location
-                GetWeatherForSavedLocationAsync(location);
                 SavedLocations.Add(location);
-                // Update the JSON file with the new weather data
-                UpdatePlacesJson();
             }
         }
 
@@ -204,9 +199,8 @@ namespace WeatherApp.ViewModels
                     try
                     {
                         var jsonObject = JObject.Parse(json);
-                        var locationsObject = jsonObject["Locations"] as JObject;
 
-                        if (locationsObject != null)
+                        if (jsonObject["Locations"] is JObject locationsObject)
                         {
                             var locationsArray = locationsObject.Properties()
                                                                 .Select(prop => prop.Value)
@@ -270,7 +264,7 @@ namespace WeatherApp.ViewModels
         /// </summary>
         /// <param name="selectedLocation">The selected location</param>
         /// <returns>True if saved, false if the location already exists</returns>
-        public async Task<SaveLocationResult> SaveSelectedLocation(LocationModel selectedLocation)
+        public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
         {
             try
             {
@@ -331,31 +325,34 @@ namespace WeatherApp.ViewModels
         /// <returns>A completed <see cref="Task"/></returns>
         public void GetWeatherForSavedLocationAsync(LocationModel location)
         {
-            // Create a CountdownEvent to signal when all tasks are completed
             var countdown = new CountdownEvent(1);
 
             try
             {
-                // Queue a work item to the ThreadPool
-                ThreadPool.QueueUserWorkItem(async _ =>
+                ThreadPool.QueueUserWorkItem(_ =>
                 {
                     try
                     {
-                        // Fetch weather data for the location
-                        await FetchWeatherForLocationAsync(location);
+                        // Fetch the weather data asynchronously
+                        var task = FetchWeatherForLocationAsync(location);
+
+                        task.ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                            {
+                                Debug.WriteLine($"Error fetching weather for {location.Name}: {t.Exception?.Message}");
+                            }
+
+                            countdown.Signal();
+                        }, TaskContinuationOptions.ExecuteSynchronously);
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
-                    }
-                    finally
-                    {
-                        // Signal when the work is done
+                        Debug.WriteLine($"Error queuing work for {location.Name}: {ex.Message}");
                         countdown.Signal();
                     }
                 });
 
-                // Wait for all tasks to complete
                 countdown.Wait();
             }
             catch (Exception ex)
