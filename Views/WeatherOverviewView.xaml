@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
-             x:Class="WeatherApp.Views.WeatherOverviewView">
+             x:Class="WeatherApp.Views.WeatherOverviewView"
+             Title="Weeroverzicht">
 
     <Grid RowDefinitions="Auto, Auto, Auto, 2*">
 
@@ -102,7 +103,7 @@
                 Padding="0"
                 Clicked="CityViewButton_OnClicked" />
             <Button
-                Text="Settings"
+                Text="Instellingen"
                 HorizontalOptions="Start"
                 WidthRequest="110" 
                 HeightRequest="40" 

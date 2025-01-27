@@ -3,17 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
              x:Class="WeatherApp.Views.SettingsPage"
-
-             Title="Settings">
+             Title="Instellingen">
 
     <ScrollView>
         <StackLayout Padding="10">
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <Label Text="Simulate requests:" VerticalOptions="Center" />
+                <Label Text="Simuleer API verzoeken:" VerticalOptions="Center" />
                 <Switch IsToggled="{Binding SimulateMode, Mode=TwoWay}" />
             </HorizontalStackLayout>
 
-            <Label HorizontalOptions="Center" Text="API Sources" FontAttributes="Bold" />
+            <Label HorizontalOptions="Center" Text="API Bronnen" FontAttributes="Bold" />
             <CollectionView ItemsSource="{Binding WeatherServices}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
@@ -25,17 +24,10 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-
-
-
-
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <Button Text="Go to Test Page"  HorizontalOptions="Center" Command="{Binding NavigateToTestPageCommand}" Margin="0,20,0,0" />
-
-                <Button Text="Save"  HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
+                <Button Text="Ga naar de testpagina" HorizontalOptions="Center" Command="{Binding NavigateToTestPageCommand}" Margin="0,20,0,0" />
+                <Button Text="Opslaan" HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
             </HorizontalStackLayout>
-            
-      
         </StackLayout>
     </ScrollView>
 </ContentPage>

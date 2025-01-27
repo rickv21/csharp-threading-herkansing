@@ -341,17 +341,18 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-
-                WeatherDataModel lastWeatherData = location.WeatherData?.FirstOrDefault();
+                WeatherDisplayItem lastWeatherData = location.WeatherData?.FirstOrDefault();
                 if (lastWeatherData != null)
                 {
-                    DateTime timestamp = lastWeatherData.TimeStamp;
-
-                    // Check if the data is less than an hour old
-                    if ((DateTime.Now - timestamp).TotalHours < 1)
+                    // Parse the TimeStamp string into a DateTime object
+                    if (DateTime.TryParse(lastWeatherData.TimeStamp, out DateTime timestamp))
                     {
-                        Debug.WriteLine($"Using cached weather data for {location.Name} (retrieved at {timestamp})");
-                        return; // Skip fetching data from the API
+                        // Check if the data is less than an hour old
+                        if ((DateTime.Now - timestamp).TotalHours < 1)
+                        {
+                            Debug.WriteLine($"Using cached weather data for {location.Name} (retrieved at {timestamp})");
+                            return; // Skip fetching data from the API
+                        }
                     }
                 }
 
@@ -359,20 +360,20 @@ namespace WeatherApp.ViewModels
 
                 if (response.Success)
                 {
-                    location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data };
+                    location.WeatherData = new ObservableCollection<WeatherDisplayItem> { response.Data };
                     location.IsWeatherDataAvailable = true;
                     Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
                 }
                 else
                 {
-                    location.WeatherData = [];
+                    location.WeatherData = new ObservableCollection<WeatherDisplayItem>();
                     location.IsWeatherDataAvailable = false;
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
-                location.WeatherData = [];
+                location.WeatherData = new ObservableCollection<WeatherDisplayItem>();
             }
         }
 

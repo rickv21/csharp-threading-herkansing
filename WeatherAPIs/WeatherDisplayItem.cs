@@ -5,7 +5,7 @@ namespace WeatherApp.WeatherAPIs
     public class WeatherDisplayItem
     {
         [JsonIgnore] //To ignore imagesource for json export
-        public ImageSource Image { get; set; }
+        public ImageSource? Image { get; set; }
         public string WeatherInfo { get; set; }
         public string TimeStamp { get; set; }
         public string MinTemp { get; set; }

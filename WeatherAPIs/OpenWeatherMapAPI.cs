@@ -293,13 +293,13 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="location">A specified location</param>
         /// <param name="simulate">True to simulate data, false to retrieve actual data</param>
         /// <returns>Returns an API response containing a WeatherDataModel depending on the outcome of the executed method</returns>
-        public async Task<APIResponse<WeatherDataModel>> GetCurrentWeatherAsync(LocationModel location, bool simulate = false)
+        public async Task<APIResponse<WeatherDisplayItem>> GetCurrentWeatherAsync(LocationModel location, bool simulate = false)
         {
             try
             {
                 if (HasReachedRequestLimit())
                 {
-                    return new APIResponse<WeatherDataModel>
+                    return new APIResponse<WeatherDisplayItem>
                     {
                         Success = false,
                         ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
@@ -327,7 +327,7 @@ namespace WeatherApp.WeatherAPIs
                         string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
                         string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
                         
-                        return new APIResponse<WeatherDataModel>
+                        return new APIResponse<WeatherDisplayItem>
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
@@ -347,7 +347,7 @@ namespace WeatherApp.WeatherAPIs
 
                 if (main == null || weather == null || weather["id"] == null)
                 {
-                    return new APIResponse<WeatherDataModel>
+                    return new APIResponse<WeatherDisplayItem>
                     {
                         Success = false,
                         ErrorMessage = "Missing weather data in API response",
@@ -359,16 +359,16 @@ namespace WeatherApp.WeatherAPIs
                 int weatherId = (int)weather["id"]!;
                 WeatherCondition condition = CalculateWeatherCondition(weatherId);
 
-                WeatherDataModel currentWeather = new(
-                    Name,
-                    condition,
-                    DateTime.Now, // Use current date for the weather data
-                    minTemperature: (double)main["temp_min"]!,
-                    maxTemperature: (double)main["temp_max"]!,
-                    humidity: (double)main["humidity"]!
+                // Prepare the WeatherInfo string
+                string weatherInfo = $"Time: {DateTime.Now.ToString("HH:mm")}, Min Temp: {main["temp_min"]}°C, Max Temp: {main["temp_max"]}°C, Humidity: {main["humidity"]}%, Condition: {condition}";
+
+                WeatherDisplayItem currentWeather = new(
+                    image: null,
+                    weatherInfo: weatherInfo,
+                    isDayItem: true
                 );
 
-                return new APIResponse<WeatherDataModel>
+                return new APIResponse<WeatherDisplayItem>
                 {
                     Success = true,
                     ErrorMessage = null,
@@ -377,7 +377,7 @@ namespace WeatherApp.WeatherAPIs
             }
             catch (Exception ex)
             {
-                return new APIResponse<WeatherDataModel>
+                return new APIResponse<WeatherDisplayItem>
                 {
                     Success = false,
                     ErrorMessage = "An error occurred: " + ex.Message,
