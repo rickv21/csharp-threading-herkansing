@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Reflection;
 using System.Windows.Input;
 using WeatherApp.Models;
 using WeatherApp.Utils;
@@ -333,6 +332,11 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Fetch the weather data for a location
+        /// </summary>
+        /// <param name="location">The specified location</param>
+        /// <returns>A task</returns>
         private async Task FetchWeatherForLocationAsync(LocationModel location)
         {
             try
@@ -356,11 +360,13 @@ namespace WeatherApp.ViewModels
                 if (response.Success)
                 {
                     location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data };
+                    location.IsWeatherDataAvailable = true;
                     Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
                 }
                 else
                 {
                     location.WeatherData = [];
+                    location.IsWeatherDataAvailable = false;
                 }
             }
             catch (Exception ex)
@@ -370,6 +376,15 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// THREADPOOL
+        /// ==========
+        /// In this method, a ThreadPool is used to gather weatherdata for all of the favorited locations
+        /// It loops through the saved locations and starts a workitem for each location
+        /// When an item has been looped and has been executed successfully, a signal is sent by using the countdown to let the method know the next task can be executed
+        /// ==========
+        /// Gather all weather data for the saved locations
+        /// </summary>
         private void FetchWeatherDataForAllLocations()
         {
             var countdown = new CountdownEvent(SavedLocations.Count);
