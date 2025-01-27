@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Sprache;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -19,9 +20,20 @@ namespace WeatherApp.ViewModels
     {
         private readonly WeatherAppData _weatherAppData;
 
-        private DateTime currentDate; // Tracks the current date for fetching weather data.
+        private DateTime _displayedDate;
+        public DateTime DisplayedDate {
+            get => _displayedDate;
+            set
+            {
+                if (_displayedDate != value)
+                {
+                    _displayedDate = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
-        public Dictionary<int, List<WeatherDataModel>> HourlyData { get; set; } = new Dictionary<int, List<WeatherDataModel>>();
+        public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
 
         public ObservableCollection<LocationModel> Locations { get; set; }
 
@@ -57,15 +69,34 @@ namespace WeatherApp.ViewModels
         // Commands for UI interaction
         public ICommand ExportCommand { get; }
         public ICommand SettingsCommand { get; }
+        public ICommand DayWeekCommand { get; }
+        public ICommand LeftArrowCommand { get; }
+        public ICommand RightArrowCommand { get; }
+
+
+        private string _dayWeekButtonText;
+        public string DayWeekButtonText
+        {
+            get => _dayWeekButtonText;
+            set
+            {
+                if(value.Equals("Week Overzicht") || value.Equals("Dag Overzicht"))
+                {
+                    _dayWeekButtonText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes the ViewModel, sets default values, and starts loading data.
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
+            DayWeekButtonText = "Week Overzicht";
+            DisplayedDate = DateTime.Now;
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
-            this.currentDate = DateTime.Now;
             this.Locations = new ObservableCollection<LocationModel>();
             foreach(var location in weatherAppData.Locations)
             {
@@ -75,6 +106,9 @@ namespace WeatherApp.ViewModels
             this.SelectedTab = this.Locations.First();
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
+            DayWeekCommand = new Command(SwitchDayWeek);
+            LeftArrowCommand = new Command(LeftArrow);
+            RightArrowCommand = new Command(RightArrow);
         }
 
         // Event for notifying UI of property changes
@@ -118,10 +152,20 @@ namespace WeatherApp.ViewModels
 
             try
             {
-                // Fetch weather data from all services concurrently
-                var tasks = _weatherAppData.WeatherServices.Values.Select(service =>
-                    service.GetWeatherDataAsync(date, location, _weatherAppData.SimulateMode)
-                );
+                IEnumerable<Task<APIResponse<List<WeatherDataModel>>>> tasks = null;
+                if (DayWeekButtonText.Equals("Week Overzicht"))
+                {
+                    // Fetch weather data from all services concurrently
+                    tasks = _weatherAppData.WeatherServices.Values.Select(service =>
+                        service.GetWeatherDataAsync(date, location, false)
+                    );
+                }
+                else
+                {
+                    tasks = _weatherAppData.WeatherServices.Values.Select(service =>
+                        service.GetWeatherForAWeekAsync(location, false)
+                    );
+                }
 
                 Debug.WriteLine("Fetching weather data from services...");
                 var results = await Task.WhenAll(tasks);
@@ -138,10 +182,10 @@ namespace WeatherApp.ViewModels
         /// Aggregates weather data by hour and processes it for display.
         /// </summary>
         /// <returns>Dictionary of aggregated weather data indexed by hour.</returns>
-        private async Task<Dictionary<int, WeatherDataModel>> UpdateHourlyData()
+        private async Task<Dictionary<string, WeatherDataModel>> UpdateData()
         {
             LocationModel location = _weatherAppData.Locations[0]; //Temp hardcoded.
-            var results = await FetchWeatherDataAsync(location, currentDate);
+            var results = await FetchWeatherDataAsync(location, DisplayedDate);
             foreach (var result in results)
             {
                 if (result.Success)
@@ -159,13 +203,14 @@ namespace WeatherApp.ViewModels
                             continue;
                         }
                         Debug.WriteLine(apiData.ToString());
-                        int hour = apiData.TimeStamp.Hour;
-                        if (!HourlyData.ContainsKey(hour))
+                        DateTime periodInTime = DateTime.Now;
+                        periodInTime = apiData.TimeStamp;
+                        if (!TimedData.ContainsKey(periodInTime))
                         {
-                            HourlyData[hour] = new List<WeatherDataModel>();
+                            TimedData[periodInTime] = new List<WeatherDataModel>();
                         }
 
-                        HourlyData[hour].Add(apiData);
+                        TimedData[periodInTime].Add(apiData);
                     }
                 }
                 else
@@ -175,10 +220,10 @@ namespace WeatherApp.ViewModels
                 }
             } 
       
-            var aggregatedData = HourlyData.ToDictionary(hourEntry => hourEntry.Key, hourEntry =>
+            var aggregatedData = TimedData.ToDictionary(entry => entry.Key, entry =>
             {
-                int hour = hourEntry.Key;
-                var dataList = hourEntry.Value;
+                DateTime time = entry.Key;
+                var dataList = entry.Value;
 
                 double totalHumidity = -1;
                 double minTemperature = double.MaxValue; 
@@ -207,27 +252,61 @@ namespace WeatherApp.ViewModels
 
                 double averageHumidity = validHumidityCount > 0 ? totalHumidity / validHumidityCount : 0;
 
-                return new WeatherDataModel(
-                    "",
-                    aggregatedCondition,
-                    new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, hour, 0, 0), // Set the hour.
-                    minTemperature,
-                    maxTemperature,
-                    averageHumidity
-                );
+                if(DayWeekButtonText.Equals("Week Overzicht"))
+                {
+                    return new WeatherDataModel(
+                        "",
+                        aggregatedCondition,
+                        new DateTime(DisplayedDate.Year, DisplayedDate.Month, DisplayedDate.Day, time.Hour, 0, 0), // Set the hour.
+                        minTemperature,
+                        maxTemperature,
+                        averageHumidity
+                    );
+                }
+                else
+                {
+                    return new WeatherDataModel(
+                        "",
+                        aggregatedCondition,
+                        time,
+                        minTemperature,
+                        maxTemperature,
+                        averageHumidity
+                    );
+                }
             }
          );
-
-            var sortedAggregatedData = aggregatedData.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+            Dictionary<string, WeatherDataModel> sortedAggregatedData = new Dictionary<string, WeatherDataModel>();
+            if (DayWeekButtonText.Equals("Week Overzicht"))
+            {
+                sortedAggregatedData = aggregatedData
+                    .OrderBy(x => x.Key)
+                    .GroupBy(x => "" + x.Key.Hour) // Group by the key
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
+                    );
+            }
+            else
+            {
+                sortedAggregatedData = aggregatedData
+                    .OrderBy(x => x.Key)
+                    .GroupBy(x => x.Key.DayOfWeek.ToString()) // Group by the key
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
+                    );
+            }
             return sortedAggregatedData;
         }
+
 
         /// <summary>
         /// Updates the UI with aggregated weather data.
         /// </summary>
         public async Task UpdateGUI()
         {
-            var data = await UpdateHourlyData();
+            var data = await UpdateData();
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 WeatherItems.Clear();
@@ -236,7 +315,17 @@ namespace WeatherApp.ViewModels
                     Debug.WriteLine("Entry: " + entry);
 
                     var model = entry.Value;
-                    var weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}");
+                    WeatherDisplayItem weatherItem = null;
+                    // Only adds :00 if the day is displayed rather than the week.
+                    if (DayWeekButtonText.Equals("Week Overzicht"))
+                    {
+                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}", true);
+                    }
+                    else
+                    {
+                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key} - {model.ToString()}", false);
+
+                    }
                     Debug.WriteLine("GUI - " + model.ToString());
                     WeatherItems.Add(weatherItem);
                 }
@@ -403,6 +492,43 @@ namespace WeatherApp.ViewModels
         public async void OpenSettings()
         {
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
+        }
+
+        public async void SwitchDayWeek()
+        {
+            if(DayWeekButtonText.Equals("Week Overzicht"))
+            {
+                TimedData.Clear();
+                DayWeekButtonText = "Dag Overzicht";
+                await UpdateData();
+                await UpdateGUI();
+            }
+            else
+            {
+                TimedData.Clear();
+                DayWeekButtonText = "Week Overzicht";
+                await UpdateData();
+                await UpdateGUI();
+            }
+        }
+
+        public async void LeftArrow()
+        {
+            if(DisplayedDate.Date <= DateTime.Now)
+            {
+                return;
+            }
+            TimedData.Clear();
+            DisplayedDate = DisplayedDate.AddDays(-1);
+            await UpdateData();
+            await UpdateGUI();
+        }
+        public async void RightArrow()
+        {
+            TimedData.Clear();
+            DisplayedDate = DisplayedDate.AddDays(1);
+            await UpdateData();
+            await UpdateGUI();
         }
     }
 }
