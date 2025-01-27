@@ -1,5 +1,3 @@
-using Microsoft.Maui.Controls;
-using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using WeatherApp.Models;
 using WeatherApp.Utils;
@@ -18,20 +16,24 @@ namespace WeatherApp.Views
             _viewModel = new LocationViewModel();
             BindingContext = _viewModel;
             SavedLocations = _viewModel.SavedLocations;
-            //BindingContext = new LocationViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
-            //if (BindingContext is LocationViewModel viewModel)
-            //{
-            //    //TEMP
-            //    SavedLocations = _viewModel.SavedLocations;
-            //}
         }
 
-        private void OnItemTapped(object sender, EventArgs e)
+        private async void OnItemTapped(object sender, EventArgs e)
         {
             var tappedLocation = ((TappedEventArgs)e).Parameter as LocationModel;
-            if (_viewModel.SaveSelectedLocation(tappedLocation) == false)
+            var result = _viewModel.SaveSelectedLocation(tappedLocation);
+
+            switch (result)
             {
-                DisplayAlert("Informatie", "Deze locatie is al opgeslagen als favoriet!", "OK");
+                case SaveLocationResult.DuplicateLocation:
+                    await DisplayAlert("Informatie", "Deze locatie is al opgeslagen als favoriet!", "OK");
+                    break;
+                case SaveLocationResult.FavoriteLimitReached:
+                    await DisplayAlert("Informatie", "Je hebt het maximum aantal favorieten van 5 bereikt!", "OK");
+                    break;
+                case SaveLocationResult.Success:
+                    await DisplayAlert("Informatie", "Locatie succesvol toegevoegd aan favorieten!", "OK");
+                    break;
             }
         }
     }

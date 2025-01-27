@@ -9,6 +9,12 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        /// <summary>
+        /// Retrieve locations from the API
+        /// </summary>
+        /// <param name="searchQuery">The user-inputted search query</param>
+        /// <param name="simulate">Bool to simulate data</param>
+        /// <returns>A task with an APIResponse which contains a list of LocationModels</returns>
         public async Task<APIResponse<List<LocationModel>>> GetLocationAsync(string searchQuery, bool simulate = false)
         {
             // Check if the request limit has been reached
@@ -29,7 +35,7 @@ namespace WeatherApp.WeatherAPIs
             }
             else
             {
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new())
                 {
                     string url = $"{_baseURL}/v1/geocode/search?text={Uri.EscapeDataString(searchQuery)}&format=json&apiKey={_apiKey}";
                     HttpResponseMessage response = await client.GetAsync(url);
@@ -58,6 +64,11 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Parse the locations retrieved from the API
+        /// </summary>
+        /// <param name="responseBody">The string with the location data</param>
+        /// <returns>A list with LocationModels</returns>
         private List<LocationModel> ParseLocations(string responseBody)
         {
             var locations = new List<LocationModel>();
@@ -72,7 +83,7 @@ namespace WeatherApp.WeatherAPIs
                 double latitude = result.lat != null ? (double)result.lat : 0;
                 double longitude = result.lon != null ? (double)result.lon : 0;
 
-                var location = new LocationModel(city, state, country, placeId, latitude, longitude);
+                var location = new LocationModel(city, state, country, placeId, latitude, longitude, null);
                 locations.Add(location);
             }
 
