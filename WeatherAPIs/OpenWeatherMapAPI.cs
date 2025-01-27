@@ -324,7 +324,7 @@ namespace WeatherApp.WeatherAPIs
                         var errorResponse = JObject.Parse(responseBody);
                         string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
                         string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
-
+                        
                         return new APIResponse<WeatherDataModel>
                         {
                             Success = false,

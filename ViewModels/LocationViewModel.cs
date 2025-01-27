@@ -391,7 +391,6 @@ namespace WeatherApp.ViewModels
 
             countdown.Wait();
             UpdatePlacesJson();
-            //LoadLocationsFromFile(GetFilePath());
         }
     }
 }
