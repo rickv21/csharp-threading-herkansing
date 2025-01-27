@@ -139,13 +139,13 @@ namespace WeatherApp.ViewModels
                 {
                     // Fetch weather data from all services concurrently
                     tasks = _weatherAppData.WeatherServices.Values.Select(service =>
-                        service.GetWeatherDataAsync(date, location, _weatherAppData.SimulateMode)
+                        service.GetWeatherDataAsync(date, location, false)
                     );
                 }
                 else
                 {
                     tasks = _weatherAppData.WeatherServices.Values.Select(service =>
-                        service.GetWeatherForAWeekAsync(location, _weatherAppData.SimulateMode)
+                        service.GetWeatherForAWeekAsync(location, false)
                     );
                 }
 
@@ -261,11 +261,23 @@ namespace WeatherApp.ViewModels
             Dictionary<string, WeatherDataModel> sortedAggregatedData;
             if (DayWeekButtonText.Equals("Week Overzicht"))
             {
-                sortedAggregatedData = aggregatedData.OrderBy(x => x.Key).ToDictionary(x => "" + x.Key.Hour, x => x.Value);
+                sortedAggregatedData = aggregatedData
+                    .OrderBy(x => x.Key)
+                    .GroupBy(x => "" + x.Key.Hour) // Group by the key
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
+                    );
             }
             else
             {
-                sortedAggregatedData = aggregatedData.OrderBy(x => x.Key).ToDictionary(x => x.Key.DayOfWeek.ToString(), x => x.Value);
+                sortedAggregatedData = aggregatedData
+                    .OrderBy(x => x.Key)
+                    .GroupBy(x => x.Key.DayOfWeek.ToString()) // Group by the key
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
+                    );
             }
             return sortedAggregatedData;
         }
