@@ -105,13 +105,15 @@ namespace WeatherApp.WeatherAPIs
                             double temperature = (double)hourItem["temp"]!;
                             double humidity = (double?)hourItem["humidity"] ?? -1;
                             string conditions = (string)hourItem["conditions"]!;
+                            string splitCondition = conditions.Split(", ")[0];
+
 
                             //Since it is called conditions, maybe it can have more than 1??
                             //I do not see it giving more than 1 at the moment, so let's make sure that it is indeed always only giving 1.
-                            Debug.Assert(!conditions.Contains(","), $"More than 1 condition was given (day-{hourDateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
-                            Debug.Assert(!conditions.Contains(" "), $"More than 1 condition was given (dat-{hourDateString}, space seperator), this should not happen.\nPost this in the group chat!!");
+                            //Debug.Assert(!conditions.Contains(","), $"More than 1 condition was given (day-{hourDateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
+                            //Debug.Assert(!conditions.Contains(" "), $"More than 1 condition was given (dat-{hourDateString}, space seperator), this should not happen.\nPost this in the group chat!!");
 
-                            WeatherCondition condition = CalculateWeatherCondition(conditions);
+                            WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
                             weatherData.Add(new WeatherDataModel(
                                 Name,
@@ -226,13 +228,14 @@ namespace WeatherApp.WeatherAPIs
                     double maxTemperature = (double)dayItem["tempmax"]!;
                     double averageHumidity = (double?)dayItem["humidity"] ?? -1;
                     string conditionText = (string)dayItem["conditions"] ?? "";
+                    string splitCondition = conditionText.Split(", ")[0];
 
                     //Since it is called conditions, maybe it can have more than 1??
                     //I do not see it giving more than 1 at the moment, so let's make sure that it is indeed always only giving 1.
-                    Debug.Assert(!conditionText.Contains(","), $"More than 1 condition was given (week-{dateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
-                    Debug.Assert(!conditionText.Contains(" "), $"More than 1 condition was given (week-{dateString}, space seperator), this should not happen.\nPost this in the group chat!!");
+                    //Debug.Assert(!conditionText.Contains(","), $"More than 1 condition was given (week-{dateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
+                    //Debug.Assert(!conditionText.Contains(" "), $"More than 1 condition was given (week-{dateString}, space seperator), this should not happen.\nPost this in the group chat!!");
 
-                    WeatherCondition condition = CalculateWeatherCondition(conditionText);
+                    WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
                     weatherData.Add(new WeatherDataModel(
                         Name,
