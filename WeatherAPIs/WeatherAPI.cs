@@ -41,7 +41,10 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Latitude},{location.Longitude}&dt={day:yyyy-MM-dd}";
+                    var latitude = location.Latitude.ToString().Replace(",", ".");
+                    var longitude = location.Longitude.ToString().Replace(",", ".");
+                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&dt={day:yyyy-MM-dd}";
+                    Debug.WriteLine("URL: " + url);
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
@@ -125,7 +128,9 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={location.Latitude},{location.Longitude}&days=7";
+                    var latitude = location.Latitude.ToString().Replace(",", ".");
+                    var longitude = location.Longitude.ToString().Replace(",", ".");
+                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&days=7";
                     HttpResponseMessage response = await client.GetAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
