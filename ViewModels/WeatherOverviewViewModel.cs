@@ -324,7 +324,6 @@ namespace WeatherApp.ViewModels
                     else
                     {
                         weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key} - {model.ToString()}", false);
-
                     }
                     Debug.WriteLine("GUI - " + model.ToString());
                     WeatherItems.Add(weatherItem);

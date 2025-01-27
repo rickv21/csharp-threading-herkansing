@@ -1,14 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-namespace WeatherApp.WeatherAPIs
 
+namespace WeatherApp.WeatherAPIs
 {
     public class WeatherDisplayItem
     {
         [JsonIgnore] //To ignore imagesource for json export
         public ImageSource Image { get; set; }
-
         public string WeatherInfo { get; set; }
-
         public string TimeStamp { get; set; }
         public string MinTemp { get; set; }
         public string MaxTemp { get; set; }
@@ -27,7 +25,7 @@ namespace WeatherApp.WeatherAPIs
                 var parts = weatherInfo.Split(',');
                 if (!isDayItem)
                 {
-                    TimeStamp = WeatherInfo.Split(' ')[0];
+                    TranslateDaysOfTheWeek(WeatherInfo.Split(' ')[0]);
                 }
                 foreach (var part in parts)
                 {
@@ -40,15 +38,15 @@ namespace WeatherApp.WeatherAPIs
                     }
                     else if (part.Contains("Min Temp:"))
                     {
-                        MinTemp = "Min Temp: " + part.Split(':')[1].Trim() + " °C";
+                        MinTemp = "Min. Temp: " + part.Split(':')[1].Trim() + " °C";
                     }
                     else if (part.Contains("Max Temp:"))
                     {
-                        MaxTemp = "Max Temp: " + part.Split(':')[1].Trim() + " °C";
+                        MaxTemp = "Max. Temp: " + part.Split(':')[1].Trim() + " °C";
                     }
                     else if (part.Contains("Humidity:"))
                     {
-                        Humidity = "Humidity: " + part.Split(':')[1].Trim();
+                        Humidity = "Luchtvochtigheid: " + part.Split(':')[1].Trim();
                     }
                     else if (part.Contains("Condition:"))
                     {
@@ -132,9 +130,39 @@ namespace WeatherApp.WeatherAPIs
             }
         }
 
+        private void TranslateDaysOfTheWeek(string text)
+        {
+            switch (text)
+            {
+                case "Monday":
+                    TimeStamp =  "Maandag";
+                    break;
+                case "Tuesday":
+                    TimeStamp = "Dinsdag";
+                    break;
+                case "Wednesday":
+                    TimeStamp = "Woensdag";
+                    break;
+                case "Thursday":
+                    TimeStamp = "Donderdag";
+                    break;
+                case "Friday":
+                    TimeStamp = "Vrijdag";
+                    break;
+                case "Saturday":
+                    TimeStamp = "Zaterdag";
+                    break;
+                case "Sunday":
+                    TimeStamp = "Zondag";
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public override string ToString()
         {
-            return $"Time: {TimeStamp}, Min Temp: {MinTemp}, Max Temp: {MaxTemp}, Humidity: {Humidity}, Condition: {Condition}";
+            return $"Tijd: {TimeStamp}, Min. Temp: {MinTemp}, Max. Temp: {MaxTemp}, Luchtvochtigheid: {Humidity}, Conditie: {Condition}";
         }
     }
 }
