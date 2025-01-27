@@ -26,9 +26,10 @@
         </ScrollView>
 
         <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
+            <!-- Export Button -->
             <Button Text="Exporteer" 
             HorizontalOptions="Start" 
-            VerticalOptions="Start" 
+            VerticalOptions="Center" 
             Grid.Column="0" 
             WidthRequest="110" 
             HeightRequest="40" 
@@ -38,9 +39,25 @@
             CornerRadius="5" 
             Clicked="OnExportButtonClicked" />
 
+            <StackLayout Orientation="Horizontal" 
+                 HorizontalOptions="Center" 
+                 VerticalOptions="Center"
+                 Grid.Column="1"
+                 Spacing="10">
+                <Button Text="◀" 
+                Command="{Binding LeftArrowCommand}" />
+
+                <Label Text="{Binding DisplayedDate, StringFormat='{0:dd-MM-yyyy}'}"
+                HorizontalOptions="Center" 
+               VerticalOptions="Center" />
+
+                <Button Text="▶" 
+                Command="{Binding RightArrowCommand}" />
+            </StackLayout>
+
             <Button Text="{Binding DayWeekButtonText}" 
             HorizontalOptions="End" 
-            VerticalOptions="Start" 
+            VerticalOptions="Center" 
             Grid.Column="2" 
             WidthRequest="110" 
             HeightRequest="40" 
@@ -50,6 +67,7 @@
             Padding="0"
             Command="{Binding DayWeekCommand}" />
         </Grid>
+
 
         <ScrollView Orientation="Horizontal" Grid.Row="2">
             <CollectionView ItemsSource="{Binding WeatherItems}" BackgroundColor="#3A3A3A" 

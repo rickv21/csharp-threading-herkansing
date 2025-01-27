@@ -20,7 +20,18 @@ namespace WeatherApp.ViewModels
     {
         private readonly WeatherAppData _weatherAppData;
 
-        private DateTime currentDate; // Tracks the current date for fetching weather data.
+        private DateTime _displayedDate;
+        public DateTime DisplayedDate {
+            get => _displayedDate;
+            set
+            {
+                if (_displayedDate != value)
+                {
+                    _displayedDate = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
 
@@ -59,6 +70,9 @@ namespace WeatherApp.ViewModels
         public ICommand ExportCommand { get; }
         public ICommand SettingsCommand { get; }
         public ICommand DayWeekCommand { get; }
+        public ICommand LeftArrowCommand { get; }
+        public ICommand RightArrowCommand { get; }
+
 
         private string _dayWeekButtonText;
         public string DayWeekButtonText
@@ -80,9 +94,9 @@ namespace WeatherApp.ViewModels
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
             DayWeekButtonText = "Week Overzicht";
+            DisplayedDate = DateTime.Now;
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
-            this.currentDate = DateTime.Now;
             this.Locations = new ObservableCollection<LocationModel>();
             foreach(var location in weatherAppData.Locations)
             {
@@ -93,6 +107,8 @@ namespace WeatherApp.ViewModels
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
             DayWeekCommand = new Command(SwitchDayWeek);
+            LeftArrowCommand = new Command(LeftArrow);
+            RightArrowCommand = new Command(RightArrow);
         }
 
         // Event for notifying UI of property changes
@@ -169,7 +185,7 @@ namespace WeatherApp.ViewModels
         private async Task<Dictionary<string, WeatherDataModel>> UpdateData()
         {
             LocationModel location = _weatherAppData.Locations[0]; //Temp hardcoded.
-            var results = await FetchWeatherDataAsync(location, currentDate);
+            var results = await FetchWeatherDataAsync(location, DisplayedDate);
             foreach (var result in results)
             {
                 if (result.Success)
@@ -241,7 +257,7 @@ namespace WeatherApp.ViewModels
                     return new WeatherDataModel(
                         "",
                         aggregatedCondition,
-                        new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, time.Hour, 0, 0), // Set the hour.
+                        new DateTime(DisplayedDate.Year, DisplayedDate.Month, DisplayedDate.Day, time.Hour, 0, 0), // Set the hour.
                         minTemperature,
                         maxTemperature,
                         averageHumidity
@@ -260,7 +276,7 @@ namespace WeatherApp.ViewModels
                 }
             }
          );
-            Dictionary<string, WeatherDataModel> sortedAggregatedData;
+            Dictionary<string, WeatherDataModel> sortedAggregatedData = new Dictionary<string, WeatherDataModel>();
             if (DayWeekButtonText.Equals("Week Overzicht"))
             {
                 sortedAggregatedData = aggregatedData
@@ -494,6 +510,25 @@ namespace WeatherApp.ViewModels
                 await UpdateData();
                 await UpdateGUI();
             }
+        }
+
+        public async void LeftArrow()
+        {
+            if(DisplayedDate.Date <= DateTime.Now)
+            {
+                return;
+            }
+            TimedData.Clear();
+            DisplayedDate = DisplayedDate.AddDays(-1);
+            await UpdateData();
+            await UpdateGUI();
+        }
+        public async void RightArrow()
+        {
+            TimedData.Clear();
+            DisplayedDate = DisplayedDate.AddDays(1);
+            await UpdateData();
+            await UpdateGUI();
         }
     }
 }
