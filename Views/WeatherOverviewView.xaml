@@ -38,17 +38,17 @@
             CornerRadius="5" 
             Clicked="OnExportButtonClicked" />
 
-            <Button Text="Week Overzicht" 
+            <Button Text="{Binding DayWeekButtonText}" 
             HorizontalOptions="End" 
             VerticalOptions="Start" 
             Grid.Column="2" 
             WidthRequest="110" 
             HeightRequest="40" 
             BorderWidth="1" 
-            CornerRadius="5" 
+            CornerRadius="5"
             Margin="0"
             Padding="0"
-            Clicked="OnDayWeekButtonClicked" />
+            Command="{Binding DayWeekCommand}" />
         </Grid>
 
         <ScrollView Orientation="Horizontal" Grid.Row="2">
