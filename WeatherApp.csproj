@@ -225,6 +225,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ExportWeatherData\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties testdata_4openweather_3test_1json__JsonSchema="https://alec016.github.io/Custom-Machinery/Json%20Schema/src/main/resources/schemas/custom_machinery_machine.json" /></VisualStudio></ProjectExtensions>
 
 </Project>
