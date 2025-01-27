@@ -77,4 +77,8 @@ public partial class WeatherOverviewView : ContentPage
         throw new NotImplementedException();
     }
 
+    private void CityViewButton_OnClicked(object sender, EventArgs e)
+    {
+        Navigation.PushAsync(new CityView());
+    }
 }
