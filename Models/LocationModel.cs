@@ -11,9 +11,8 @@ namespace WeatherApp.Models
     /// <param name="latitude">The latitude of the location.</param>
     /// <param name="longitude">The longitude of the location.</param>
     /// <param name="weatherData">A list of WeatherDataModels, optional.</param>
-    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, ObservableCollection<WeatherDataModel>? weatherData = null) : INotifyPropertyChanged
+    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, ObservableCollection<WeatherDataModel>? weatherData) : INotifyPropertyChanged
     {
-        private bool _isWeatherDataAvailable = false;
         /// <summary>
         /// The name of the location
         /// </summary>
@@ -44,34 +43,11 @@ namespace WeatherApp.Models
         /// </summary>
         public double Longitude { get; set; } = longitude;
 
-        private ObservableCollection<WeatherDataModel> _weatherData;
-
         /// <summary>
-        /// A list of WeatherDataModels.
+        /// An ObservableCollection of WeatherDataModels.
         /// This either represents multiple hours of a day or multiple days of a week.
         /// </summary>
-        public ObservableCollection<WeatherDataModel> WeatherData
-        {
-            get => _weatherData;
-            set
-            {
-                if (_weatherData != value)
-                {
-                    _weatherData = value;
-                    OnPropertyChanged(nameof(WeatherData));
-                }
-            }
-        }
-
-        public bool IsWeatherDataAvailable
-        {
-            get => _isWeatherDataAvailable;
-            set
-            {
-                _isWeatherDataAvailable = value;
-                OnPropertyChanged(nameof(IsWeatherDataAvailable));
-            }
-        }
+        public ObservableCollection<WeatherDataModel> WeatherData { get; set; } = weatherData;
 
         public event PropertyChangedEventHandler PropertyChanged;
 

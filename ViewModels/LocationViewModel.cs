@@ -337,18 +337,30 @@ namespace WeatherApp.ViewModels
         {
             try
             {
+
+                WeatherDataModel lastWeatherData = location.WeatherData?.FirstOrDefault();
+                if (lastWeatherData != null)
+                {
+                    DateTime timestamp = lastWeatherData.TimeStamp;
+
+                    // Check if the data is less than an hour old
+                    if ((DateTime.Now - timestamp).TotalHours < 1)
+                    {
+                        Debug.WriteLine($"Using cached weather data for {location.Name} (retrieved at {timestamp})");
+                        return; // Skip fetching data from the API
+                    }
+                }
+
                 var response = await _weatherAPI.GetCurrentWeatherAsync(location);
 
                 if (response.Success)
                 {
-                    location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data }; // Set WeatherData
-                    location.IsWeatherDataAvailable = true;
+                    location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data };
                     Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
                 }
                 else
                 {
                     location.WeatherData = [];
-                    location.IsWeatherDataAvailable = false;
                 }
             }
             catch (Exception ex)
@@ -364,7 +376,7 @@ namespace WeatherApp.ViewModels
 
             foreach (var location in SavedLocations)
             {
-                // Queue work to the ThreadPool to match the original method's behavior
+                // Queue work to the ThreadPool
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     try

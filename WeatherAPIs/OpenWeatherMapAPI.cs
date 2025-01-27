@@ -309,7 +309,7 @@ namespace WeatherApp.WeatherAPIs
                 if (simulate)
                 {
                     responseBody = GetTestJSON("openweather_test.json");
-                    CountRequest(); // Important: this counts the requests for the limit.
+                    //CountRequest(); // Important: this counts the requests for the limit.
                 }
                 else
                 {
@@ -333,7 +333,7 @@ namespace WeatherApp.WeatherAPIs
                         };
                     }
 
-                    CountRequest(); // Important: this counts the requests for the limit.
+                    //CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
 
