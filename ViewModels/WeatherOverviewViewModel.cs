@@ -436,16 +436,38 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
         }
-
+        
         /// <summary>
         /// Exports weather data to JSON
         /// </summary>
         private void ExportToJson(string jsonData, string folder, string timestamp)
         {
             string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.json");
-            File.WriteAllText(filePath, jsonData);
+
+            // Location
+            if (_selectedTab != null)
+            {
+                location = _selectedTab;
+            }
+            else
+            {
+                location = this.Locations.First();
+            }
+
+            var weatherWithLocation = new
+            {
+                Location = location.Name,
+                WeatherData = WeatherItems
+            };
+
+            // Serialize to JSON
+            string jsonWithLocation = JsonSerializer.Serialize(weatherWithLocation, new JsonSerializerOptions { WriteIndented = true });
+
+            File.WriteAllText(filePath, jsonWithLocation);
             Debug.WriteLine($"Weather data exported to JSON: {filePath}");
         }
+
+        private LocationModel location;
 
         /// <summary>
         /// Exports weather data to CSV
@@ -457,10 +479,19 @@ namespace WeatherApp.ViewModels
             if (WeatherItems == null) return;
 
             // CSV-header 
-            var csvLines = new List<string> { "Tijdstip;Weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
+            var csvLines = new List<string> { "Plaats;Tijdstip;Weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
+
+            if(_selectedTab != null)
+            {
+                location = _selectedTab;
+            }
+            else
+            {
+                location = this.Locations.First();
+            }
 
             csvLines.AddRange(WeatherItems.Select(item =>
-                $"{item.TimeStamp};{item.Condition.Trim()};{GetTemperatureValue(item.MinTemp)};{GetTemperatureValue(item.MaxTemp)};{item.Humidity}"
+                $"{location};{item.TimeStamp};{item.Condition.Trim()};{GetTemperatureValue(item.MinTemp)};{GetTemperatureValue(item.MaxTemp)};{item.Humidity}"
             ));
 
             File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
@@ -485,7 +516,22 @@ namespace WeatherApp.ViewModels
 
             if (WeatherItems == null) return;
 
-            var txtLines = WeatherItems.Select(item => item.DisplayText).ToList();
+
+            //location
+            if (_selectedTab != null)
+            {
+                location = _selectedTab;
+            }
+            else
+            {
+                location = this.Locations.First();
+            }
+
+            // Adds location
+            var txtLines = new List<string> { $"Locatie: {location.Name}" };
+
+            txtLines.AddRange(WeatherItems.Select(item => item.DisplayText));
+
             File.WriteAllLines(filePath, txtLines);
             Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
