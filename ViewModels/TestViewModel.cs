@@ -226,7 +226,7 @@ namespace WeatherApp.ViewModels
                 return;
             }
 
-            await HandleButtonClick(api);
+          //  await HandleButtonClick(api);
         }
 
         public ICommand WeatherbitCommand { get; }

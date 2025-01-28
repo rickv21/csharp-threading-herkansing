@@ -3,7 +3,7 @@ using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
 {
-    public class GeocodingAPI : WeatherService
+    public class GeocodingAPI : APIService
     {
         public GeocodingAPI() : base("Geocoding", "https://api.geoapify.com", 3000, -1)
         {
@@ -88,21 +88,6 @@ namespace WeatherApp.WeatherAPIs
             }
 
             return locations;
-        }
-
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
-        {
-            return null;
-        }
-
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
-        {
-            return null;
-        }
-
-        protected override WeatherCondition CalculateWeatherCondition(object data)
-        {
-           return WeatherCondition.UNKNOWN;
         }
     }
 }
