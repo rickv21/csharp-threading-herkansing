@@ -1,8 +1,10 @@
 ﻿using Sprache;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
@@ -374,7 +376,7 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Converts weatherdata to JSON
+        /// Converts weather data to JSON
         /// </summary>
         public string GetWeatherDataAsJson()
         {
@@ -398,14 +400,14 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-                string jsonData = GetWeatherDataAsJson();
-
                 //Checks if there is weatherdata
-                if (string.IsNullOrEmpty(jsonData))
+                if (WeatherItems == null || WeatherItems.Count == 0)
                 {
                     await Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
                     return;
                 }
+
+                string jsonData = GetWeatherDataAsJson();
 
                 string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
@@ -419,11 +421,11 @@ namespace WeatherApp.ViewModels
                 // Filename based on date
                 string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
 
-                // Start export threads 
+                // Start export threads
                 await Task.WhenAll(
                     Task.Run(() => ExportToJson(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToCsv(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToTxt(jsonData, exportFolder, timestamp))
+                    Task.Run(() => ExportToCsv(exportFolder, timestamp)),
+                    Task.Run(() => ExportToTxt(exportFolder, timestamp))
                 );
 
                 await Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
@@ -436,11 +438,8 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Exports to JSON
+        /// Exports weather data to JSON
         /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
         private void ExportToJson(string jsonData, string folder, string timestamp)
         {
             string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.json");
@@ -449,42 +448,48 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Exports weatherdata to CSV
+        /// Exports weather data to CSV
         /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToCsv(string jsonData, string folder, string timestamp)
+        private void ExportToCsv(string folder, string timestamp)
         {
             string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.csv");
 
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayItem>>(jsonData);
-            if (weatherItems == null) return;
+            if (WeatherItems == null) return;
 
-            var csvLines = new List<string> { "Tijdstip,Weersomstandigheden" };
-            csvLines.AddRange(weatherItems.Select(item => $"{item.DisplayText}"));
+            // CSV-header 
+            var csvLines = new List<string> { "Tijdstip;Weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
 
-            File.WriteAllLines(filePath, csvLines);
+            csvLines.AddRange(WeatherItems.Select(item =>
+                $"{item.TimeStamp};{item.Condition.Trim()};{GetTemperatureValue(item.MinTemp)};{GetTemperatureValue(item.MaxTemp)};{item.Humidity}"
+            ));
+
+            File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
             Debug.WriteLine($"Weather data exported to CSV: {filePath}");
         }
 
         /// <summary>
-        /// Exports to TXT-file 
+        /// Trims min and max temperature for CSV export so as example only 8°C is displayed in the csv column
         /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToTxt(string jsonData, string folder, string timestamp)
+        private string GetTemperatureValue(string temperature)
+        {
+            var cleanedTemperature = System.Text.RegularExpressions.Regex.Replace(temperature, @"[^\d.,-]", "");
+            return $"{cleanedTemperature} °C";
+        }
+
+        /// <summary>
+        /// Exports weather data to TXT
+        /// </summary>
+        private void ExportToTxt(string folder, string timestamp)
         {
             string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.txt");
 
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayItem>>(jsonData);
-            if (weatherItems == null) return;
+            if (WeatherItems == null) return;
 
-            var txtLines = weatherItems.Select(item => $"{item.DisplayText}").ToList();
+            var txtLines = WeatherItems.Select(item => item.DisplayText).ToList();
             File.WriteAllLines(filePath, txtLines);
             Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
+
 
         /// <summary>
         /// Opens the settings page.
