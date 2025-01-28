@@ -26,7 +26,7 @@ public partial class WeatherOverviewView : ContentPage
         base.OnAppearing();
         if (BindingContext is WeatherOverviewViewModel viewModel)
         {
-            viewModel.UpdateGUI();
+            viewModel.SetDefaultViewData();
         }
     }
 

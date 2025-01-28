@@ -18,7 +18,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
             if (simulate)
@@ -27,7 +27,6 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
-                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -39,7 +38,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = true,
-                    ErrorMessage = null,
+                    Source = Name,
                     Data = weatherData
                 };
             }
@@ -58,7 +57,6 @@ namespace WeatherApp.WeatherAPIs
                 var weatherData = new List<WeatherDataModel>
                 {
                     new WeatherDataModel(
-                        Name,
                         WeatherCondition.SUNNY,
                         day,
                         minTemperature: 15.0,
@@ -70,7 +68,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = true,
-                    ErrorMessage = null,
+                    Source = Name,
                     Data = weatherData
                 };
             }
@@ -85,7 +83,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
             string responseBody;
@@ -115,7 +113,6 @@ namespace WeatherApp.WeatherAPIs
             for (int i = 0; i < 7; i++)
             {
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     WeatherCondition.SUNNY,
                     DateTime.Now.AddDays(i),
                     minTemperature: 15.0,
@@ -127,7 +124,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }

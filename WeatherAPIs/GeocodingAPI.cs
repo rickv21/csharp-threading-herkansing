@@ -24,7 +24,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached. Please reset the limit.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -46,7 +46,7 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"Error {response.StatusCode}: {await response.Content.ReadAsStringAsync()}",
-                            Data = null
+                            Source = Name
                         };
                     }
 
@@ -60,7 +60,8 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<LocationModel>>
             {
                 Success = true,
-                Data = locations
+                Data = locations,
+                Source = Name
             };
         }
 

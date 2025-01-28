@@ -20,7 +20,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -35,6 +35,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                     HttpResponseMessage response = await client.GetAsync(url);
+                    Debug.WriteLine(response.StatusCode);
                     if (!response.IsSuccessStatusCode)
                     {
                         responseBody = await response.Content.ReadAsStringAsync();
@@ -45,7 +46,7 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
                     CountRequest(); // Important: this counts the requests for the limit.
@@ -82,7 +83,6 @@ namespace WeatherApp.WeatherAPIs
                 var maxTemp = hour["temp"];
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                    condition,
                    forecastDate,
                    minTemperature: (double)minTemp,
@@ -96,9 +96,9 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = true,
-                    ErrorMessage = null,
-                    Data = weatherData
-                };
+                    Data = weatherData,
+                    Source = Name
+            };
             }
 
 
@@ -112,7 +112,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -137,7 +137,7 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
                     CountRequest(); // Important: this counts the requests for the limit.
@@ -159,7 +159,6 @@ namespace WeatherApp.WeatherAPIs
                 var maxTemp = day["max_temp"];
 
                 weatherData.Add(new WeatherDataModel(
-                   Name,
                    condition,
                    forecastDate,
                    minTemperature: (double)minTemp,
@@ -170,7 +169,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }

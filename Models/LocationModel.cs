@@ -44,6 +44,8 @@ namespace WeatherApp.Models
         /// </summary>
         public double Longitude { get; set; } = longitude;
 
+        public bool IsSelected { get; set; } = false;
+
         /// <summary>
         /// An ObservableCollection of WeatherDataModels
         /// This either represents multiple hours of a day or multiple days of a week
