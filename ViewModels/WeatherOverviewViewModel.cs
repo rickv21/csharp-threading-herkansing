@@ -400,7 +400,7 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-                //Checks if there is weatherdata
+                // Checks if there is weatherdata
                 if (WeatherItems == null || WeatherItems.Count == 0)
                 {
                     await Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
@@ -409,16 +409,18 @@ namespace WeatherApp.ViewModels
 
                 string jsonData = GetWeatherDataAsJson();
 
-                string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
+                string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-                // Creates folder 'ExportWeatherData if it doesnt exists'
+                // Location where export documents get saved
+                string exportFolder = Path.Combine(documentsFolder, "ExportWeatherData");
+
+                // Creates folder 'ExportWeatherDat' if it doesnt exists
                 if (!Directory.Exists(exportFolder))
                 {
                     Directory.CreateDirectory(exportFolder);
                 }
 
-                // Filename based on date
+                // Filename based on date time
                 string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
 
                 // Start export threads
@@ -436,7 +438,7 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
         }
-        
+
         /// <summary>
         /// Exports weather data to JSON
         /// </summary>
