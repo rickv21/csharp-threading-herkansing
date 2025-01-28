@@ -46,7 +46,7 @@ namespace WeatherApp.WeatherAPIs
                     }
                     else if (part.Contains("Humidity:"))
                     {
-                        Humidity = "Luchtvochtigheid: " + part.Split(':')[1].Trim();
+                        Humidity = "Luchtvochtigheid: " + part.Split(':')[1].Trim() + "%";
                     }
                     else if (part.Contains("Condition:"))
                     {

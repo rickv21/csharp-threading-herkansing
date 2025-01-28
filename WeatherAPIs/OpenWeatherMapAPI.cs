@@ -360,7 +360,7 @@ namespace WeatherApp.WeatherAPIs
                 WeatherCondition condition = CalculateWeatherCondition(weatherId);
 
                 // Prepare the WeatherInfo string
-                string weatherInfo = $"Time: {DateTime.Now.ToString("HH:mm")}, Min Temp: {main["temp_min"]}°C, Max Temp: {main["temp_max"]}°C, Humidity: {main["humidity"]}%, Condition: {condition}";
+                string weatherInfo = $"Time: {DateTime.Now.ToString("HH:mm")}, Min Temp: {main["temp_min"]}°C, Max Temp: {main["temp_max"]}°C, Humidity: {main["humidity"]}, Condition: {condition}";
 
                 WeatherDisplayItem currentWeather = new(
                     image: null,
