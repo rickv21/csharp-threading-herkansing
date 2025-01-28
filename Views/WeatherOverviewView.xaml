@@ -112,11 +112,15 @@
                 Margin="0"
                 Padding="0"
                 Command="{Binding SettingsCommand}" />
-            <WebView x:Name="MapWebView"
-                    HeightRequest="400"
-                    WidthRequest="300"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="FillAndExpand" />
+            <ScrollView
+                Margin="5"
+                Padding="5">
+                <WebView x:Name="MapWebView"
+                     HeightRequest="600"
+                     WidthRequest="450"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="FillAndExpand" />
+            </ScrollView>
         </VerticalStackLayout>
 
     </Grid>

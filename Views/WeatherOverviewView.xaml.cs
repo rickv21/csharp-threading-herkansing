@@ -27,7 +27,15 @@ public partial class WeatherOverviewView : ContentPage
         <body>
             <div id=""map"" style=""width: 100%; height: 100vh;""></div>
             <script>
-                var map = L.map('map').setView([52.1326, 5.2913], 7);
+               var map = L.map('map', {
+                    center: [52.1326, 5.2913], // Center of the Netherlands
+                    zoom: 7, // Initial zoom level
+                    minZoom: 7, // Minimum zoom level (zoom out (restricted))
+                    maxZoom: 19, // Maximum zoom level (zoom in)
+                    maxBounds: [[50.7504, 3.3584], [53.6316, 7.2275]], // Southwest and northeast bounds of NL
+                    maxBoundsViscosity: 0.5,
+                    wheelPxPerZoomLevel: 60,
+                });
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: 'Map data � <a href=""https://www.openstreetmap.org/"">OpenStreetMap</a> contributors',
