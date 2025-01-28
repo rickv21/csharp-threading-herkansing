@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices.Sensors;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using WeatherApp.Models;
 using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
 
@@ -41,15 +43,15 @@ namespace WeatherApp
 
             // Retrieve the simulateData boolean.
             var data = jsonManager.GetData("data", "simulateMode") as string;
-
+            Debug.WriteLine("SimulateMode: " + data);
             if (bool.TryParse(data, out bool isEnabled))
             {
                 appData.SimulateMode = isEnabled;
+                Debug.WriteLine("Loaded SimulateMode: " + isEnabled);
             }
 
-            //TEMP
-            appData.Locations.Add(new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810, null));
-            appData.Locations.Add(new("Amsterdam", "Noord-Holland", "NL", "Test", 52.377956, 4.897070, null));
+            PlacesManager placesManager = new PlacesManager();
+            appData.Locations = placesManager.LoadLocationsFromFile();
 
             try
             {

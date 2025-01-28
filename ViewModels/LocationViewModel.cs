@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -12,11 +10,13 @@ namespace WeatherApp.ViewModels
 {
     public class LocationViewModel : INotifyPropertyChanged
     {
+        private readonly WeatherAppData _weatherAppData;
         private readonly GeocodingAPI _api;
         private readonly OpenWeatherMapAPI _weatherAPI;
         private string _searchQuery;
         private Action<string> _onSearchQueryChanged;
         private CancellationTokenSource _debounceCts;
+        private PlacesManager _placesManager;
 
         public ObservableCollection<LocationModel> SearchResults { get; set; }
 
@@ -43,12 +43,13 @@ namespace WeatherApp.ViewModels
         }
 
         public ICommand SearchCommand { get; }
-
         public ICommand RemoveLocationCommand { get; }
         public ICommand FetchWeatherDataCommand { get; }
 
-        public LocationViewModel()
+        public LocationViewModel(WeatherAppData weatherAppData)
         {
+            _weatherAppData = weatherAppData;
+            _placesManager = new PlacesManager();
             _api = new GeocodingAPI();
             _weatherAPI = new OpenWeatherMapAPI();
             RemoveLocationCommand = new Command<LocationModel>(async (location) => await RemoveLocationAsync(location));
@@ -56,7 +57,41 @@ namespace WeatherApp.ViewModels
             SearchResults = [];
             SearchCommand = new Command(async () => await PerformSearch());
             FetchWeatherDataCommand = new Command(FetchWeatherDataForAllLocations);
+
             LoadSavedLocations();
+        }
+
+        private void LoadSavedLocations()
+        {
+            SavedLocations.Clear();
+            foreach (var location in _weatherAppData.Locations)
+            {
+                SavedLocations.Add(location);
+            }
+        }
+
+        public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
+        {
+            if (HasReachedFavoriteLimit())
+            {
+                return SaveLocationResult.FavoriteLimitReached;
+            }
+
+            SaveLocationResult result = _placesManager.SaveLocation(selectedLocation);
+            if(result == SaveLocationResult.Success)
+            {
+                SavedLocations.Add(selectedLocation);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Check if the favorites limit has been reached
+        /// </summary>
+        /// <returns>True if reached, false if not reached</returns>
+        public bool HasReachedFavoriteLimit()
+        {
+            return SavedLocations.Count >= 5;
         }
 
         /// <summary>
@@ -92,65 +127,8 @@ namespace WeatherApp.ViewModels
             if (isConfirmed)
             {
                 SavedLocations.Remove(location);
-                UpdatePlacesJson();
+                _placesManager.UpdatePlacesJson(SavedLocations);
             }
-        }
-
-        /// <summary>
-        /// Update the JSON file with favorite places
-        /// </summary>
-        private void UpdatePlacesJson()
-        {
-            try
-            {
-                string filePath = GetFilePath();
-
-                if (File.Exists(filePath))
-                {
-                    string json = File.ReadAllText(filePath);
-                    JObject jsonObject = JObject.Parse(json);
-                    JArray geocodingArray = (JArray)jsonObject["Geocoding"] ?? [];
-
-                    JObject locationsObject = [];
-
-                    foreach (var location in SavedLocations)
-                    {
-                        string placeId = location.PlaceId ?? Guid.NewGuid().ToString(); // Ensure a unique place_id
-                        locationsObject[placeId] = JObject.FromObject(new
-                        {
-                            location.Name,
-                            location.Latitude,
-                            location.Longitude,
-                            location.Country,
-                            location.State,
-                            WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : []
-                        });
-                    }
-
-                    JObject updatedJson = new()
-                    {
-                        ["Geocoding"] = geocodingArray,
-                        ["Locations"] = locationsObject
-                    };
-
-                    File.WriteAllText(filePath, updatedJson.ToString(Formatting.Indented));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while updating the favorite places JSON file", ex);
-            }
-        }
-
-        /// <summary>
-        /// Get the file path of the places.json file
-        /// </summary>
-        /// <returns>The file path</returns>
-        private string GetFilePath()
-        {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "places.json");
-
-            return filePath;
         }
 
         /// <summary>
@@ -191,144 +169,6 @@ namespace WeatherApp.ViewModels
             catch (TaskCanceledException)
             {
                 // Ignore if the task was canceled due to a new keystroke
-            }
-        }
-
-        /// <summary>
-        /// Load the saved locations from the places.json
-        /// </summary>
-        public void LoadSavedLocations()
-        {
-            var savedLocations = LoadLocationsFromFile(GetFilePath());
-            SavedLocations.Clear();
-            foreach (var location in savedLocations)
-            {
-                SavedLocations.Add(location);
-            }
-        }
-
-        /// <summary>
-        /// Load the locations from the places.json
-        /// </summary>
-        /// <param name="filePath">The file path of places.json</param>
-        /// <returns>An observable collection of favorited locations</returns>
-        private static ObservableCollection<LocationModel> LoadLocationsFromFile(string filePath)
-        {
-            if (File.Exists(filePath))
-            {
-                string json = File.ReadAllText(filePath);
-
-                if (!string.IsNullOrWhiteSpace(json))
-                {
-                    try
-                    {
-                        var jsonObject = JObject.Parse(json);
-
-                        if (jsonObject["Locations"] is JObject locationsObject)
-                        {
-                            var locationsArray = locationsObject.Properties()
-                                                                .Select(prop => prop.Value)
-                                                                .ToArray();
-
-                            var locations = locationsArray.Select(value => value.ToObject<LocationModel>())
-                                                          .Where(location => location != null)
-                                                          .ToList();
-
-                            return new ObservableCollection<LocationModel>(locations);
-                        }
-
-                        return [];
-                    }
-                    catch (JsonException ex)
-                    {
-                        return [];
-                    }
-                }
-            }
-
-            return [];
-        }
-
-        /// <summary>
-        /// Check if a location has already been added as a favorite
-        /// </summary>
-        /// <param name="locationsToken">The locations token containing all saved locations</param>
-        /// <param name="selectedLocation">The location to be added</param>
-        /// <returns></returns>
-        private bool IsLocationDuplicate(JObject locationsToken, LocationModel selectedLocation)
-        {
-            return locationsToken.Properties().Any(prop =>
-            {
-                var loc = prop.Value as JObject;
-                var latitude = loc?["Latitude"]?.Value<double>();
-                var longitude = loc?["Longitude"]?.Value<double>();
-
-                return latitude == selectedLocation.Latitude && longitude == selectedLocation.Longitude;
-            });
-        }
-
-        /// <summary>
-        /// Check if the favorites limit has been reached
-        /// </summary>
-        /// <returns>True if reached, false if not reached</returns>
-        public bool HasReachedFavoriteLimit()
-        {
-            ObservableCollection<LocationModel> array = LoadLocationsFromFile(GetFilePath());
-
-            if (array.Count == 5)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Save the selected location to places.json
-        /// </summary>
-        /// <param name="selectedLocation">The selected location</param>
-        /// <returns>True if saved, false if the location already exists</returns>
-        public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
-        {
-            try
-            {
-                if (HasReachedFavoriteLimit())
-                {
-                    return SaveLocationResult.FavoriteLimitReached;
-                }
-
-                JsonFileManager jsonFileManager = new(GetFilePath());
-                var root = jsonFileManager.GetAllJson();
-                var locationsToken = root["Locations"] as JObject ?? [];
-                string placeId = selectedLocation.PlaceId;
-
-                // Check if the location already exists
-                if (IsLocationDuplicate(locationsToken, selectedLocation))
-                {
-                    return SaveLocationResult.DuplicateLocation;
-                }
-
-                var locationObject = new JObject
-                {
-                    ["Name"] = selectedLocation.Name,
-                    ["Latitude"] = selectedLocation.Latitude,
-                    ["Longitude"] = selectedLocation.Longitude,
-                    ["Country"] = selectedLocation.Country,
-                    ["State"] = selectedLocation.State,
-                    ["WeatherData"] = null
-                };
-
-                // Add the location with place_id as the key
-                locationsToken[placeId] = locationObject;
-                root["Locations"] = locationsToken;
-                jsonFileManager.SaveAllJson(root);
-                SavedLocations.Add(selectedLocation);
-
-                return SaveLocationResult.Success;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while saving the selected location", ex);
             }
         }
 
@@ -418,7 +258,7 @@ namespace WeatherApp.ViewModels
             }
 
             countdown.Wait();
-            UpdatePlacesJson();
+            _placesManager.UpdatePlacesJson(SavedLocations);
         }
     }
 }

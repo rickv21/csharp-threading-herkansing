@@ -34,14 +34,6 @@ namespace WeatherApp.Utils
             if (File.Exists(_filePath))
             {
                 string json = File.ReadAllText(_filePath);
-
-                // Check if the JSON starts with "[" (indicating an array)
-                if (json.TrimStart().StartsWith("["))
-                {
-                    // Wrap the array in an object with a property for consistency
-                    return new JObject { ["Geocoding"] = JArray.Parse(json) };
-                }
-
                 return JObject.Parse(json);
             }
 

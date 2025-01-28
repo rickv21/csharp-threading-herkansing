@@ -19,6 +19,12 @@ namespace WeatherApp.ViewModels
     public class WeatherOverviewViewModel : INotifyPropertyChanged
     {
         private readonly WeatherAppData _weatherAppData;
+        // Commands for UI interaction
+        public ICommand ExportCommand { get; }
+        public ICommand SettingsCommand { get; }
+        public ICommand DayWeekCommand { get; }
+        public ICommand LeftArrowCommand { get; }
+        public ICommand RightArrowCommand { get; }
 
         private DateTime _displayedDate;
         public DateTime DisplayedDate {
@@ -37,7 +43,6 @@ namespace WeatherApp.ViewModels
 
         public ObservableCollection<LocationModel> Locations { get; set; }
 
-
         private LocationModel _selectedTab;
         public LocationModel SelectedTab
         {
@@ -53,6 +58,7 @@ namespace WeatherApp.ViewModels
         }
 
         private ObservableCollection<WeatherDisplayItem> _weatherItems;
+
         /// <summary>
         /// Collection of weather items to display in the UI.
         /// </summary>
@@ -65,14 +71,6 @@ namespace WeatherApp.ViewModels
                 OnPropertyChanged();
             }
         }
-
-        // Commands for UI interaction
-        public ICommand ExportCommand { get; }
-        public ICommand SettingsCommand { get; }
-        public ICommand DayWeekCommand { get; }
-        public ICommand LeftArrowCommand { get; }
-        public ICommand RightArrowCommand { get; }
-
 
         private string _dayWeekButtonText;
         public string DayWeekButtonText

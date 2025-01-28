@@ -32,7 +32,7 @@ namespace WeatherApp.Models
         /// <summary>
         /// The place id of the location
         /// </summary>
-        public string? PlaceId { get; set; } = placeId;
+        public string PlaceId { get; set; } = placeId;
 
         /// <summary>
         /// The latitude of the location.
