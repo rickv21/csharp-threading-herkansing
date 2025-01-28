@@ -38,11 +38,11 @@ namespace WeatherApp.WeatherAPIs
                     }
                     else if (part.Contains("Min Temp:"))
                     {
-                        MinTemp = "Min. Temp: " + part.Split(':')[1].Trim() + " °C";
+                        MinTemp = "Min. Temp: " + part.Split(':')[1].Trim() + "°C";
                     }
                     else if (part.Contains("Max Temp:"))
                     {
-                        MaxTemp = "Max. Temp: " + part.Split(':')[1].Trim() + " °C";
+                        MaxTemp = "Max. Temp: " + part.Split(':')[1].Trim() + "°C";
                     }
                     else if (part.Contains("Humidity:"))
                     {

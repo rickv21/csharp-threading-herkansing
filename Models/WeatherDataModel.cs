@@ -43,7 +43,7 @@ namespace WeatherApp.Models
         /// <returns>A string that represents the weather data.</returns>
         public override string ToString()
         {
-            return $"Source: {APISource}, Condition: {Condition}, Time: {TimeStamp}, Min Temp: {MinTemperature}°C, Max Temp: {MaxTemperature}°C, Humidity: {Humidity}%";
+            return $"Source: {APISource}, Condition: {Condition}, Time: {TimeStamp}, Min Temp: {MinTemperature}, Max Temp: {MaxTemperature}, Humidity: {Humidity}";
         }
     }
 }
