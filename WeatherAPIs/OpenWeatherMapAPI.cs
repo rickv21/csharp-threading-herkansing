@@ -6,10 +6,50 @@ namespace WeatherApp.WeatherAPIs
 {
     public class OpenWeatherMapAPI : WeatherService
     {
-        public string OpenWeatherApiKey => _apiKey;
 
         public OpenWeatherMapAPI() : base("Open Weather Map", "https://api.openweathermap.org/data/2.5/", 1000, -1)
         {
+        }
+
+        public string GetMapCode()
+        {
+            // Kaart
+            string htmlContent = @"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <link rel=""stylesheet"" href=""https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"" />
+                    <script src=""https://unpkg.com/leaflet@1.9.3/dist/leaflet.js""></script>
+                </head>
+                <body>
+                    <div id=""map"" style=""width: 100%; height: 100vh;""></div>
+                    <script>
+                       var map = L.map('map', {
+                            center: [52.1326, 5.2913], // Center of the Netherlands
+                            zoom: 7, // Initial zoom level
+                            minZoom: 7, // Minimum zoom level (zoom out (restricted))
+                            maxZoom: 19, // Maximum zoom level (zoom in)
+                            maxBounds: [[50.7504, 3.3584], [53.6316, 7.2275]], // Southwest and northeast bounds of NL
+                            maxBoundsViscosity: 0.5,
+                            wheelPxPerZoomLevel: 60,
+                        });
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: 'Map data � <a href=""https://www.openstreetmap.org/"">OpenStreetMap</a> contributors',
+                            maxZoom: 19,
+                        }).addTo(map);
+
+                        L.tileLayer('https://tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png?appid=APIKEY', {
+                            attribution: 'Cloud data � <a href=""https://openweathermap.org/"">OpenWeatherMap</a>',
+                            maxZoom: 19,
+                        }).addTo(map);
+                    </script>
+                </body>
+                </html>";
+
+            htmlContent = htmlContent.Replace("APIKEY", _apiKey);
+
+            return htmlContent;
         }
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
