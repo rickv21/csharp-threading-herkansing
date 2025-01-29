@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
@@ -311,7 +312,7 @@ namespace WeatherApp.ViewModels
             }
 
             var riskyData = sortedAggregatedData.Values
-                .Where(item => _dangerCons.Contains(item.Condition))
+                .Where(item => !_dangerCons.Contains(item.Condition))
                 .ToList();
 
             DisplayAlerts(riskyData); 
@@ -323,19 +324,22 @@ namespace WeatherApp.ViewModels
         /// </summary>
         private async void DisplayAlerts(List<WeatherDataModel> data)
         {
+            if (data == null || data.Count == 0)
+                return;
+
+            // Build a message string with all alerts
+            StringBuilder alertMessage = new StringBuilder("");
+
             foreach (var item in data)
             {
-                if (_dangerCons.Contains(item.Condition))
-                {
-                    await Task.Run(async () =>
-                    {
-                        await Task.Delay(2000);
-                        App.AlertSvc.ShowAlert("Slecht weer opkomst!",
-                            "Om " + item.TimeStamp.ToString() + " komt er " + item.Condition + " aan",
-                            "Ik ben gewaarschuwd");
-                    });
-                }
+                alertMessage.AppendLine($"Om {item.TimeStamp} komt er {item.Condition} aan.");
             }
+
+            // Delay if needed (Optional: Keeps original 2s delay)
+            await Task.Delay(2000);
+
+            // Show single alert with all messages
+            App.AlertSvc.ShowAlert("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
         }
 
 

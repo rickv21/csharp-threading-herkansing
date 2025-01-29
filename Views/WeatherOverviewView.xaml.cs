@@ -64,7 +64,7 @@ public partial class WeatherOverviewView : ContentPage
         base.OnDisappearing();
     }
 
-    public async void OnExportButtonClicked(object sender, EventArgs e)
+    public void OnExportButtonClicked(object sender, EventArgs e)
     {
         if (BindingContext is WeatherOverviewViewModel viewModel)
         {
