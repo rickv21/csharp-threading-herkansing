@@ -3,33 +3,36 @@
     public class AlertService : IAlertService
     {
 
-        public Task ShowAlertAsync(string title, string message, string cancel = "OK")
+        /// <summary>
+        /// Show a alert with the given variables.
+        /// This should be run async.
+        /// </summary>
+        public Task ShowAlert(string title, string message, string cancel = "OK")
         {
             return Application.Current!.MainPage!.DisplayAlert(title, message, cancel);
         }
 
+        /// <summary>
+        /// Show a confirmation alert with the given variables.
+        /// </summary>
         public Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
         {
             return Application.Current!.MainPage!.DisplayAlert(title, message, accept, cancel);
         }
 
-
-        // ----- "Fire and forget" calls -----
-
         /// <summary>
-        /// "Fire and forget". Method returns BEFORE showing alert.
+        /// Show a alert with the given variables.
         /// </summary>
-        public void ShowAlert(string title, string message, string cancel = "OK")
+        public void ShowAlertAsync(string title, string message, string cancel = "OK")
         {
             Application.Current!.MainPage!.Dispatcher.Dispatch(async () =>
-                await ShowAlertAsync(title, message, cancel)
+                await ShowAlert(title, message, cancel)
             );
         }
 
         /// <summary>
-        /// "Fire and forget". Method returns BEFORE showing alert.
+        /// Show a confimation alert with the given variables.
         /// </summary>
-        /// <param name="callback">Action to perform afterwards.</param>
         public void ShowConfirmation(string title, string message, Action<bool> callback,
                                      string accept = "Yes", string cancel = "No")
         {

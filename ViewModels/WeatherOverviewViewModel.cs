@@ -446,7 +446,7 @@ namespace WeatherApp.ViewModels
             await Task.Delay(1000);
 
             // Show single alert with all messages
-            App.AlertSvc.ShowAlert("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
+            App.AlertSvc.ShowAlertAsync("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
         }
 
         /// <summary>
