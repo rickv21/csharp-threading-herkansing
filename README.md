@@ -18,7 +18,7 @@ Deze sectie beschrijft de threading manieren die in dit project gebruikt zijn en
 - Async & await: Voor het ophalen van de data van de API('s) en het laden van de verschillende pagina's in de applicatie.
 
 ## Installatie handleiding
-Voor het gebruik van de applicatie is een computer nodig met het volgende:  
+Voor het gebruik van de applicatie is een computer nodig met de volgende vereisten:  
    - x86 gebaseerde processor
    - Windows 10/11
    - Internet verbinding
