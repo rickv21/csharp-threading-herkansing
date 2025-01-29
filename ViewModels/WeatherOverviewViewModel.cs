@@ -382,7 +382,7 @@ namespace WeatherApp.ViewModels
         /// Handles export data
         /// 
         /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
-        /// export functions are executed in parallel, potentially speeding up processing
+        /// export functions are executed in parallel, potentially speeding up processing. In Export.cs
         /// 
         /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>

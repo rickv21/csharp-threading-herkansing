@@ -23,7 +23,7 @@ namespace WeatherApp.Utils
             string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             _exportFolder = Path.Combine(documentsFolder, "ExportWeatherData");
 
-            // Creates folder 'ExportWeatherDat' if it doesnt exists
+            // Creates folder 'ExportWeatherData' if it doesnt exists
             if (!Directory.Exists(_exportFolder))
             {
                 Directory.CreateDirectory(_exportFolder);
@@ -45,6 +45,7 @@ namespace WeatherApp.Utils
             // Filename based on place and datetime
             string timestamp = $"{location}_{DateTime.Now:ddMMyyyy_HHmmss}";
 
+            //Start the threads
             await Task.WhenAll(
                 Task.Run(() => ExportToJson(weatherItems, location, timestamp)),
                 Task.Run(() => ExportToCsv(weatherItems, location, timestamp)),
