@@ -84,7 +84,7 @@
 
                                     <!-- Right column for weather data -->
                                     <StackLayout Grid.Column="1" Padding="10">
-                                        <Label Text="{Binding WeatherData[0].Condition, StringFormat='Huidige weer: {0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].ConditionFormatted, StringFormat='Huidige weer: {0}'}" FontSize="Medium" />
                                         <Label Text="{Binding WeatherData[0].MinTemperatureFormatted, StringFormat='{0}'}" FontSize="Medium" />
                                         <Label Text="{Binding WeatherData[0].MaxTemperatureFormatted, StringFormat='{0}'}" FontSize="Medium" />
                                         <Label Text="{Binding WeatherData[0].Humidity, StringFormat='Luchtvochtigheid: {0}%'}" FontSize="Medium" />

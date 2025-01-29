@@ -562,7 +562,7 @@ namespace WeatherApp.ViewModels
             }
             else
             {
-                DisplayedDateFormatted = $"Week {WeatherUtils.GetWeekNumber(DisplayedDate)}, {DisplayedDate:yyyy}";
+                DisplayedDateFormatted = "Komende week";
             }
         }
 
