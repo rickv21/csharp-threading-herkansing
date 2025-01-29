@@ -18,6 +18,11 @@ Deze sectie beschrijft de threading manieren die in dit project gebruikt zijn en
 - Async & await: Voor het ophalen van de data van de API('s) en het laden van de verschillende pagina's in de applicatie.
 
 ## Installatie handleiding
+Voor het gebruik van de applicatie is een computer nodig met het volgende:  
+   - x86 gebaseerde processor
+   - Windows 10/11
+   - Internet verbinding
+
 Hieronder staan de stappen die genomen moeten worden om gebruik te kunnen maken van de applicatie.
                                 
 1. Download de gecompileerde versie van de applicatie [hier](https://github.com/rickv21/csharp-threading-herkansing/releases/download/v1/WeatherApp.zip) (v1 GitHub release).
