@@ -17,34 +17,15 @@ namespace WeatherApp.ViewModels
         {
             _weatherAppData = weatherAppData;
             WeatherServices = new ObservableCollection<WeatherService>(_weatherAppData.WeatherServices.Values);
-            //Test code.
-            foreach (WeatherService service in WeatherServices)
-            {
-                Debug.WriteLine(service.Name);
-            }
-            SimulateMode = _weatherAppData.SimulateMode;
             SaveCommand = new Command(SaveSettings);
-        }
-
-        private bool _simulateMode;
-        public bool SimulateMode
-        {
-            get => _simulateMode;
-            set
-            {
-                _simulateMode = value;
-                OnPropertyChanged();
-            }
         }
 
         public ICommand SaveCommand { get; }
         private async void SaveSettings()
         {
-            _weatherAppData.SimulateMode = SimulateMode;
             _weatherAppData.WeatherServices = WeatherServices.ToDictionary(item => item.Name);
 
-            JsonFileManager jsonManager = new JsonFileManager();
-            jsonManager.SetData(SimulateMode, "data", "simulateMode");
+            JsonFileManager jsonManager = new();
 
             foreach (WeatherService service in WeatherServices)
             {

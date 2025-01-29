@@ -31,7 +31,7 @@ namespace WeatherApp.Utils
                 return JObject.Parse(json);
             }
 
-            return new JObject();
+            return [];
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace WeatherApp.Utils
                 string key = keys[i];
                 if (current[key] is not JObject next)
                 {
-                    next = new JObject();
+                    next = [];
                     current[key] = next;
                 }
                 current = next;

@@ -63,17 +63,5 @@ namespace WeatherApp.Utils
                 _ => "Onbekende conditie",
             };
         }
-
-        /// <summary>
-        /// Determines the week number of a given date according to the current culture's calendar.
-        /// Used for formatting week-based date displays.
-        /// </summary>
-        /// <param name="date">The date to determine the week number for.</param>
-        /// <returns>The week number as an integer.</returns>
-        public static int GetWeekNumber(DateTime date)
-        {
-            var culture = CultureInfo.CurrentCulture;
-            return culture.Calendar.GetWeekOfYear(date, culture.DateTimeFormat.CalendarWeekRule, culture.DateTimeFormat.FirstDayOfWeek);
-        }
     }
 }

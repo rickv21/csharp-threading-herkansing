@@ -57,9 +57,9 @@ namespace WeatherApp.ViewModels
             }
         }
 
-        public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
+        public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = [];
 
-        public ObservableCollection<LocationModel> Locations { get; set; } = new ObservableCollection<LocationModel>();
+        public ObservableCollection<LocationModel> Locations { get; set; } = [];
 
         private LocationModel? _selectedTab;
         public LocationModel? SelectedTab
@@ -176,7 +176,7 @@ namespace WeatherApp.ViewModels
             });
 
 
-            WeatherItems = new ObservableCollection<WeatherDisplayModel>();
+            WeatherItems = [];
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace WeatherApp.ViewModels
                     tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
                         .Select(async service =>
                         {
-                            var response = await service.GetWeatherDataAsync(DisplayedDate, location, _weatherAppData.SimulateMode);
+                            var response = await service.GetWeatherDataAsync(DisplayedDate, location);
                             usedServices.Add(service);
                             return response;
                         });
@@ -258,7 +258,7 @@ namespace WeatherApp.ViewModels
                     tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
                         .Select(async service =>
                         {
-                            var response = await service.GetWeatherForAWeekAsync(location, _weatherAppData.SimulateMode);
+                            var response = await service.GetWeatherForAWeekAsync(location);
                             usedServices.Add(service);
                             return response;
                         });
@@ -301,14 +301,13 @@ namespace WeatherApp.ViewModels
                     {
                         var service = _weatherAppData.WeatherServices[result.Source];
                         Debug.Assert(service.IsEnabled == true);
-                        Debug.WriteLine(service.Name + ", enabled: " + service.IsEnabled + ", simulate: " + _weatherAppData.SimulateMode);
                         Debug.WriteLine(apiData.ToString());
 
                         DateTime periodInTime = DateTime.Now;
                         periodInTime = apiData.TimeStamp;
                         if (!TimedData.ContainsKey(periodInTime))
                         {
-                            TimedData[periodInTime] = new List<WeatherDataModel>();
+                            TimedData[periodInTime] = [];
                         }
                         //Add api data to a time list.
                         TimedData[periodInTime].Add(apiData);
@@ -385,7 +384,7 @@ namespace WeatherApp.ViewModels
                 }
             }
          );
-            Dictionary<string, WeatherDataModel> sortedAggregatedData = new Dictionary<string, WeatherDataModel>();
+            Dictionary<string, WeatherDataModel> sortedAggregatedData = [];
 
             Func<KeyValuePair<DateTime, WeatherDataModel>, string> groupKeySelector = DayWeekButtonText.Equals("Week Overzicht")
                 ? x => x.Key.Hour.ToString() // Group by hour
@@ -563,7 +562,7 @@ namespace WeatherApp.ViewModels
             }
             else
             {
-                DisplayedDateFormatted = $"Week {WeatherUtils.GetWeekNumber(DisplayedDate)}, {DisplayedDate:yyyy}";
+                DisplayedDateFormatted = "Komende week";
             }
         }
 

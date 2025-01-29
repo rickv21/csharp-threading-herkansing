@@ -13,9 +13,8 @@ namespace WeatherApp.WeatherAPIs
         /// Retrieve locations from the API
         /// </summary>
         /// <param name="searchQuery">The user-inputted search query</param>
-        /// <param name="simulate">Bool to simulate data</param>
         /// <returns>A task with an APIResponse which contains a list of LocationModels</returns>
-        public async Task<APIResponse<List<LocationModel>>> GetLocationAsync(string searchQuery, bool simulate = false)
+        public async Task<APIResponse<List<LocationModel>>> GetLocationAsync(string searchQuery)
         {
             // Check if the request limit has been reached
             if (HasReachedRequestLimit())
@@ -29,29 +28,23 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("geocoding_location_test.json");  // Simulated response for testing
-            }
-            else
-            {
-                using (HttpClient client = new())
+                string url = $"{_baseURL}/v1/geocode/search?filter=countrycode:nl&text={Uri.EscapeDataString(searchQuery)}&format=json&lang=nl&apiKey={_apiKey}";
+                HttpResponseMessage response = await client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    string url = $"{_baseURL}/v1/geocode/search?filter=countrycode:nl&text={Uri.EscapeDataString(searchQuery)}&format=json&lang=nl&apiKey={_apiKey}";
-                    HttpResponseMessage response = await client.GetAsync(url);
-
-                    if (!response.IsSuccessStatusCode)
+                    return new APIResponse<List<LocationModel>>
                     {
-                        return new APIResponse<List<LocationModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"Error {response.StatusCode}: {await response.Content.ReadAsStringAsync()}",
-                            Source = Name
-                        };
-                    }
-
-                    responseBody = await response.Content.ReadAsStringAsync();
+                        Success = false,
+                        ErrorMessage = $"Error {response.StatusCode}: {await response.Content.ReadAsStringAsync()}",
+                        Source = Name
+                    };
                 }
+
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             var locations = ParseLocations(responseBody);

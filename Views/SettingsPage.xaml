@@ -7,11 +7,6 @@
 
     <ScrollView>
         <StackLayout Padding="10">
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <Label Text="Simuleer API verzoeken:" VerticalOptions="Center" />
-                <Switch IsToggled="{Binding SimulateMode, Mode=TwoWay}" />
-            </HorizontalStackLayout>
-
             <Label HorizontalOptions="Center" Text="API Bronnen" FontAttributes="Bold" />
             <CollectionView ItemsSource="{Binding WeatherServices}">
                 <CollectionView.ItemTemplate>
@@ -25,7 +20,7 @@
             </CollectionView>
 
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <Button Text="Opslaan"  HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
+                <Button Text="Opslaan" HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
             </HorizontalStackLayout>
         </StackLayout>
     </ScrollView>

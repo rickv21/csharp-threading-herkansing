@@ -48,7 +48,6 @@ namespace WeatherApp.WeatherAPIs
         /// Loads the API key for this API from the .env file.
         /// This file is in the root of the project during development.
         /// It looks for the Name of the WeatherService in uppercase and appends _API_KEY to it.
-        /// To in the case of a WeatherService called Test, it will be looking for: TEST_API_KEY.
         /// </summary>
         /// <returns>The API key.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the API key is not found.</exception>
@@ -76,7 +75,7 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="requestLimitMonth">The request limit per month.</param>
         protected void GetCurrentRequestsFromFile(int requestLimitDay, int requestLimitMonth)
         {
-            JsonFileManager jsonManager = new JsonFileManager();
+            JsonFileManager jsonManager = new();
             string currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             string currentMonth = DateTime.Now.ToString("yyyy-MM");
 
@@ -111,7 +110,7 @@ namespace WeatherApp.WeatherAPIs
         /// </summary>
         protected void SaveRequestCountsToFile()
         {
-            JsonFileManager jsonManager = new JsonFileManager();
+            JsonFileManager jsonManager = new();
 
             // Save daily request count and date
             jsonManager.SetData(
@@ -150,28 +149,6 @@ namespace WeatherApp.WeatherAPIs
             RequestLimitDay.CountRequest();
             RequestLimitMonth.CountRequest();
             SaveRequestCountsToFile();
-        }
-
-        /// <summary>
-        /// Reads an embedded JSON resource file and returns its content as a string.
-        /// </summary>
-        /// <param name="fileName">The name of the JSON file (include the extension).</param>
-        /// <returns>The content of the JSON file as a string.</returns>
-        public static string GetTestJSON(string fileName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            string resourceName = $"{assembly.GetName().Name}.TestData.{fileName}";
-
-            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                    throw new FileNotFoundException($"Resource '{resourceName}' not found. Ensure the file is embedded as a resource and the folder structure matches.");
-
-                using (var reader = new StreamReader(stream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
         }
     }
 }

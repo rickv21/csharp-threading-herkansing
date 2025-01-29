@@ -10,7 +10,7 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
@@ -24,52 +24,47 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("weer_live_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
+                HttpResponseMessage response = await client.GetAsync(url);
+                Debug.WriteLine(response.StatusCode);
+
+                responseBody = await response.Content.ReadAsStringAsync();
+
+                try
                 {
-                    string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    Debug.WriteLine(response.StatusCode);
+                    var jsonResponse = JObject.Parse(responseBody);
+                    var liveweerArray = jsonResponse["liveweer"] as JArray;
 
-                    responseBody = await response.Content.ReadAsStringAsync();
-
-                    try
+                    if (liveweerArray != null && liveweerArray.Count > 0)
                     {
-                        var jsonResponse = JObject.Parse(responseBody);
-                        var liveweerArray = jsonResponse["liveweer"] as JArray;
-
-                        if (liveweerArray != null && liveweerArray.Count > 0)
+                        var firstElement = liveweerArray.First();
+                        if (firstElement["fout"] != null)
                         {
-                            var firstElement = liveweerArray.First();
-                            if (firstElement["fout"] != null)
+                            string errorMessage = firstElement["fout"].ToString();
+                            return new APIResponse<List<WeatherDataModel>>
                             {
-                                string errorMessage = firstElement["fout"].ToString();
-                                return new APIResponse<List<WeatherDataModel>>
-                                {
-                                    Success = false,
-                                    ErrorMessage = $"API Error: {errorMessage}",
-                                    Source = Name
-                                };
-                            }
+                                Success = false,
+                                ErrorMessage = $"API Error: {errorMessage}",
+                                Source = Name
+                            };
                         }
                     }
-                    catch (Exception ex)
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
+                    return new APIResponse<List<WeatherDataModel>>
                     {
-                        Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = "Invalid JSON response from API.",
-                            Source = Name
-                        };
-                    }
+                        Success = false,
+                        ErrorMessage = "Invalid JSON response from API.",
+                        Source = Name
+                    };
                 }
             }
+
             Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
@@ -78,18 +73,11 @@ namespace WeatherApp.WeatherAPIs
 
             var weatherData = new List<WeatherDataModel>();
         
-
-            bool setTestDay = false;
             foreach (var hour in hourPredictions)
             {
                 var condition = CalculateWeatherCondition((string)hour["image"]);
                 DateTime forecastDate = DateTime.Parse((string)hour["uur"]!);
 
-                if (simulate && !setTestDay)
-                {
-                    day = forecastDate;
-                    setTestDay = true;
-                }
                 if (forecastDate.Date != day.Date)
                 {
                     Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate}) does not match.");
@@ -120,7 +108,7 @@ namespace WeatherApp.WeatherAPIs
 
 
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
@@ -134,53 +122,48 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("weer_live_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
+                HttpResponseMessage response = await client.GetAsync(url);
+                Debug.WriteLine(response.StatusCode);
+
+                responseBody = await response.Content.ReadAsStringAsync();
+
+                // Handle API error messages inside 200 responses
+                try
                 {
-                    string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    Debug.WriteLine(response.StatusCode);
+                    var jsonResponse = JObject.Parse(responseBody);
+                    var liveweerArray = jsonResponse["liveweer"] as JArray;
 
-                    responseBody = await response.Content.ReadAsStringAsync();
-
-                    // ✅ Handle API error messages inside 200 responses
-                    try
+                    if (liveweerArray != null && liveweerArray.Count > 0)
                     {
-                        var jsonResponse = JObject.Parse(responseBody);
-                        var liveweerArray = jsonResponse["liveweer"] as JArray;
-
-                        if (liveweerArray != null && liveweerArray.Count > 0)
+                        var firstElement = liveweerArray.First();
+                        if (firstElement["fout"] != null)
                         {
-                            var firstElement = liveweerArray.First();
-                            if (firstElement["fout"] != null)
+                            string errorMessage = firstElement["fout"].ToString();
+                            return new APIResponse<List<WeatherDataModel>>
                             {
-                                string errorMessage = firstElement["fout"].ToString();
-                                return new APIResponse<List<WeatherDataModel>>
-                                {
-                                    Success = false,
-                                    ErrorMessage = $"API Error: {errorMessage}",
-                                    Source = Name
-                                };
-                            }
+                                Success = false,
+                                ErrorMessage = $"API Error: {errorMessage}",
+                                Source = Name
+                            };
                         }
                     }
-                    catch (Exception ex)
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
+                    return new APIResponse<List<WeatherDataModel>>
                     {
-                        Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = "Invalid JSON response from API.",
-                            Source = Name
-                        };
-                    }
+                        Success = false,
+                        ErrorMessage = "Invalid JSON response from API.",
+                        Source = Name
+                    };
                 }
             }
+
             Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 

@@ -49,9 +49,6 @@ Responses vanuit API's zullen in JSON formaat zijn
 ## Planning
 Om de voortgang van dit project te bewaken, is er een planning gemaakt. Deze planning bevat in grote lijnen hetgeen waarmee wij ons bezig zullen houden per week tot de deadline. Er kan natuurlijk afgeweken worden van deze planning, maar het is het doel om deze in grote lijnen te volgen.
 
-Dit project is begonnen op vrijdag 15 november 2024 en zal eindigen op vrijdag 23 april 2024.
+Dit project is begonnen op woensdag 20 november 2024 (akkoord voor dit startdocument) en zal eindigen op woensdag 29 januari 2025.
 
 ![Planning](img/planning.png "Project planning")
-
-## Literatuurlijst
-- 
