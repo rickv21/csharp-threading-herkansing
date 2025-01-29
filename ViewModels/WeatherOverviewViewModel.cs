@@ -325,7 +325,7 @@ namespace WeatherApp.ViewModels
         {
             foreach (var item in data)
             {
-                if (!_dangerCons.Contains(item.Condition))
+                if (_dangerCons.Contains(item.Condition))
                 {
                     await Task.Run(async () =>
                     {
