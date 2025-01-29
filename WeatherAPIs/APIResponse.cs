@@ -9,7 +9,7 @@
         /// <summary>
         /// Indicates whether the API request was successful.
         /// </summary>
-        public bool Success { get; set; }
+        public bool Success { get; set; } = true;
 
         private string? errorMessage;
         /// <summary>
@@ -32,5 +32,7 @@
             get => Success ? data : default;
             set => data = value;
         }
+
+        public required string Source { get; set; }
     }
 }

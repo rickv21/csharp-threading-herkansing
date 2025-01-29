@@ -1,17 +1,13 @@
-﻿using WeatherApp.WeatherAPIs;
+﻿using WeatherApp.Utils;
+using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.Models
 {
     /// <summary>
     /// This class represents the weather data for a specific time.
     /// </summary>
-    public class WeatherDataModel(string apiSource, WeatherCondition condition, DateTime timeStamp, double minTemperature, double maxTemperature, double humidity)
+    public class WeatherDataModel(WeatherCondition condition, DateTime timeStamp, double minTemperature, double maxTemperature, double humidity)
     {
-        /// <summary>
-        /// The name of the API that this data was obtained from.
-        /// </summary>
-        public string APISource { get; } = apiSource;
-
         /// <summary>
         /// The weather condition (e.g., sunny, cloudy, etc.).
         /// </summary>
@@ -37,13 +33,19 @@ namespace WeatherApp.Models
         /// </summary>
         public double Humidity { get; } = humidity;
 
+        //Computed Properties for UI Binding
+        public string ConditionFormatted => WeatherUtils.TranslateWeatherCondition(condition);
+        public string MinTemperatureFormatted => $"Min. Temp: {MinTemperature}°C";
+        public string MaxTemperatureFormatted => $"Max. Temp: {MaxTemperature}°C";
+        public string HumidityFormatted => $"Luchtvochtigheid: {Math.Round(Humidity, 2)}%";
+
         /// <summary>
         /// Returns a string that represents the weather data.
         /// </summary>
         /// <returns>A string that represents the weather data.</returns>
         public override string ToString()
         {
-            return $"Source: {APISource}, Condition: {Condition}, Time: {TimeStamp}, Min Temp: {MinTemperature}°C, Max Temp: {MaxTemperature}°C, Humidity: {Humidity}%";
+            return $"Condition: {Condition}, Time: {TimeStamp}, Min Temp: {MinTemperature}, Max Temp: {MaxTemperature}, Humidity: {Humidity}";
         }
     }
 }
