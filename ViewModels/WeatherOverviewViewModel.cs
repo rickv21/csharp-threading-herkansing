@@ -245,6 +245,7 @@ namespace WeatherApp.ViewModels
             if (_weatherAppData.WeatherServices == null || _weatherAppData.WeatherServices.Count == 0)
             {
                 await Shell.Current.DisplayAlert("Error", "Er zijn geen weerservices beschikbaar!", "Oké");
+
                 return [];
             }
 
@@ -279,6 +280,7 @@ namespace WeatherApp.ViewModels
                 {
                     service.CountRequest();
                 }
+
                 return results;
             }
             catch (Exception ex)
@@ -289,6 +291,7 @@ namespace WeatherApp.ViewModels
                 // So when such an error happens we just reset the locations so the tabs become unselected so another attempt can be made.
                 // This is a bit of a band-aid fix but this issue is really rare and is caused by the API's.
                 SetDefaultViewData();
+
                 return [];
             }
         }
@@ -407,6 +410,7 @@ namespace WeatherApp.ViewModels
                 .ToList();
 
             DisplayAlerts(riskyData);
+
             return sortedAggregatedData;
         }
 
@@ -438,7 +442,7 @@ namespace WeatherApp.ViewModels
             await Task.Delay(1000);
 
             // Show single alert with all messages
-            App.AlertSvc.ShowAlert("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
+            App.AlertSvc.ShowAlertAsync("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
         }
 
         /// <summary>
@@ -504,6 +508,7 @@ namespace WeatherApp.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"Exception occurred while fetching the icon: {ex.Message}. Using fallback image.");
+
                 return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
             }
         }
