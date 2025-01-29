@@ -25,6 +25,7 @@ namespace WeatherApp
                 InitializeWeatherAppData(data);
                 return data;
             });
+            builder.Services.AddSingleton<IAlertService, AlertService>();
 
 
 

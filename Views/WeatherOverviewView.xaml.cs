@@ -64,7 +64,7 @@ public partial class WeatherOverviewView : ContentPage
         base.OnDisappearing();
     }
 
-    public void OnExportButtonClicked(object sender, EventArgs e)
+    public async void OnExportButtonClicked(object sender, EventArgs e)
     {
         if (BindingContext is WeatherOverviewViewModel viewModel)
         {
@@ -75,6 +75,7 @@ public partial class WeatherOverviewView : ContentPage
     public void OnDayWeekButtonClicked(object sender, EventArgs e)
     {
         throw new NotImplementedException();
+
     }
 
 }

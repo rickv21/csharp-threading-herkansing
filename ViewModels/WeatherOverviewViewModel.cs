@@ -20,6 +20,8 @@ namespace WeatherApp.ViewModels
     {
         private readonly WeatherAppData _weatherAppData;
 
+        private List<WeatherCondition> _dangerCons;
+
         private DateTime _displayedDate;
         public DateTime DisplayedDate {
             get => _displayedDate;
@@ -109,6 +111,16 @@ namespace WeatherApp.ViewModels
             DayWeekCommand = new Command(SwitchDayWeek);
             LeftArrowCommand = new Command(LeftArrow);
             RightArrowCommand = new Command(RightArrow);
+
+            _dangerCons = new List<WeatherCondition>()
+            {
+                WeatherCondition.THUNDERSTORM,
+                WeatherCondition.ICE,
+                WeatherCondition.FOG,
+                WeatherCondition.HAZE,
+                WeatherCondition.MIST,
+                WeatherCondition.TORNADO
+            };
         }
 
         // Event for notifying UI of property changes
@@ -297,7 +309,33 @@ namespace WeatherApp.ViewModels
                         group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
                     );
             }
+
+            var riskyData = sortedAggregatedData.Values
+                .Where(item => _dangerCons.Contains(item.Condition))
+                .ToList();
+
+            DisplayAlerts(riskyData); 
             return sortedAggregatedData;
+        }
+
+        /// <summary>
+        /// Displays a bad weather alert for a list of weatherData
+        /// </summary>
+        private async void DisplayAlerts(List<WeatherDataModel> data)
+        {
+            foreach (var item in data)
+            {
+                if (!_dangerCons.Contains(item.Condition))
+                {
+                    await Task.Run(async () =>
+                    {
+                        await Task.Delay(2000);
+                        App.AlertSvc.ShowAlert("Slecht weer opkomst!",
+                            "Om " + item.TimeStamp.ToString() + " komt er " + item.Condition + " aan",
+                            "Ik ben gewaarschuwd");
+                    });
+                }
+            }
         }
 
 
