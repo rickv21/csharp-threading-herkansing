@@ -23,7 +23,6 @@ namespace WeatherApp.ViewModels
                 Debug.WriteLine(service.Name);
             }
             SimulateMode = _weatherAppData.SimulateMode;
-            NavigateToTestPageCommand = new Command(async () => await NavigateToTestPage());
             SaveCommand = new Command(SaveSettings);
         }
 
@@ -62,13 +61,5 @@ namespace WeatherApp.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public ICommand NavigateToTestPageCommand { get; }
-
-        private async Task NavigateToTestPage() {
-            await Shell.Current.GoToAsync("///TestPage");
-        }
-
-      
     }
 }
