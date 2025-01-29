@@ -2,8 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using System.Windows.Input;
 using WeatherApp.Models;
@@ -108,6 +110,9 @@ namespace WeatherApp.ViewModels
             }
         }
 
+
+        private readonly Export _exporter;
+		
         private bool _isPreviousButtonEnabled = true;
         public bool IsPreviousButtonEnabled
         {
@@ -136,6 +141,8 @@ namespace WeatherApp.ViewModels
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
             _weatherAppData = weatherAppData;
+            _exporter = new Export();
+
             SetDefaultViewData();
  
             ExportCommand = new Command(Export);
@@ -485,7 +492,7 @@ namespace WeatherApp.ViewModels
         /// Handles export data
         /// 
         /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
-        /// export functions are executed in parallel, potentially speeding up processing
+        /// export functions are executed in parallel, potentially speeding up processing. In Export.cs
         /// 
         /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
@@ -493,92 +500,22 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-                string jsonData = GetWeatherDataAsJson();
-
-                //Checks if there is weatherdata
-                if (string.IsNullOrEmpty(jsonData))
+                // Checks if there is weatherdata
+                if (WeatherItems == null || WeatherItems.Count == 0)
                 {
                     await Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
                     return;
                 }
 
-                string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
+                LocationModel location = _selectedTab ?? Locations.First();
 
-                // Creates folder 'ExportWeatherData if it doesnt exists'
-                if (!Directory.Exists(exportFolder))
-                {
-                    Directory.CreateDirectory(exportFolder);
-                }
-
-                // Filename based on date
-                string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
-
-                // Start export threads 
-                await Task.WhenAll(
-                    Task.Run(() => ExportToJson(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToCsv(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToTxt(jsonData, exportFolder, timestamp))
-                );
-
-                await Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
+                await _exporter.ExportWeatherData(WeatherItems.ToList(), location, Locations.ToList());
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error exporting data: {ex}");
                 await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
-        }
-
-        /// <summary>
-        /// Exports to JSON
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToJson(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.json");
-            File.WriteAllText(filePath, jsonData);
-            Debug.WriteLine($"Weather data exported to JSON: {filePath}");
-        }
-
-        /// <summary>
-        /// Exports weatherdata to CSV
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToCsv(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.csv");
-
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayModel>>(jsonData);
-            if (weatherItems == null) return;
-
-            var csvLines = new List<string> { "Tijdstip,Weersomstandigheden" };
-            csvLines.AddRange(weatherItems.Select(item => $"{item.DisplayText}"));
-
-            File.WriteAllLines(filePath, csvLines);
-            Debug.WriteLine($"Weather data exported to CSV: {filePath}");
-        }
-
-        /// <summary>
-        /// Exports to TXT-file 
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToTxt(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.txt");
-
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayModel>>(jsonData);
-            if (weatherItems == null) return;
-
-            var txtLines = weatherItems.Select(item => $"{item.DisplayText}").ToList();
-            File.WriteAllLines(filePath, txtLines);
-            Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using WeatherApp.Utils;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.Models
@@ -11,6 +13,8 @@ namespace WeatherApp.Models
         /// <summary>
         /// The weather condition (e.g., sunny, cloudy, etc.).
         /// </summary>
+        /// 
+        [JsonConverter(typeof(StringEnumConverter))]
         public WeatherCondition Condition { get; } = condition;
 
         /// <summary>
@@ -35,8 +39,11 @@ namespace WeatherApp.Models
 
         //Computed Properties for UI Binding
         public string ConditionFormatted => WeatherUtils.TranslateWeatherCondition(condition);
+        [JsonIgnore]
         public string MinTemperatureFormatted => $"Min. Temp: {MinTemperature}°C";
+        [JsonIgnore]
         public string MaxTemperatureFormatted => $"Max. Temp: {MaxTemperature}°C";
+        [JsonIgnore]
         public string HumidityFormatted => $"Luchtvochtigheid: {Math.Round(Humidity, 2)}%";
 
         /// <summary>
