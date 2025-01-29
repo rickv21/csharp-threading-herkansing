@@ -32,12 +32,13 @@ namespace WeatherApp.Utils
 
         /// <summary>
         /// Executes export tasks
-        /// 
-        /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
-        /// export functions are executed in parallel, potentially speeding up processing
-        /// 
-        /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
+        /// <remarks>
+        /// ### ** Multithreading **
+        /// Export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
+        /// Export functions are executed in parallel, potentially speeding up processing
+        /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
+        /// </remarks>
         public async Task ExportWeatherData(List<WeatherDisplayModel> weatherItems, LocationModel selectedLocation, List<LocationModel> locations)
         {
             LocationModel location = selectedLocation ?? locations.First();
@@ -62,7 +63,6 @@ namespace WeatherApp.Utils
         {
             if (weatherItems == null || weatherItems.Count == 0)
             {
-                Debug.WriteLine("Geen weerdata beschikbaar om te exporteren naar JSON.");
                 return;
             }
 
@@ -87,7 +87,6 @@ namespace WeatherApp.Utils
             string jsonWithLocation = JsonSerializer.Serialize(weatherWithLocation, new JsonSerializerOptions { WriteIndented = true });
 
             File.WriteAllText(filePath, jsonWithLocation);
-            Debug.WriteLine($"Weather data exported to JSON: {filePath}");
         }
 
 
@@ -105,7 +104,6 @@ namespace WeatherApp.Utils
             ));
 
             File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
-            Debug.WriteLine($"Weather data exported to CSV: {filePath}");
         }
 
         /// <summary>
@@ -119,7 +117,6 @@ namespace WeatherApp.Utils
             txtLines.AddRange(weatherItems.Select(item => item.DisplayText));
 
             File.WriteAllLines(filePath, txtLines);
-            Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
     }
 }

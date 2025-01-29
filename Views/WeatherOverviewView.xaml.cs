@@ -21,7 +21,6 @@ public partial class WeatherOverviewView : ContentPage
 
     protected override async void OnAppearing()
     {
-        Debug.WriteLine("Appear");
         base.OnAppearing();
         if (BindingContext is WeatherOverviewViewModel viewModel)
         {
@@ -31,7 +30,6 @@ public partial class WeatherOverviewView : ContentPage
 
     protected override void OnDisappearing()
     {
-        Debug.WriteLine("Disappear");
         base.OnDisappearing();
     }
 

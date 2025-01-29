@@ -22,7 +22,6 @@ namespace WeatherApp.WeatherAPIs
         /// </returns>
         private async Task<APIResponse<string>> GetLocationKey(LocationModel location)
         {
-            Debug.WriteLine($"Requesting location key for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<string>
@@ -38,7 +37,6 @@ namespace WeatherApp.WeatherAPIs
             using (HttpClient client = new())
             {
                 string url = $"{_baseURL}/locations/v1/cities/geoposition/search?apikey={_apiKey}&q={location.Latitude},{location.Longitude}&details=true";
-                Debug.WriteLine(url);
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -89,28 +87,30 @@ namespace WeatherApp.WeatherAPIs
         
         }
 
+        /// <summary>
+        /// Get weather data of a location
+        /// </summary>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             JsonFileManager jsonFileManager = new();
 
             //Check if locationKey existst in the JSON file, otherwise get it from AccuWeather.
             string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
-            Debug.WriteLine(locationKey);
             if (locationKey == null)
             {
-                Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
                 APIResponse<string> locationKeyResponse = await GetLocationKey(location);
                 if (!locationKeyResponse.Success)
+                {
                     return new APIResponse<List<WeatherDataModel>>
                     {
                         Success = false,
                         Source = Name,
                         ErrorMessage = locationKeyResponse.ErrorMessage,
                     };
-                {
                 }
-                Debug.Assert(locationKeyResponse.Data != null);
                 locationKey = locationKeyResponse.Data;
                 jsonFileManager.SetData(locationKey, "data", Name, "storedPlaceKeys", location.Name);
             }
@@ -156,7 +156,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JArray weatherArray = JArray.Parse(responseBody);
             var weatherData = new List<WeatherDataModel>();
             foreach (var item in weatherArray)
@@ -168,7 +167,6 @@ namespace WeatherApp.WeatherAPIs
 
                     if (forecastDate.Date != day.Date)
                     {
-                        Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
                         continue; // Skip entries not matching the requested day (only when not simulating).
                     }
 
@@ -216,27 +214,29 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get weatherdata of a full week
+        /// </summary>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             JsonFileManager jsonFileManager = new();
 
             string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
-            Debug.WriteLine(locationKey);
             if (locationKey == null)
             {
-                Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
                 APIResponse<String> locationKeyResponse = await GetLocationKey(location);
                 if (!locationKeyResponse.Success)
+                {
                     return new APIResponse<List<WeatherDataModel>>
                     {
                         Success = false,
                         Source = Name,
                         ErrorMessage = locationKeyResponse.ErrorMessage,
                     };
-                {
                 }
-                Debug.Assert(locationKeyResponse.Data != null);
                 locationKey = locationKeyResponse.Data;
                 string locationName = location.Name!;
                 jsonFileManager.SetData(locationKey, "data", Name, "storedPlaceKeys", location.Name);
@@ -284,7 +284,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var dailyForecasts = weatherResponse["DailyForecasts"] ?? throw new Exception("Missing DailyForecasts data in API response");
@@ -295,7 +294,6 @@ namespace WeatherApp.WeatherAPIs
                 try
                 {
                     string dateString = (string)forecast["Date"]!;
-                    Debug.WriteLine(dateString);
 
                     DateTime forecastDate = DateTime.ParseExact(dateString, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
@@ -303,7 +301,6 @@ namespace WeatherApp.WeatherAPIs
                     double maxTemperature = (double)forecast["Temperature"]!["Maximum"]!["Value"]!;
                     double averageHumidity = -1; // Assuming humidity data is not provided in this structure.
                     WeatherCondition dayCondition = CalculateWeatherCondition((int)forecast["Day"]!["Icon"]!);
-                    //WeatherCondition nightCondition = CalculateWeatherCondition((int)forecast["Night"]["Icon"]!);
 
                     weatherData.Add(new WeatherDataModel(
                         condition: dayCondition,
@@ -328,6 +325,11 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get the weathercondition based on the ID of the several known weatherconditions
+        /// </summary>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             int id = (int)data;
@@ -396,7 +398,6 @@ namespace WeatherApp.WeatherAPIs
                 case 43:
                     return WeatherCondition.SNOW; // Night flurries
                 default:
-                    Debug.WriteLine("Unknown weather icon ID: " + id);
                     return WeatherCondition.UNKNOWN;
             }
         }

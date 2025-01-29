@@ -10,9 +10,15 @@ namespace WeatherApp.WeatherAPIs
         public VisualCrossingAPI() : base("Visual Crossing", "https://weather.visualcrossing.com/VisualCrossingWebServices", 50, -1)
         {
         }
+
+        /// <summary>
+        /// Get weather data of a location
+        /// </summary>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -30,7 +36,6 @@ namespace WeatherApp.WeatherAPIs
                 var latitude = location.Latitude.ToString().Replace(",", ".");
                 var longitude = location.Longitude.ToString().Replace(",", ".");
                 string url = $"{_baseURL}/rest/services/timeline/{latitude}%2C%20{longitude}?unitGroup=metric&key={_apiKey}&contentType=json&lang=id";
-                Debug.WriteLine(url);
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -56,7 +61,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherObject = JObject.Parse(responseBody);
             JArray daysArray = (JArray)weatherObject["days"]!;
             var weatherData = new List<WeatherDataModel>();
@@ -69,7 +73,6 @@ namespace WeatherApp.WeatherAPIs
 
                     if (forecastDate.Date != day.Date)
                     {
-                        Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
                         continue; // Skip entries not matching the requested day (only when not simulating).
                     }
 
@@ -88,12 +91,6 @@ namespace WeatherApp.WeatherAPIs
                             double humidity = (double?)hourItem["humidity"] ?? -1;
                             string conditions = (string)hourItem["conditions"]!;
                             string splitCondition = conditions.Split(", ")[0];
-
-
-                            //Since it is called conditions, maybe it can have more than 1??
-                            //I do not see it giving more than 1 at the moment, so let's make sure that it is indeed always only giving 1.
-                            //Debug.Assert(!conditions.Contains(","), $"More than 1 condition was given (day-{hourDateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
-                            //Debug.Assert(!conditions.Contains(" "), $"More than 1 condition was given (dat-{hourDateString}, space seperator), this should not happen.\nPost this in the group chat!!");
 
                             WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
@@ -138,10 +135,14 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get weatherdata of a full week
+        /// </summary>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
-
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -185,7 +186,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var daysArray = weatherResponse["days"] ?? throw new Exception("Missing days data in API response");
@@ -196,7 +196,6 @@ namespace WeatherApp.WeatherAPIs
                 try
                 {
                     string dateString = (string)dayItem["datetime"]!;
-                    Debug.WriteLine(dateString);
                     DateTime forecastDate = DateTime.ParseExact(dateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                     double minTemperature = (double)dayItem["tempmin"]!;
@@ -204,11 +203,6 @@ namespace WeatherApp.WeatherAPIs
                     double averageHumidity = (double?)dayItem["humidity"] ?? -1;
                     string conditionText = (string)dayItem["conditions"] ?? "";
                     string splitCondition = conditionText.Split(", ")[0];
-
-                    //Since it is called conditions, maybe it can have more than 1??
-                    //I do not see it giving more than 1 at the moment, so let's make sure that it is indeed always only giving 1.
-                    //Debug.Assert(!conditionText.Contains(","), $"More than 1 condition was given (week-{dateString}, comma seperator), this should not happen.\nPost this in the group chat!!");
-                    //Debug.Assert(!conditionText.Contains(" "), $"More than 1 condition was given (week-{dateString}, space seperator), this should not happen.\nPost this in the group chat!!");
 
                     WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
@@ -235,6 +229,11 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get the weathercondition based on the ID of the several known weatherconditions
+        /// </summary>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             string conditionText = data.ToString()?.ToLowerInvariant() ?? "";

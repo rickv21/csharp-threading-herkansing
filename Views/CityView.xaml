@@ -7,6 +7,7 @@
     <ScrollView>
         <StackLayout Padding="10">
             <Label Text="Zoek een locatie" FontSize="Large" FontAttributes="Bold" Margin="25, 25 ,25, 10" HorizontalOptions="Center"/>
+            <Label Text="Na het invoeren van een locatie zal er worden gezocht via de Geocoding API.&#10;Dit kan een paar seconden duren.&#10;Er wordt alleen gezocht naar Nederlandse plaatsen en wanneer er meer dan 2 tekens zijn ingevoerd." HorizontalTextAlignment="Center" HorizontalOptions="Center" ></Label>
 
             <!-- Search Entry -->
             <Entry Text="{Binding SearchQuery}" 

@@ -4,22 +4,20 @@ using WeatherApp.Models;
 
 namespace WeatherApp.WeatherAPIs
 {
-    internal class WeatherAPI : WeatherService
+    public class WeatherAPI : WeatherService
     {
         public WeatherAPI() : base("WeatherAPI", "https://api.weatherapi.com/v1/", 1000, -1) // Pas aan op basis van de API-limieten.
         {
         }
 
         /// <summary>
-        /// Gets weatherdata hourly
+        /// Get weather data of a location
         /// </summary>
-        /// <param name="day"></param>
-        /// <param name="location"></param>
-        /// <returns>weather data hourly from current day</returns>
-        /// <exception cref="Exception"></exception>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -37,7 +35,6 @@ namespace WeatherApp.WeatherAPIs
                 var latitude = location.Latitude.ToString().Replace(",", ".");
                 var longitude = location.Longitude.ToString().Replace(",", ".");
                 string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&dt={day:yyyy-MM-dd}";
-                Debug.WriteLine("URL: " + url);
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -55,7 +52,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Extract relevant data
@@ -89,15 +85,13 @@ namespace WeatherApp.WeatherAPIs
         }
 
         /// <summary>
-        /// Gets forecast weather data from the next 3 days
-        /// Only the next 3 days is free with weatherapi free subscription
+        /// Get weatherdata of a full week
         /// </summary>
-        /// <param name="location"></param>
-        /// <returns>weatherdata from the next 3 days</returns>
-        /// <exception cref="Exception"></exception>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -132,7 +126,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var forecastDays = weatherResponse["forecast"]?["forecastday"] ?? throw new Exception("Missing forecast data in API response.");
@@ -163,14 +156,10 @@ namespace WeatherApp.WeatherAPIs
         }
 
         /// <summary>
-        /// Can't base the switch on icon id's
-        /// Weather API doesnt have unique id's for their weather conditions. 
-        /// Only id's for day and night weather combinations 
-        /// 
-        /// see: https://www.weatherapi.com/docs/ - CSV version
+        /// Get the weathercondition based on the ID of the several known weatherconditions
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns>Weather condition</returns>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             string condition = ((string)data).Trim().ToLower(); //Deletes space and lowercase
@@ -279,7 +268,6 @@ namespace WeatherApp.WeatherAPIs
                     return WeatherCondition.THUNDERSTORM;
             }
 
-            Debug.WriteLine($"Unknown condition: '{condition}'");
             return WeatherCondition.UNKNOWN;
         }
     }

@@ -19,19 +19,20 @@ namespace WeatherApp.WeatherAPIs
         }
 
         /// <summary>
-        /// Gets the weather data for a day and returns the weather data for each hour as a list.
+        /// Get weather data of a location
         /// </summary>
-        /// <param name="day">The day that will be passed to the API, only the day of the DateTime object will be looked at.</param>
-        /// <param name="location">The location as a string that will be passed to the API.</param>
-        /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location);
 
         /// <summary>
-        /// Gets the weather data for the current week and returns the weather data for each day as a list.
+        /// Get weatherdata of a full week
         /// </summary>
-        /// <param name="location">The location as a string that will be passed to the API.</param>
-        /// <returns>A APIResponse Task that should be awaited. The API response will contain the data is Success is true, otherwise data will be true and ErrorMessage will be set.</returns>
-        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location); //TODO: Maybe we could pass a week number if we later want to check more weeks.
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
+        public abstract Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location);
 
         protected bool GetEnabled()
         {
@@ -51,10 +52,10 @@ namespace WeatherApp.WeatherAPIs
         }
 
         /// <summary>
-        /// Converts weather info from an API to a WeatherCondition enum.
+        /// Get the weathercondition based on the ID of the several known weatherconditions
         /// </summary>
-        /// <param name="data">The weather info. Is a object because some API's use codes and some names.</param>
-        /// <returns>The WeatherCondition.</returns>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected abstract WeatherCondition CalculateWeatherCondition(object data);
     }
 }

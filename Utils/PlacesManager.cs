@@ -54,7 +54,6 @@ namespace WeatherApp.Utils
                     if (location != null)
                     {
                         location.PlaceId = prop.Name;
-                        Debug.WriteLine("NAME: " + location.PlaceId);
                     }
                     return location;
                 })

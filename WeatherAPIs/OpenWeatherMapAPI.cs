@@ -11,9 +11,12 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        /// <summary>
+        /// Retrieve the map
+        /// </summary>
+        /// <returns>The htmlcontent of the map</returns>
         public string GetMapCode()
         {
-            // Kaart
             string htmlContent = @"
                     <!DOCTYPE html>
                     <html>
@@ -67,9 +70,14 @@ namespace WeatherApp.WeatherAPIs
             return htmlContent;
         }
 
+        /// <summary>
+        /// Get weather data of a location
+        /// </summary>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -118,7 +126,6 @@ namespace WeatherApp.WeatherAPIs
                 
                 if (forecastDate.Date != day.Date)
                 {
-                    Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate.Date}) does not match.");
                     continue; // Skip entries not matching the requested day (only when not simulating).
                 }
     
@@ -143,9 +150,14 @@ namespace WeatherApp.WeatherAPIs
 
         }
 
+        /// <summary>
+        /// Get weatherdata of a full week
+        /// </summary>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -178,7 +190,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Check if weatherResponse["list"] exists and is not null
@@ -233,6 +244,11 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get the weathercondition based on the ID of the several known weatherconditions
+        /// </summary>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             int id = (int)data;
@@ -291,7 +307,6 @@ namespace WeatherApp.WeatherAPIs
                         {
                             return WeatherCondition.TORNADO;
                         }
-                        Debug.WriteLine("Unknown weather code: " + id);
                         return WeatherCondition.UNKNOWN;
                     }
                 case 8:
@@ -307,7 +322,6 @@ namespace WeatherApp.WeatherAPIs
 
                     }
                 default:
-                    Debug.WriteLine("Unknown weather code: " + id);
                     return WeatherCondition.UNKNOWN;
             }
 
@@ -336,7 +350,6 @@ namespace WeatherApp.WeatherAPIs
 
                 using HttpClient client = new();
                 string url = $"{_baseURL}weather?lat={location.Latitude}&lon={location.Longitude}&appid={_apiKey}&units=metric";
-                Debug.WriteLine(url);
                 HttpResponseMessage response = await client.GetAsync(url);
 
                 if (!response.IsSuccessStatusCode)

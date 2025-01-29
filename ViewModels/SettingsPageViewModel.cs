@@ -21,6 +21,10 @@ namespace WeatherApp.ViewModels
         }
 
         public ICommand SaveCommand { get; }
+
+        /// <summary>
+        /// Save the settings of the application
+        /// </summary>
         private async void SaveSettings()
         {
             _weatherAppData.WeatherServices = WeatherServices.ToDictionary(item => item.Name);
@@ -30,7 +34,6 @@ namespace WeatherApp.ViewModels
             foreach (WeatherService service in WeatherServices)
             {
                 jsonManager.SetData(service.IsEnabled, "status", service.Name, "enabled");
-                Debug.WriteLine(service.Name + " - " + service.IsEnabled);
             }
 
             await Shell.Current.GoToAsync("///Main");
