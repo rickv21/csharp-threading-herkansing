@@ -32,12 +32,13 @@ namespace WeatherApp.Utils
 
         /// <summary>
         /// Executes export tasks
-        /// 
-        /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
-        /// export functions are executed in parallel, potentially speeding up processing
-        /// 
-        /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
+        /// <remarks>
+        /// ### ** Multithreading **
+        /// Export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
+        /// Export functions are executed in parallel, potentially speeding up processing
+        /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
+        /// </remarks>
         public async Task ExportWeatherData(List<WeatherDisplayModel> weatherItems, LocationModel selectedLocation, List<LocationModel> locations)
         {
             LocationModel location = selectedLocation ?? locations.First();

@@ -140,6 +140,7 @@ namespace WeatherApp.ViewModels
         /// <summary>
         /// Initializes the ViewModel, sets default values, and starts loading data.
         /// </summary>
+        /// <param name="weatherAppData">The WeatherAppData</param>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
             _weatherAppData = weatherAppData;
@@ -153,15 +154,15 @@ namespace WeatherApp.ViewModels
             LeftArrowCommand = new Command(LeftArrowClick);
             RightArrowCommand = new Command(RightArrowClick);
 
-            _dangerCons = new List<WeatherCondition>()
-            {
+            _dangerCons =
+            [
                 WeatherCondition.THUNDERSTORM,
                 WeatherCondition.ICE,
                 WeatherCondition.FOG,
                 WeatherCondition.HAZE,
                 WeatherCondition.MIST,
                 WeatherCondition.TORNADO
-            };
+            ];
         }
 
         /// <summary>
@@ -422,13 +423,14 @@ namespace WeatherApp.ViewModels
         /// <summary>
         /// Displays a bad weather alert for a list of weatherData
         /// </summary>
+        /// <param name="data">A List of WeatherDataModels</param>
         private async void DisplayAlerts(List<WeatherDataModel> data)
         {
             if (data == null || data.Count == 0)
                 return;
 
             // Build a message string with all alerts
-            StringBuilder alertMessage = new StringBuilder("");
+            StringBuilder alertMessage = new("");
 
             foreach (var item in data)
             {
@@ -446,7 +448,7 @@ namespace WeatherApp.ViewModels
             await Task.Delay(1000);
 
             // Show single alert with all messages
-            App.AlertSvc.ShowAlertAsync("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
+            App.AlertSvc.ShowAlert("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
         }
 
         /// <summary>

@@ -11,9 +11,12 @@ namespace WeatherApp.WeatherAPIs
         {
         }
 
+        /// <summary>
+        /// Retrieve the map
+        /// </summary>
+        /// <returns>The htmlcontent of the map</returns>
         public string GetMapCode()
         {
-            // Kaart
             string htmlContent = @"
                     <!DOCTYPE html>
                     <html>
@@ -67,6 +70,12 @@ namespace WeatherApp.WeatherAPIs
             return htmlContent;
         }
 
+        /// <summary>
+        /// Get weather data of a location
+        /// </summary>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
@@ -143,6 +152,12 @@ namespace WeatherApp.WeatherAPIs
 
         }
 
+        /// <summary>
+        /// Get weatherdata of a full week
+        /// </summary>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
@@ -233,6 +248,11 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
+        /// <summary>
+        /// Get the weathercondition based on the ID of the several known weatherconditions
+        /// </summary>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             int id = (int)data;

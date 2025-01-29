@@ -5,13 +5,18 @@ using System.Globalization;
 
 namespace WeatherApp.WeatherAPIs
 {
-    internal class WeatherbitAPI : WeatherService
+    public class WeatherbitAPI : WeatherService
     {
         public WeatherbitAPI() : base("Weatherbit", "http://api.weatherbit.io/v2.0/forecast/daily", 50, -1)
         {
         }
 
-        //not possible with free weatherbit subscription, sends empty data 
+        /// <summary>
+        /// Get weather data of a location
+        /// </summary>
+        /// <param name="day">The day of which the weather should be retrieved</param>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting weather data for {Name} on {day:yyyy-MM-dd}.");
@@ -25,13 +30,12 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
-
         /// <summary>
-        /// Requests forecast data for a week
+        /// Get weatherdata of a full week
         /// </summary>
-        /// <param name="location"></param>
-        /// <returns>7 days of weather data</returns>
-        /// <exception cref="Exception"></exception>
+        /// <param name="location">The location of which the weather should be retrieved</param>
+        /// <returns>An APIResponse with a list of WeatherDataModels</returns>
+        /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
@@ -107,10 +111,10 @@ namespace WeatherApp.WeatherAPIs
         }
 
         /// <summary>
-        /// Calculates the weathercondition
+        /// Get the weathercondition based on the ID of the several known weatherconditions
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns>Weathercondition</returns>
+        /// <param name="data">The ID of a weathercondition</param>
+        /// <returns>The weathercondition that's connected to the ID</returns>
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
             int id = (int)data;

@@ -242,14 +242,14 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// THREADPOOL
-        /// ==========
+        /// Gather all weather data for the saved locations
+        /// </summary>
+        /// <remarks>
+        /// ### ** ThreadPool **
         /// In this method, a ThreadPool is used to gather weatherdata for all of the favorited locations
         /// It loops through the saved locations and starts a workitem for each location
         /// When an item has been looped and has been executed successfully, a signal is sent by using the countdown to let the method know the next task can be executed
-        /// ==========
-        /// Gather all weather data for the saved locations
-        /// </summary>
+        /// </remarks>
         private void FetchWeatherDataForAllLocations()
         {
             var countdown = new CountdownEvent(SavedLocations.Count);

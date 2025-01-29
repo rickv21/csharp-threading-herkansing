@@ -21,6 +21,10 @@ namespace WeatherApp.ViewModels
         }
 
         public ICommand SaveCommand { get; }
+
+        /// <summary>
+        /// Save the settings of the application
+        /// </summary>
         private async void SaveSettings()
         {
             _weatherAppData.WeatherServices = WeatherServices.ToDictionary(item => item.Name);
