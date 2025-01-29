@@ -1,9 +1,5 @@
-﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Platform;
-using System.Collections.ObjectModel;
-using WeatherApp.Utils;
+﻿using WeatherApp.Utils;
 using WeatherApp.ViewModels;
-using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.Views
 {

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Devices.Sensors;
 using System.Diagnostics;
 using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
@@ -27,8 +26,6 @@ namespace WeatherApp
             });
             builder.Services.AddSingleton<IAlertService, AlertService>();
 
-
-
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -36,21 +33,21 @@ namespace WeatherApp
             return builder.Build();
         }
 
+        /// <summary>
+        /// Loads the config values and weather services.
+        /// </summary>
+        /// <param name="appData">The WeatherAppData object to be updated.</param>
         private static void InitializeWeatherAppData(WeatherAppData appData)
         {
             JsonFileManager jsonManager = new JsonFileManager();
 
             // Retrieve the simulateData boolean.
-            var data = jsonManager.GetData("data", "simulateMode") as string;
+            var data = jsonManager.GetBoolean(["data", "simulateMode"]) ?? false;
+            appData.SimulateMode = data;
+            Debug.WriteLine("Loaded SimulateMode: " + data);
 
-            if (bool.TryParse(data, out bool isEnabled))
-            {
-                appData.SimulateMode = isEnabled;
-            }
-
-            //TEMP
-            appData.Locations.Add(new("Emmen", "Drenthe", "NL", "Test", 52.787701, 6.894810, null));
-            appData.Locations.Add(new("Amsterdam", "Noord-Holland", "NL", "Test", 52.377956, 4.897070, null));
+            PlacesManager placesManager = new PlacesManager();
+            appData.Locations = placesManager.LoadLocationsFromFile();
 
             try
             {

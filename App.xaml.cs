@@ -7,6 +7,7 @@
         public App(IServiceProvider provider)
         {
             InitializeComponent();
+            UserAppTheme = AppTheme.Dark;
             Services = provider;
             AlertSvc = Services.GetService<IAlertService>();
             MainPage = new AppShell();

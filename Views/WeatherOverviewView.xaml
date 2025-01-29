@@ -2,22 +2,34 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:WeatherApp.ViewModels"
-             x:Class="WeatherApp.Views.WeatherOverviewView">
+             x:Class="WeatherApp.Views.WeatherOverviewView"
+             Title="Weeroverzicht">
 
-
+    <ScrollView>
     <Grid RowDefinitions="Auto, Auto, Auto, 2*">
 
         <ScrollView Orientation="Horizontal" Grid.Row="1">
             <CollectionView ItemsSource="{Binding Locations}" 
-            SelectionMode="Single"
-            x:Name="TabCollection"
-            SelectedItem="{Binding SelectedTab}">
+                SelectionMode="Single"
+                x:Name="TabCollection"
+                SelectedItem="{Binding SelectedTab}">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame Padding="10" Margin="5" BorderColor="LightGray" CornerRadius="10">
+                        <Frame Padding="10" Margin="5" CornerRadius="0">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal"></VisualState>
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="#ac99ea"></Setter>
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                             <Label Text="{Binding Name}" />
                         </Frame>
                     </DataTemplate>
@@ -25,9 +37,103 @@
             </CollectionView>
         </ScrollView>
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" HorizontalOptions="FillAndExpand">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="0" HorizontalOptions="FillAndExpand">
             <!-- Export Button -->
-            <Button Text="Exporteer" 
+            <Button
+                Text="Voeg locatie toe"
+                HorizontalOptions="Start"
+                WidthRequest="120" 
+                HeightRequest="40" 
+                BorderWidth="1" 
+                CornerRadius="5" 
+                Margin="0"
+                Padding="0"
+                Clicked="CityViewButton_OnClicked" />
+
+            <StackLayout Orientation="Horizontal" 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                x:Name="DayButtons"
+                Grid.Column="1"
+                Spacing="10">
+                <Button Text="◀" 
+                    Command="{Binding LeftArrowCommand}"
+                    IsEnabled="{Binding IsPreviousButtonEnabled}"/>
+
+                <Label Text="{Binding DisplayedDateFormatted}"
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center" />
+
+                <Button Text="▶" 
+                    Command="{Binding RightArrowCommand}" 
+                    IsEnabled="{Binding IsNextButtonEnabled}"/>
+            </StackLayout>
+
+            <Button Text="{Binding DayWeekButtonText}" 
+                HorizontalOptions="End" 
+                VerticalOptions="Center" 
+                Grid.Column="2" 
+                WidthRequest="110" 
+                HeightRequest="40" 
+                BorderWidth="1" 
+                CornerRadius="5"
+                Margin="0"
+                Padding="0"
+                Command="{Binding DayWeekCommand}" />
+        </Grid>
+
+        <ScrollView Orientation="Horizontal" Grid.Row="2" BackgroundColor="#3A3A3A">
+            <CollectionView ItemsSource="{Binding WeatherItems}" BackgroundColor="#3A3A3A" 
+                    x:Name="WeatherItemsCollection"
+                    HorizontalOptions="CenterAndExpand">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="10, 0, 20, 0" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="Selecteer een plaats om weerinfomatie te zien."
+                       FontSize="18"
+                       TextColor="White"
+                       HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="0,0,0,10">
+                            <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
+                            <Label Text="{Binding WeatherData.ConditionFormatted}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding LocalizedName}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding WeatherData.MinTemperatureFormatted}" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding WeatherData.MaxTemperatureFormatted}" HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding WeatherData.HumidityFormatted}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <VerticalStackLayout Grid.Row="3">
+            <ScrollView
+                Margin="5"
+                Padding="5">
+                <WebView x:Name="MapWebView"
+                     HeightRequest="600"
+                     WidthRequest="450"
+                     HorizontalOptions="Fill"
+                     VerticalOptions="FillAndExpand" />
+            </ScrollView>
+            <HorizontalStackLayout Spacing="5">
+                <Button
+                Text="Instellingen"
+                HorizontalOptions="Start"
+                WidthRequest="110" 
+                HeightRequest="40" 
+                BorderWidth="1" 
+                CornerRadius="5" 
+                Margin="0"
+                Padding="0"
+                Command="{Binding SettingsCommand}" />
+                <Button Text="Exporteer" 
             HorizontalOptions="Start" 
             VerticalOptions="Center" 
             Grid.Column="0" 
@@ -38,76 +144,10 @@
             Padding="0"
             CornerRadius="5" 
             Clicked="OnExportButtonClicked" />
+            </HorizontalStackLayout>
 
-            <StackLayout Orientation="Horizontal" 
-                 HorizontalOptions="Center" 
-                 VerticalOptions="Center"
-                 Grid.Column="1"
-                 Spacing="10">
-                <Button Text="◀" 
-                Command="{Binding LeftArrowCommand}" />
-
-                <Label Text="{Binding DisplayedDate, StringFormat='{0:dd-MM-yyyy}'}"
-                HorizontalOptions="Center" 
-               VerticalOptions="Center" />
-
-                <Button Text="▶" 
-                Command="{Binding RightArrowCommand}" />
-            </StackLayout>
-
-            <Button Text="{Binding DayWeekButtonText}" 
-            HorizontalOptions="End" 
-            VerticalOptions="Center" 
-            Grid.Column="2" 
-            WidthRequest="110" 
-            HeightRequest="40" 
-            BorderWidth="1" 
-            CornerRadius="5"
-            Margin="0"
-            Padding="0"
-            Command="{Binding DayWeekCommand}" />
-        </Grid>
-
-
-        <ScrollView Orientation="Horizontal" Grid.Row="2">
-            <CollectionView ItemsSource="{Binding WeatherItems}" BackgroundColor="#3A3A3A" 
-                    x:Name="WeatherItemsCollection"
-                    HorizontalOptions="FillAndExpand">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <VerticalStackLayout Padding="0,0,0,10">
-                            <Image Source="{Binding Image}" WidthRequest="40" HeightRequest="40" />
-                            <Label Text="{Binding Condition}" HorizontalTextAlignment="Center" />
-                            <Label Text="{Binding TimeStamp}" HorizontalTextAlignment="Center" />
-                            <Label Text="{Binding MinTemp}" HorizontalTextAlignment="Center"/>
-                            <Label Text="{Binding MaxTemp}" HorizontalTextAlignment="Center" />
-                            <Label Text="{Binding Humidity}" HorizontalTextAlignment="Center" />
-                        </VerticalStackLayout>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </ScrollView>
-
-        <VerticalStackLayout Grid.Row="3">
-            <Button
-                Text="Settings"
-                HorizontalOptions="Start"
-                 WidthRequest="110" 
-                 HeightRequest="40" 
-                 BorderWidth="1" 
-                 CornerRadius="5" 
-                 Margin="0"
-                 Padding="0"
-                Command="{Binding SettingsCommand}" />
-            <WebView x:Name="MapWebView"
-                     HeightRequest="400"
-                     WidthRequest="300"
-                     HorizontalOptions="Fill"
-                     VerticalOptions="FillAndExpand" />
         </VerticalStackLayout>
 
     </Grid>
+    </ScrollView>
 </ContentPage>

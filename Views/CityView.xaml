@@ -41,7 +41,7 @@
 
             <!-- Saved Places -->
             <Label Text="Favoriete locaties" FontSize="Large" FontAttributes="Bold" Margin="25, 0 ,25, 10" HorizontalOptions="Center"/>
-
+            <Label Text="Klik op een plaats om deze te verwijderen." HorizontalOptions="Center"></Label>
             <!-- Button to fetch weather data -->
             <Button Text="Haal weerdata op" 
                     Command="{Binding FetchWeatherDataCommand}" 
@@ -55,6 +55,17 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Padding="10" Margin="5" BorderColor="Blue" CornerRadius="5">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal"></VisualState>
+                                    <VisualState Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BorderColor" Value="Red"></Setter>
+                                        </VisualState.Setters>
+                                    </VisualState>
+
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                             <StackLayout>
                                 <Grid Padding="10">
                                     <Grid.ColumnDefinitions>
@@ -74,9 +85,9 @@
                                     <!-- Right column for weather data -->
                                     <StackLayout Grid.Column="1" Padding="10">
                                         <Label Text="{Binding WeatherData[0].Condition, StringFormat='Huidige weer: {0}'}" FontSize="Medium" />
-                                        <Label Text="{Binding WeatherData[0].MinTemperature, StringFormat='Min Temp: {0}°C'}" FontSize="Medium" />
-                                        <Label Text="{Binding WeatherData[0].MaxTemperature, StringFormat='Max Temp: {0}°C'}" FontSize="Medium" />
-                                        <Label Text="{Binding WeatherData[0].Humidity, StringFormat='Luchtvochtigheid: {0}%'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MinTemp, StringFormat='{0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].MaxTemp, StringFormat='{0}'}" FontSize="Medium" />
+                                        <Label Text="{Binding WeatherData[0].Humidity, StringFormat='{0}'}" FontSize="Medium" />
                                     </StackLayout>
                                 </Grid>
                             </StackLayout>

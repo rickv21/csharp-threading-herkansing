@@ -1,9 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using WeatherApp.Models;
 using System.Globalization;
@@ -25,7 +20,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = "No weather data available for the requested date.",
+                Source = Name,
                 Data = new List<WeatherDataModel>() // Lege lijst
             };
         }
@@ -47,7 +42,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached. Reset your request count or check the API settings.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -79,10 +74,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -103,7 +97,6 @@ namespace WeatherApp.WeatherAPIs
                 double humidity = day["rh"] != null ? (double)day["rh"] : 0;
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)day["min_temp"]!,
@@ -115,7 +108,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }

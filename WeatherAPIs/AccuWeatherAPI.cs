@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices.Sensors;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using WeatherApp.Models;
@@ -10,7 +8,7 @@ namespace WeatherApp.WeatherAPIs
 {
     public class AccuWeatherAPI : WeatherService
     {
-        public AccuWeatherAPI() : base("AccuWeather", "http://dataservice.accuweather.com", 50, -1)
+        public AccuWeatherAPI() : base("AccuWeather", "http://dataservice.accuweather.com", 40, -1)
         {
         }
 
@@ -31,6 +29,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<string>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
                 };
             }
@@ -54,7 +53,7 @@ namespace WeatherApp.WeatherAPIs
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
 
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -62,17 +61,17 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
 
                         return new APIResponse<string>
                         {
                             Success = false,
+                            Source = Name,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
                             Data = null
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
         
                 }
@@ -84,6 +83,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<string>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "Could not get locationKey."
                 };
             }
@@ -91,6 +91,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<string>
             {
                 Success = true,
+                Source = Name,
                 Data = locationKey.ToString()
             };
         
@@ -112,6 +113,7 @@ namespace WeatherApp.WeatherAPIs
                     return new APIResponse<List<WeatherDataModel>>
                     {
                         Success = false,
+                        Source = Name,
                         ErrorMessage = locationKeyResponse.ErrorMessage,
                     };
                 {
@@ -126,8 +128,8 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
                 };
             }
 
@@ -135,7 +137,6 @@ namespace WeatherApp.WeatherAPIs
             if (simulate)
             {
                 responseBody = GetTestJSON("accu_weather_hour_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -148,7 +149,7 @@ namespace WeatherApp.WeatherAPIs
                         responseBody = await response.Content.ReadAsStringAsync();
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -156,16 +157,15 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
                         return new APIResponse<List<WeatherDataModel>>
                         {
                             Success = false,
+                            Source = Name,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -205,7 +205,6 @@ namespace WeatherApp.WeatherAPIs
                     WeatherCondition condition = CalculateWeatherCondition(weatherIcon);
 
                     weatherData.Add(new WeatherDataModel(
-                        apiSource: Name,
                         condition: condition,
                         timeStamp: forecastDate,
                         minTemperature: temperature,
@@ -225,6 +224,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "The API did not return data for the given datatime.",
                 };
             }
@@ -233,7 +233,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }
@@ -253,6 +253,7 @@ namespace WeatherApp.WeatherAPIs
                     return new APIResponse<List<WeatherDataModel>>
                     {
                         Success = false,
+                        Source = Name,
                         ErrorMessage = locationKeyResponse.ErrorMessage,
                     };
                 {
@@ -268,8 +269,8 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
                 };
             }
 
@@ -277,7 +278,6 @@ namespace WeatherApp.WeatherAPIs
             if (simulate)
             {
                 responseBody = GetTestJSON("accu_weather_week_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -290,7 +290,7 @@ namespace WeatherApp.WeatherAPIs
                         responseBody = await response.Content.ReadAsStringAsync();
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -298,17 +298,16 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
 
                         return new APIResponse<List<WeatherDataModel>>
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name,
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -335,7 +334,6 @@ namespace WeatherApp.WeatherAPIs
                     //WeatherCondition nightCondition = CalculateWeatherCondition((int)forecast["Night"]["Icon"]!);
 
                     weatherData.Add(new WeatherDataModel(
-                        apiSource: Name,
                         condition: dayCondition,
                         timeStamp: forecastDate,
                         minTemperature: minTemperature,
@@ -353,7 +351,8 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                Data = weatherData
+                Data = weatherData,
+                Source = Name,
             };
         }
 

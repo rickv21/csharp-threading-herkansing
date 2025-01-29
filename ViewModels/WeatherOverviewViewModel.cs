@@ -1,11 +1,12 @@
 ﻿using Sprache;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows.Input;
 using WeatherApp.Models;
 using WeatherApp.Utils;
@@ -20,6 +21,13 @@ namespace WeatherApp.ViewModels
     public class WeatherOverviewViewModel : INotifyPropertyChanged
     {
         private readonly WeatherAppData _weatherAppData;
+
+        // Commands for UI interaction
+        public ICommand ExportCommand { get; }
+        public ICommand SettingsCommand { get; }
+        public ICommand DayWeekCommand { get; }
+        public ICommand LeftArrowCommand { get; }
+        public ICommand RightArrowCommand { get; }
 
         private List<WeatherCondition> _dangerCons;
 
@@ -36,13 +44,27 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        private string _displayedDateFormatted;
+
+        public string DisplayedDateFormatted
+        {
+            get => _displayedDateFormatted;
+            set
+            {
+                if(_displayedDateFormatted != value)
+                {
+                    _displayedDateFormatted = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
 
-        public ObservableCollection<LocationModel> Locations { get; set; }
+        public ObservableCollection<LocationModel> Locations { get; set; } = new ObservableCollection<LocationModel>();
 
-
-        private LocationModel _selectedTab;
-        public LocationModel SelectedTab
+        private LocationModel? _selectedTab;
+        public LocationModel? SelectedTab
         {
             get => _selectedTab;
             set
@@ -50,16 +72,23 @@ namespace WeatherApp.ViewModels
                 if (_selectedTab != value)
                 {
                     _selectedTab = value;
+
+                    if (_selectedTab != null)
+                    {
+                        HandleTabChanged(_selectedTab);
+                    }
+
                     OnPropertyChanged();
                 }
             }
         }
 
-        private ObservableCollection<WeatherDisplayItem> _weatherItems;
+        private ObservableCollection<WeatherDisplayModel> _weatherItems;
+
         /// <summary>
         /// Collection of weather items to display in the UI.
         /// </summary>
-        public ObservableCollection<WeatherDisplayItem> WeatherItems
+        public ObservableCollection<WeatherDisplayModel> WeatherItems
         {
             get => _weatherItems;
             set
@@ -68,14 +97,6 @@ namespace WeatherApp.ViewModels
                 OnPropertyChanged();
             }
         }
-
-        // Commands for UI interaction
-        public ICommand ExportCommand { get; }
-        public ICommand SettingsCommand { get; }
-        public ICommand DayWeekCommand { get; }
-        public ICommand LeftArrowCommand { get; }
-        public ICommand RightArrowCommand { get; }
-
 
         private string _dayWeekButtonText;
         public string DayWeekButtonText
@@ -91,22 +112,41 @@ namespace WeatherApp.ViewModels
             }
         }
 
+
+        private readonly Export _exporter;
+		
+        private bool _isPreviousButtonEnabled = true;
+        public bool IsPreviousButtonEnabled
+        {
+            get => _isPreviousButtonEnabled;
+            set
+            {
+                _isPreviousButtonEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _isNextButtonEnabled = true;
+        public bool IsNextButtonEnabled
+        {
+            get => _isNextButtonEnabled;
+            set
+            {
+                _isNextButtonEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Initializes the ViewModel, sets default values, and starts loading data.
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
-            DayWeekButtonText = "Week Overzicht";
-            DisplayedDate = DateTime.Now;
-            WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
-            this.Locations = new ObservableCollection<LocationModel>();
-            foreach(var location in weatherAppData.Locations)
-            {
-                this.Locations.Add(location);
-            }
+            _exporter = new Export();
 
-            this.SelectedTab = this.Locations.First();
+            SetDefaultViewData();
+ 
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
             DayWeekCommand = new Command(SwitchDayWeek);
@@ -124,6 +164,48 @@ namespace WeatherApp.ViewModels
             };
         }
 
+        /// <summary>
+        /// Sets the default view data when the view is first loaded or reloaded.
+        /// Initializes the displayed date, resets UI elements, and refreshes the location list.
+        /// </summary>
+        public void SetDefaultViewData()
+        {
+            DayWeekButtonText = "Week Overzicht";
+            DisplayedDate = DateTime.Now;
+            DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
+
+            IsPreviousButtonEnabled = false;
+            IsNextButtonEnabled = true;
+
+            //Use main thread here due to the UI not updating correctly otherwise.
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Locations.Clear();
+                foreach (var location in _weatherAppData.Locations)
+                {
+                    Locations.Add(location);
+                }
+            });
+
+
+            WeatherItems = new ObservableCollection<WeatherDisplayModel>();
+        }
+
+        /// <summary>
+        /// Handles changes to the selected tab by updating the weather data.
+        /// </summary>
+        /// <param name="selectedLocation">The newly selected location.</param>
+        private void HandleTabChanged(LocationModel selectedLocation)
+        {
+            if(WeatherItems == null)
+            {
+                return;
+            }
+            Debug.WriteLine($"Tab changed to: {selectedLocation.Name}");
+            UpdateGUI();
+        }
+
+
         // Event for notifying UI of property changes
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -137,10 +219,9 @@ namespace WeatherApp.ViewModels
         /// </summary>
         /// <param name="location">The location for which weather data is to be fetched.</param>
         /// <param name="date">The date for which weather data is required.</param>
-        /// <returns>
-        /// An array of <see cref="APIResponse{T}"/> objects, each containing weather data from one of the available services.
-        /// Returns an empty array if no services are available or an error occurs.
-        /// </returns>
+        /// 
+        /// <returns>An array of APIResponse objects containing weather data from different services.</returns>
+        /// 
         /// <remarks>
         /// ### **Task Parallel Library (TPL) Overview**
         /// The TPL is a .NET framework for managing and executing parallel and asynchronous code using the **Task** abstraction.  
@@ -154,95 +235,124 @@ namespace WeatherApp.ViewModels
         /// - Each weather service implements an asynchronous method (`GetWeatherDataAsync`).
         /// - These methods are invoked concurrently using TPL, ensuring efficient resource utilization and reduced response time compared to sequential processing.  
         ///</remarks>
-        public async Task<APIResponse<List<WeatherDataModel>>[]> FetchWeatherDataAsync(LocationModel location, DateTime date)
+        private async Task<APIResponse<List<WeatherDataModel>>[]> FetchWeatherDataAsync()
         {
-            Debug.WriteLine($"Fetching weather data for {location.Name} on {date}");
+            LocationModel? location = SelectedTab;
+            if(location == null)
+            {
+                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
+            }
+            Debug.WriteLine($"Fetching weather data for {location.Name} on {DisplayedDate}");
             if (_weatherAppData.WeatherServices == null || _weatherAppData.WeatherServices.Count == 0)
             {
                 Debug.WriteLine("No services available.");
-                return Array.Empty<APIResponse<List<WeatherDataModel>>>(); // Return an empty array
+                await Shell.Current.DisplayAlert("Error", "Er zijn geen weerservices beschikbaar!", "Oké");
+                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
             }
 
             try
             {
+                var usedServices = new ConcurrentBag<WeatherService>();
                 IEnumerable<Task<APIResponse<List<WeatherDataModel>>>> tasks = null;
+
                 if (DayWeekButtonText.Equals("Week Overzicht"))
                 {
-                    // Fetch weather data from all services concurrently
-                    tasks = _weatherAppData.WeatherServices.Values.Select(service =>
-                        service.GetWeatherDataAsync(date, location, false)
-                    );
+                    tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
+                        .Select(async service =>
+                        {
+                            var response = await service.GetWeatherDataAsync(DisplayedDate, location, _weatherAppData.SimulateMode);
+                            usedServices.Add(service);
+                            return response;
+                        });
                 }
                 else
                 {
-                    tasks = _weatherAppData.WeatherServices.Values.Select(service =>
-                        service.GetWeatherForAWeekAsync(location, false)
-                    );
+                    tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
+                        .Select(async service =>
+                        {
+                            var response = await service.GetWeatherForAWeekAsync(location, _weatherAppData.SimulateMode);
+                            usedServices.Add(service);
+                            return response;
+                        });
                 }
 
                 Debug.WriteLine("Fetching weather data from services...");
                 var results = await Task.WhenAll(tasks);
-                return results; // Return results for further processing
+                foreach (var service in usedServices.Distinct())
+                {
+                    service.CountRequest();
+                }
+                return results;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather data: {ex.Message}");
-                return Array.Empty<APIResponse<List<WeatherDataModel>>>(); // Return an empty array on error
+                // If we get an error here it is because an API sends a weird response.
+                // During testing this happened really rarely and sending the request again had no issues.
+                // So when such an error happens we just reset the locations so the tabs become unselected so another attempt can be made.
+                // This is a bit of a band-aid fix but this issue is really rare and is caused by the API's.
+                SetDefaultViewData();
+                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
             }
         }
 
         /// <summary>
-        /// Aggregates weather data by hour and processes it for display.
+        /// Fetches and updates weather data while handling errors gracefully.
+        /// The method collects data from available services and displays relevant alerts for failed requests.
         /// </summary>
-        /// <returns>Dictionary of aggregated weather data indexed by hour.</returns>
-        private async Task<Dictionary<string, WeatherDataModel>> UpdateData()
+        /// <returns>A dictionary containing updated weather data grouped by time.</returns>
+        public async Task<Dictionary<string, WeatherDataModel>> GetUpdatedWeatherData()
         {
-            LocationModel location = _weatherAppData.Locations[0]; //Temp hardcoded.
-            var results = await FetchWeatherDataAsync(location, DisplayedDate);
+            //Data from all the weather services.
+            var results = await FetchWeatherDataAsync();
             foreach (var result in results)
             {
                 if (result.Success)
                 {
-                    if (result.Data.Count == 0)
+                    foreach (WeatherDataModel apiData in result.Data ?? [])
                     {
-                        Debug.WriteLine("Data is empty!");
-                    }
-                    foreach (WeatherDataModel apiData in result.Data)
-                    {
-                        var service = _weatherAppData.WeatherServices[apiData.APISource];
-                        Debug.WriteLine(service.Name + " - " + service.IsEnabled);
-                        if (!service.IsEnabled)
-                        {
-                            continue;
-                        }
+                        var service = _weatherAppData.WeatherServices[result.Source];
+                        Debug.Assert(service.IsEnabled == true);
+                        Debug.WriteLine(service.Name + ", enabled: " + service.IsEnabled + ", simulate: " + _weatherAppData.SimulateMode);
                         Debug.WriteLine(apiData.ToString());
+
                         DateTime periodInTime = DateTime.Now;
                         periodInTime = apiData.TimeStamp;
                         if (!TimedData.ContainsKey(periodInTime))
                         {
                             TimedData[periodInTime] = new List<WeatherDataModel>();
                         }
-
+                        //Add api data to a time list.
                         TimedData[periodInTime].Add(apiData);
                     }
                 }
                 else
                 {
                     Debug.WriteLine(result.ErrorMessage);
-                    await Shell.Current.DisplayAlert("Error", result.ErrorMessage, "OK");
                 }
-            } 
-      
+            }
+
+            return AggregateWeatherData();
+        }
+
+        /// <summary>
+        /// Aggregates weather data from multiple services and groups it by hour or day.
+        /// The method processes raw weather data and extracts the relevant information for display.
+        /// </summary>
+        /// <returns>A dictionary where the key is either an hour or a day, and the value is the aggregated weather data.</returns>
+        private Dictionary<string, WeatherDataModel> AggregateWeatherData()
+        {
             var aggregatedData = TimedData.ToDictionary(entry => entry.Key, entry =>
             {
                 DateTime time = entry.Key;
                 var dataList = entry.Value;
 
+                // Default values
                 double totalHumidity = -1;
                 double minTemperature = double.MaxValue; 
                 double maxTemperature = double.MinValue;
                 int validHumidityCount = 0;
-                WeatherCondition aggregatedCondition = WeatherCondition.UNKNOWN; // Default value
+                WeatherCondition aggregatedCondition = WeatherCondition.UNKNOWN;
 
                 foreach (var data in dataList)
                 {
@@ -268,9 +378,8 @@ namespace WeatherApp.ViewModels
                 if(DayWeekButtonText.Equals("Week Overzicht"))
                 {
                     return new WeatherDataModel(
-                        "",
                         aggregatedCondition,
-                        new DateTime(DisplayedDate.Year, DisplayedDate.Month, DisplayedDate.Day, time.Hour, 0, 0), // Set the hour.
+                        new DateTime(DisplayedDate.Year, DisplayedDate.Month, DisplayedDate.Day, time.Hour, 0, 0),
                         minTemperature,
                         maxTemperature,
                         averageHumidity
@@ -279,7 +388,6 @@ namespace WeatherApp.ViewModels
                 else
                 {
                     return new WeatherDataModel(
-                        "",
                         aggregatedCondition,
                         time,
                         minTemperature,
@@ -290,32 +398,25 @@ namespace WeatherApp.ViewModels
             }
          );
             Dictionary<string, WeatherDataModel> sortedAggregatedData = new Dictionary<string, WeatherDataModel>();
-            if (DayWeekButtonText.Equals("Week Overzicht"))
-            {
-                sortedAggregatedData = aggregatedData
-                    .OrderBy(x => x.Key)
-                    .GroupBy(x => "" + x.Key.Hour) // Group by the key
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
-                    );
-            }
-            else
-            {
-                sortedAggregatedData = aggregatedData
-                    .OrderBy(x => x.Key)
-                    .GroupBy(x => x.Key.DayOfWeek.ToString()) // Group by the key
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
-                    );
-            }
+
+            Func<KeyValuePair<DateTime, WeatherDataModel>, string> groupKeySelector = DayWeekButtonText.Equals("Week Overzicht")
+                ? x => x.Key.Hour.ToString() // Group by hour
+                : x => x.Key.DayOfWeek.ToString(); // Group by day of the week
+
+            // Perform the grouping and sorting
+            sortedAggregatedData = aggregatedData
+                .OrderBy(x => x.Key)
+                .GroupBy(groupKeySelector)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
+                );
 
             var riskyData = sortedAggregatedData.Values
                 .Where(item => !_dangerCons.Contains(item.Condition))
                 .ToList();
 
-            DisplayAlerts(riskyData); 
+            DisplayAlerts(riskyData);
             return sortedAggregatedData;
         }
 
@@ -344,11 +445,16 @@ namespace WeatherApp.ViewModels
 
 
         /// <summary>
-        /// Updates the UI with aggregated weather data.
+        /// Updates the UI with the latest weather data by clearing and refilling the WeatherItems collection.
+        /// This ensures that the displayed weather data is always up to date.
         /// </summary>
         public async Task UpdateGUI()
         {
-            var data = await UpdateData();
+            if (SelectedTab == null)
+            {
+                return;
+            }
+            var data = await GetUpdatedWeatherData();
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 WeatherItems.Clear();
@@ -357,30 +463,32 @@ namespace WeatherApp.ViewModels
                     Debug.WriteLine("Entry: " + entry);
 
                     var model = entry.Value;
-                    WeatherDisplayItem weatherItem = null;
+                    WeatherDisplayModel weatherItem = null;
                     // Only adds :00 if the day is displayed rather than the week.
                     if (DayWeekButtonText.Equals("Week Overzicht"))
                     {
-                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}", true);
+                        string displayName = model.TimeStamp.ToString("HH:mm");
+                        weatherItem = new WeatherDisplayModel(GetWeatherIcon(model.Condition), model, displayName);
                     }
                     else
                     {
-                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key} - {model.ToString()}", false);
+             
+                        string displayName = WeatherUtils.TranslateDayOfTheWeek(model.TimeStamp.DayOfWeek);
 
+                        weatherItem = new WeatherDisplayModel(GetWeatherIcon(model.Condition), model, displayName);
                     }
                     Debug.WriteLine("GUI - " + model.ToString());
                     WeatherItems.Add(weatherItem);
                 }
             });
-
-            await SetupMap();
         }
 
         /// <summary>
-        /// Fetches the appropriate weather icon for a condition.
+        /// Retrieves the appropriate weather icon for a given weather condition.
+        /// If the specified icon is not found, a fallback icon is used.
         /// </summary>
-        /// <param name="condition">The weather condition.</param>
-        /// <returns>An ImageSource for the icon.</returns>
+        /// <param name="condition">The weather condition to get an icon for.</param>
+        /// <returns>An ImageSource representing the appropriate weather icon.</returns>
         public ImageSource GetWeatherIcon(WeatherCondition condition)
         {
             string iconName = condition.ToString().ToLower();
@@ -408,14 +516,6 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Sets up the map interface.
-        /// </summary>
-        public async Task SetupMap()
-        {
-            //TODO
-        }
-
-        /// <summary>
         /// Converts weatherdata to JSON
         /// </summary>
         public string GetWeatherDataAsJson()
@@ -432,7 +532,7 @@ namespace WeatherApp.ViewModels
         /// Handles export data
         /// 
         /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
-        /// export functions are executed in parallel, potentially speeding up processing
+        /// export functions are executed in parallel, potentially speeding up processing. In Export.cs
         /// 
         /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
@@ -440,92 +540,22 @@ namespace WeatherApp.ViewModels
         {
             try
             {
-                string jsonData = GetWeatherDataAsJson();
-
-                //Checks if there is weatherdata
-                if (string.IsNullOrEmpty(jsonData))
+                // Checks if there is weatherdata
+                if (WeatherItems == null || WeatherItems.Count == 0)
                 {
                     await Shell.Current.DisplayAlert("Export Fout", "Geen weerdata beschikbaar om te exporteren.", "OK");
                     return;
                 }
 
-                string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string exportFolder = Path.Combine(userFolder, "cshard-threading-herkansing", "ExportWeatherData");
+                LocationModel location = _selectedTab ?? Locations.First();
 
-                // Creates folder 'ExportWeatherData if it doesnt exists'
-                if (!Directory.Exists(exportFolder))
-                {
-                    Directory.CreateDirectory(exportFolder);
-                }
-
-                // Filename based on date
-                string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
-
-                // Start export threads 
-                await Task.WhenAll(
-                    Task.Run(() => ExportToJson(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToCsv(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToTxt(jsonData, exportFolder, timestamp))
-                );
-
-                await Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
+                await _exporter.ExportWeatherData(WeatherItems.ToList(), location, Locations.ToList());
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error exporting data: {ex}");
                 await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
-        }
-
-        /// <summary>
-        /// Exports to JSON
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToJson(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.json");
-            File.WriteAllText(filePath, jsonData);
-            Debug.WriteLine($"Weather data exported to JSON: {filePath}");
-        }
-
-        /// <summary>
-        /// Exports weatherdata to CSV
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToCsv(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.csv");
-
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayItem>>(jsonData);
-            if (weatherItems == null) return;
-
-            var csvLines = new List<string> { "Tijdstip,Weersomstandigheden" };
-            csvLines.AddRange(weatherItems.Select(item => $"{item.DisplayText}"));
-
-            File.WriteAllLines(filePath, csvLines);
-            Debug.WriteLine($"Weather data exported to CSV: {filePath}");
-        }
-
-        /// <summary>
-        /// Exports to TXT-file 
-        /// </summary>
-        /// <param name="jsonData"></param>
-        /// <param name="folder"></param>
-        /// <param name="timestamp"></param>
-        private void ExportToTxt(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.txt");
-
-            var weatherItems = JsonSerializer.Deserialize<List<WeatherDisplayItem>>(jsonData);
-            if (weatherItems == null) return;
-
-            var txtLines = weatherItems.Select(item => $"{item.DisplayText}").ToList();
-            File.WriteAllLines(filePath, txtLines);
-            Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
 
         /// <summary>
@@ -536,25 +566,52 @@ namespace WeatherApp.ViewModels
             await Application.Current.MainPage.Navigation.PushAsync(new SettingsPage());
         }
 
+        /// <summary>
+        /// Toggles between "Week Overview" and "Day Overview" modes.
+        /// Updates the UI elements and reloads weather data accordingly.
+        /// </summary>
         public async void SwitchDayWeek()
         {
-            if(DayWeekButtonText.Equals("Week Overzicht"))
+            TimedData.Clear();
+
+            DisplayedDate = DateTime.Now;
+
+            if (DayWeekButtonText.Equals("Week Overzicht"))
             {
-                TimedData.Clear();
+                IsPreviousButtonEnabled = false;
+                IsNextButtonEnabled = false;
                 DayWeekButtonText = "Dag Overzicht";
-                await UpdateData();
-                await UpdateGUI();
             }
             else
             {
-                TimedData.Clear();
+                IsPreviousButtonEnabled = false;
+                IsNextButtonEnabled = true;
                 DayWeekButtonText = "Week Overzicht";
-                await UpdateData();
-                await UpdateGUI();
+            }
+            UpdateDisplayedDate();
+            await UpdateGUI();
+        }
+
+        /// <summary>
+        /// Updates the displayed date format based on whether the "Week Overview" or "Day Overview" mode is active.
+        /// </summary>
+        private void UpdateDisplayedDate()
+        {
+            if (DayWeekButtonText.Equals("Week Overzicht"))
+            {
+                DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
+            }
+            else
+            {
+                DisplayedDateFormatted = $"Week {WeatherUtils.GetWeekNumber(DisplayedDate)}, {DisplayedDate:yyyy}";
             }
         }
 
-        public async void LeftArrow()
+        /// <summary>
+        /// Handles left arrow button clicks to move the displayed date back by one day.
+        /// Prevents users from selecting dates in the past.
+        /// </summary>
+        public async void LeftArrowClick()
         {
             if(DisplayedDate.Date <= DateTime.Now)
             {
@@ -562,15 +619,28 @@ namespace WeatherApp.ViewModels
             }
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(-1);
-            await UpdateData();
+            IsPreviousButtonEnabled = DisplayedDate.Date > DateTime.Now;
+            UpdateDisplayedDate();
             await UpdateGUI();
         }
-        public async void RightArrow()
+
+        /// <summary>
+        /// Handles right arrow button clicks to move the displayed date forward by one day.
+        /// Updates the displayed date and reloads the weather data accordingly.
+        /// </summary>
+        public async void RightArrowClick()
         {
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(1);
-            await UpdateData();
+            IsPreviousButtonEnabled = true;
+            UpdateDisplayedDate();
             await UpdateGUI();
+
+            if (DisplayedDate.Date >= DateTime.Now.AddDays(13))
+            {
+                IsNextButtonEnabled = false;
+                return;
+            }
         }
     }
 }
