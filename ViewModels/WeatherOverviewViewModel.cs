@@ -202,7 +202,6 @@ namespace WeatherApp.ViewModels
             {
                 return;
             }
-            Debug.WriteLine($"Tab changed to: {selectedLocation.Name}");
             UpdateGUI();
         }
 
@@ -211,7 +210,6 @@ namespace WeatherApp.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            Debug.WriteLine($"Property {propertyName} changed.");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -241,14 +239,13 @@ namespace WeatherApp.ViewModels
             LocationModel? location = SelectedTab;
             if(location == null)
             {
-                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
+                return [];
             }
-            Debug.WriteLine($"Fetching weather data for {location.Name} on {DisplayedDate}");
+
             if (_weatherAppData.WeatherServices == null || _weatherAppData.WeatherServices.Count == 0)
             {
-                Debug.WriteLine("No services available.");
                 await Shell.Current.DisplayAlert("Error", "Er zijn geen weerservices beschikbaar!", "Oké");
-                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
+                return [];
             }
 
             try
@@ -277,7 +274,6 @@ namespace WeatherApp.ViewModels
                         });
                 }
 
-                Debug.WriteLine("Fetching weather data from services...");
                 var results = await Task.WhenAll(tasks);
                 foreach (var service in usedServices.Distinct())
                 {
@@ -293,7 +289,7 @@ namespace WeatherApp.ViewModels
                 // So when such an error happens we just reset the locations so the tabs become unselected so another attempt can be made.
                 // This is a bit of a band-aid fix but this issue is really rare and is caused by the API's.
                 SetDefaultViewData();
-                return Array.Empty<APIResponse<List<WeatherDataModel>>>();
+                return [];
             }
         }
 
@@ -313,8 +309,6 @@ namespace WeatherApp.ViewModels
                     foreach (WeatherDataModel apiData in result.Data ?? [])
                     {
                         var service = _weatherAppData.WeatherServices[result.Source];
-                        Debug.Assert(service.IsEnabled == true);
-                        Debug.WriteLine(apiData.ToString());
 
                         DateTime periodInTime = DateTime.Now;
                         periodInTime = apiData.TimeStamp;
@@ -325,10 +319,6 @@ namespace WeatherApp.ViewModels
                         //Add api data to a time list.
                         TimedData[periodInTime].Add(apiData);
                     }
-                }
-                else
-                {
-                    Debug.WriteLine(result.ErrorMessage);
                 }
             }
 
@@ -467,8 +457,6 @@ namespace WeatherApp.ViewModels
                 WeatherItems.Clear();
                 foreach (var entry in data)
                 {
-                    Debug.WriteLine("Entry: " + entry);
-
                     var model = entry.Value;
                     WeatherDisplayModel weatherItem = null;
                     // Only adds :00 if the day is displayed rather than the week.
@@ -484,7 +472,6 @@ namespace WeatherApp.ViewModels
 
                         weatherItem = new WeatherDisplayModel(GetWeatherIcon(model.Condition), model, displayName);
                     }
-                    Debug.WriteLine("GUI - " + model.ToString());
                     WeatherItems.Add(weatherItem);
                 }
             });
@@ -508,7 +495,6 @@ namespace WeatherApp.ViewModels
                 {
                     if (stream == null)
                     {
-                        Debug.WriteLine("Icon not found, using fallback.");
                         return ImageSource.FromResource("WeatherApp.Resources.Images.Weather.unknown.png", assembly);
                     }
 

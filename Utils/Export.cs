@@ -63,7 +63,6 @@ namespace WeatherApp.Utils
         {
             if (weatherItems == null || weatherItems.Count == 0)
             {
-                Debug.WriteLine("Geen weerdata beschikbaar om te exporteren naar JSON.");
                 return;
             }
 
@@ -88,7 +87,6 @@ namespace WeatherApp.Utils
             string jsonWithLocation = JsonSerializer.Serialize(weatherWithLocation, new JsonSerializerOptions { WriteIndented = true });
 
             File.WriteAllText(filePath, jsonWithLocation);
-            Debug.WriteLine($"Weather data exported to JSON: {filePath}");
         }
 
 
@@ -106,7 +104,6 @@ namespace WeatherApp.Utils
             ));
 
             File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
-            Debug.WriteLine($"Weather data exported to CSV: {filePath}");
         }
 
         /// <summary>
@@ -120,7 +117,6 @@ namespace WeatherApp.Utils
             txtLines.AddRange(weatherItems.Select(item => item.DisplayText));
 
             File.WriteAllLines(filePath, txtLines);
-            Debug.WriteLine($"Weather data exported to TXT: {filePath}");
         }
     }
 }

@@ -23,7 +23,6 @@ namespace WeatherApp.WeatherAPIs
         public void CountRequest()
         {
             CurrentRequestCount++;
-            Debug.WriteLine(CurrentRequestCount);
         }
 
         /// <summary>

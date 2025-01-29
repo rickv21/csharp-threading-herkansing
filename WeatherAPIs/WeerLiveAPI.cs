@@ -18,7 +18,6 @@ namespace WeatherApp.WeatherAPIs
         /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -35,7 +34,6 @@ namespace WeatherApp.WeatherAPIs
             {
                 string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                 HttpResponseMessage response = await client.GetAsync(url);
-                Debug.WriteLine(response.StatusCode);
 
                 responseBody = await response.Content.ReadAsStringAsync();
 
@@ -71,7 +69,6 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Extract "list" element or throw an exception if not found
@@ -86,7 +83,6 @@ namespace WeatherApp.WeatherAPIs
 
                 if (forecastDate.Date != day.Date)
                 {
-                    Debug.WriteLine($"Skipping entry for {Name} as date ({forecastDate}) does not match.");
                     continue; // Skip entries not matching the requested day (only when not simulating).
                 }
 
@@ -120,7 +116,6 @@ namespace WeatherApp.WeatherAPIs
         /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -137,7 +132,6 @@ namespace WeatherApp.WeatherAPIs
             {
                 string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                 HttpResponseMessage response = await client.GetAsync(url);
-                Debug.WriteLine(response.StatusCode);
 
                 responseBody = await response.Content.ReadAsStringAsync();
 
@@ -174,7 +168,6 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Extract "list" element or throw an exception if not found

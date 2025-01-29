@@ -19,9 +19,7 @@ namespace WeatherApp.WeatherAPIs
         /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting weather data for {Name} on {day:yyyy-MM-dd}.");
-
-            // sends empty data, to prevent throwing exception
+            // Sends empty data to prevent throwing exception
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
@@ -38,7 +36,6 @@ namespace WeatherApp.WeatherAPIs
         /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -63,7 +60,6 @@ namespace WeatherApp.WeatherAPIs
                 if (!response.IsSuccessStatusCode)
                 {
                     responseBody = await response.Content.ReadAsStringAsync();
-                    Debug.WriteLine("Error: " + responseBody);
 
                     var errorResponse = JObject.Parse(responseBody);
                     string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
@@ -78,7 +74,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var forecastDays = weatherResponse["data"] ?? throw new Exception("Missing forecast data in API response.");

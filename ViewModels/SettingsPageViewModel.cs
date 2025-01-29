@@ -34,7 +34,6 @@ namespace WeatherApp.ViewModels
             foreach (WeatherService service in WeatherServices)
             {
                 jsonManager.SetData(service.IsEnabled, "status", service.Name, "enabled");
-                Debug.WriteLine(service.Name + " - " + service.IsEnabled);
             }
 
             await Shell.Current.GoToAsync("///Main");

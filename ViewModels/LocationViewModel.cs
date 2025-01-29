@@ -145,12 +145,10 @@ namespace WeatherApp.ViewModels
             if (isConfirmed)
             {
                 var locationToRemove = SavedLocations.FirstOrDefault(loc => loc.Name == location.Name);
-                Debug.WriteLine(locationToRemove);
                 if (locationToRemove != null)
                 {
                     SavedLocations.Remove(locationToRemove);
                 }
-                Debug.WriteLine(SavedLocations);
                 _placesManager.UpdatePlacesJson(SavedLocations);
                 _weatherAppData.Locations = [.. SavedLocations];
             }
@@ -215,8 +213,7 @@ namespace WeatherApp.ViewModels
                     // Check if the data is less than an hour old
                     if ((DateTime.Now - timestamp).TotalHours < 1)
                     {
-                        Debug.WriteLine($"Using cached weather data for {location.Name} (retrieved at {timestamp})");
-                        return; // Skip fetching data from the API
+                        return; // Skip fetching data from the API, used cached data instead
                     }
                 }
 
@@ -226,7 +223,6 @@ namespace WeatherApp.ViewModels
                 {
                     location.WeatherData = [response.Data];
                     location.IsWeatherDataAvailable = true;
-                    Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
                 }
                 else
                 {
@@ -265,11 +261,6 @@ namespace WeatherApp.ViewModels
 
                         fetchTask.ContinueWith(t =>
                         {
-                            if (t.IsFaulted)
-                            {
-                                Debug.WriteLine($"Error fetching weather for {location.Name}: {t.Exception?.Message}");
-                            }
-
                             countdown.Signal();
                         }, TaskContinuationOptions.ExecuteSynchronously);
                     }

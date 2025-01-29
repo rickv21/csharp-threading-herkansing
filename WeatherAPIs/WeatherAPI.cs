@@ -18,7 +18,6 @@ namespace WeatherApp.WeatherAPIs
         /// <returns>An APIResponse with a list of WeatherDataModels</returns>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
-            Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -36,7 +35,6 @@ namespace WeatherApp.WeatherAPIs
                 var latitude = location.Latitude.ToString().Replace(",", ".");
                 var longitude = location.Longitude.ToString().Replace(",", ".");
                 string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&dt={day:yyyy-MM-dd}";
-                Debug.WriteLine("URL: " + url);
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -54,7 +52,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             // Extract relevant data
@@ -95,7 +92,6 @@ namespace WeatherApp.WeatherAPIs
         /// <exception cref="Exception">An exception for when the processing of weatherdata fails</exception>
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
-            Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
             {
                 return new APIResponse<List<WeatherDataModel>>
@@ -130,7 +126,6 @@ namespace WeatherApp.WeatherAPIs
                 responseBody = await response.Content.ReadAsStringAsync();
             }
 
-            Debug.WriteLine(responseBody);
             JObject weatherResponse = JObject.Parse(responseBody);
 
             var forecastDays = weatherResponse["forecast"]?["forecastday"] ?? throw new Exception("Missing forecast data in API response.");
@@ -273,7 +268,6 @@ namespace WeatherApp.WeatherAPIs
                     return WeatherCondition.THUNDERSTORM;
             }
 
-            Debug.WriteLine($"Unknown condition: '{condition}'");
             return WeatherCondition.UNKNOWN;
         }
     }
