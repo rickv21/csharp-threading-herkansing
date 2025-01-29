@@ -12,7 +12,7 @@ namespace WeatherApp.WeatherAPIs
         }
 
         //not possible with free weatherbit subscription, sends empty data 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting weather data for {Name} on {day:yyyy-MM-dd}.");
 
@@ -21,7 +21,7 @@ namespace WeatherApp.WeatherAPIs
             {
                 Success = true,
                 Source = Name,
-                Data = new List<WeatherDataModel>() // Lege lijst
+                Data = []
             };
         }
 
@@ -30,10 +30,9 @@ namespace WeatherApp.WeatherAPIs
         /// Requests forecast data for a week
         /// </summary>
         /// <param name="location"></param>
-        /// <param name="simulate"></param>
         /// <returns>7 days of weather data</returns>
         /// <exception cref="Exception"></exception>
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
@@ -47,38 +46,32 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("weatherbit_week_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string latitude = location.Latitude.ToString(CultureInfo.InvariantCulture);
+                string longitude = location.Longitude.ToString(CultureInfo.InvariantCulture);
+
+                string url = $"{_baseURL}?key={_apiKey}&lat={latitude}&lon={longitude}&days=7";
+
+                HttpResponseMessage response = await client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    string latitude = location.Latitude.ToString(CultureInfo.InvariantCulture);
-                    string longitude = location.Longitude.ToString(CultureInfo.InvariantCulture);
-
-                    string url = $"{_baseURL}?key={_apiKey}&lat={latitude}&lon={longitude}&days=7";
-
-                    HttpResponseMessage response = await client.GetAsync(url);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        Debug.WriteLine("Error: " + responseBody);
-
-                        var errorResponse = JObject.Parse(responseBody);
-                        string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
-                        string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
+                    Debug.WriteLine("Error: " + responseBody);
+
+                    var errorResponse = JObject.Parse(responseBody);
+                    string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
+                    string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);

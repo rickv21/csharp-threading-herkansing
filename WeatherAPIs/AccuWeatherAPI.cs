@@ -16,12 +16,11 @@ namespace WeatherApp.WeatherAPIs
         /// Gets the location key for the given location via the AccuWeather geolocation API.
         /// </summary>
         /// <param name="location">The location data.</param>
-        /// <param name="simulate">If the request should use test data.</param>
         /// <returns>
         /// An API Response containing the location key if successful
         /// Otherwise it contains an errorMessage.
         /// </returns>
-        private async Task<APIResponse<string>> GetLocationKey(LocationModel location, bool simulate)
+        private async Task<APIResponse<string>> GetLocationKey(LocationModel location)
         {
             Debug.WriteLine($"Requesting location key for {Name}.");
             if (HasReachedRequestLimit())
@@ -36,46 +35,39 @@ namespace WeatherApp.WeatherAPIs
 
             string responseBody;
 
-            if (simulate)
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("accu_weather_location_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string url = $"{_baseURL}/locations/v1/cities/geoposition/search?apikey={_apiKey}&q={location.Latitude},{location.Longitude}&details=true";
+                Debug.WriteLine(url);
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    string url = $"{_baseURL}/locations/v1/cities/geoposition/search?apikey={_apiKey}&q={location.Latitude},{location.Longitude}&details=true";
-                    Debug.WriteLine(url);
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        int errorCode = (int)response.StatusCode;
-
-                        var errorData = errorResponse["Message"];
-                        string errorMessage;
-                        if (errorData == null)
-                        {
-                            errorMessage = "Could not get error information.";
-                        }
-                        else
-                        {
-                            errorMessage = errorData.ToString() ?? "Unknown Error";
-                        }
-
-                        return new APIResponse<string>
-                        {
-                            Success = false,
-                            Source = Name,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
-        
+                    var errorResponse = JObject.Parse(responseBody);
+                    int errorCode = (int)response.StatusCode;
+
+                    var errorData = errorResponse["Message"];
+                    string errorMessage;
+                    if (errorData == null)
+                    {
+                        errorMessage = "Could not get error information.";
+                    }
+                    else
+                    {
+                        errorMessage = errorData.ToString() ?? "Unknown Error";
+                    }
+
+                    return new APIResponse<string>
+                    {
+                        Success = false,
+                        Source = Name,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Data = null
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
+
             JObject locationResponse = JObject.Parse(responseBody);
             var locationKey = locationResponse["Key"];
             if (locationKey == null)
@@ -97,7 +89,7 @@ namespace WeatherApp.WeatherAPIs
         
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
             JsonFileManager jsonFileManager = new();
@@ -108,7 +100,7 @@ namespace WeatherApp.WeatherAPIs
             if (locationKey == null)
             {
                 Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
-                APIResponse<string> locationKeyResponse = await GetLocationKey(location, simulate);
+                APIResponse<string> locationKeyResponse = await GetLocationKey(location);
                 if (!locationKeyResponse.Success)
                     return new APIResponse<List<WeatherDataModel>>
                     {
@@ -134,59 +126,45 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("accu_weather_hour_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                string url = $"{_baseURL}/forecasts/v1/hourly/12hour/{locationKey}/?apikey={_apiKey}&details=true&metric=true";
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    string url = $"{_baseURL}/forecasts/v1/hourly/12hour/{locationKey}/?apikey={_apiKey}&details=true&metric=true";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["Message"];
-                        string errorMessage;
-                        if (errorData == null)
-                        {
-                            errorMessage = "Could not get error information.";
-                        }
-                        else
-                        {
-                            errorMessage = errorData.ToString() ?? "Unknown Error";
-                        }
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            Source = Name,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JObject.Parse(responseBody);
+                    int errorCode = (int)response.StatusCode;
+                    var errorData = errorResponse["Message"];
+                    string errorMessage;
+                    if (errorData == null)
+                    {
+                        errorMessage = "Could not get error information.";
+                    }
+                    else
+                    {
+                        errorMessage = errorData.ToString() ?? "Unknown Error";
+                    }
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        Source = Name,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);
             JArray weatherArray = JArray.Parse(responseBody);
             var weatherData = new List<WeatherDataModel>();
-            bool setTestDay = false; 
             foreach (var item in weatherArray)
             {
                 try
                 {
                     string dateString = (string)item["DateTime"]!;
                     DateTime forecastDate = DateTime.ParseExact(dateString, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-
-                    //Some test code so that it still is limited to one day when simulating.
-                    if (simulate && !setTestDay)
-                    {
-                        day = forecastDate;
-                        setTestDay = true;
-                    }
 
                     if (forecastDate.Date != day.Date)
                     {
@@ -238,17 +216,17 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
-            JsonFileManager jsonFileManager = new JsonFileManager();
+            JsonFileManager jsonFileManager = new();
 
             string? locationKey = jsonFileManager.GetData("data", Name, "storedPlaceKeys", location.Name) as string;
             Debug.WriteLine(locationKey);
             if (locationKey == null)
             {
                 Debug.WriteLine($"Obtaining location key for {location.Name} from AccuWeather API.");
-                APIResponse<String> locationKeyResponse = await GetLocationKey(location, simulate);
+                APIResponse<String> locationKeyResponse = await GetLocationKey(location);
                 if (!locationKeyResponse.Success)
                     return new APIResponse<List<WeatherDataModel>>
                     {
@@ -275,41 +253,35 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
-            {
-                responseBody = GetTestJSON("accu_weather_week_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    string url = $"{_baseURL}/forecasts/v1/daily/5day/{locationKey}/?apikey={_apiKey}&details=true&metric=true";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["Message"];
-                        string errorMessage;
-                        if (errorData == null)
-                        {
-                            errorMessage = "Could not get error information.";
-                        }
-                        else
-                        {
-                            errorMessage = errorData.ToString() ?? "Unknown Error";
-                        }
 
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name,
-                        };
-                    }
+            using (HttpClient client = new())
+            {
+                string url = $"{_baseURL}/forecasts/v1/daily/5day/{locationKey}/?apikey={_apiKey}&details=true&metric=true";
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
                     responseBody = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JObject.Parse(responseBody);
+                    int errorCode = (int)response.StatusCode;
+                    var errorData = errorResponse["Message"];
+                    string errorMessage;
+                    if (errorData == null)
+                    {
+                        errorMessage = "Could not get error information.";
+                    }
+                    else
+                    {
+                        errorMessage = errorData.ToString() ?? "Unknown Error";
+                    }
+
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name,
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);

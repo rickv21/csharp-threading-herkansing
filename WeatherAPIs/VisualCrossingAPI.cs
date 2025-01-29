@@ -10,7 +10,7 @@ namespace WeatherApp.WeatherAPIs
         public VisualCrossingAPI() : base("Visual Crossing", "https://weather.visualcrossing.com/VisualCrossingWebServices", 50, -1)
         {
         }
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
@@ -24,62 +24,48 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("visual_crossing_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                var latitude = location.Latitude.ToString().Replace(",", ".");
+                var longitude = location.Longitude.ToString().Replace(",", ".");
+                string url = $"{_baseURL}/rest/services/timeline/{latitude}%2C%20{longitude}?unitGroup=metric&key={_apiKey}&contentType=json&lang=id";
+                Debug.WriteLine(url);
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    var latitude = location.Latitude.ToString().Replace(",", ".");
-                    var longitude = location.Longitude.ToString().Replace(",", ".");
-                    string url = $"{_baseURL}/rest/services/timeline/{latitude}%2C%20{longitude}?unitGroup=metric&key={_apiKey}&contentType=json&lang=id";
-                    Debug.WriteLine(url);
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        int errorCode = (int)response.StatusCode;
-                        var errorData = responseBody;
-                        string errorMessage;
-                        if (errorData == null)
-                        {
-                            errorMessage = "Could not get error information.";
-                        }
-                        else
-                        {
-                            errorMessage = errorData ?? "Unknown Error";
-                        }
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
+                    int errorCode = (int)response.StatusCode;
+                    var errorData = responseBody;
+                    string errorMessage;
+                    if (errorData == null)
+                    {
+                        errorMessage = "Could not get error information.";
+                    }
+                    else
+                    {
+                        errorMessage = errorData ?? "Unknown Error";
+                    }
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);
             JObject weatherObject = JObject.Parse(responseBody);
             JArray daysArray = (JArray)weatherObject["days"]!;
             var weatherData = new List<WeatherDataModel>();
-            bool setTestDay = false; 
             foreach (var dayItem in daysArray)
             {
                 try
                 {
                     string dateString = (string)dayItem["datetime"]!;
                     DateTime forecastDate = DateTime.ParseExact(dateString, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-                    //Some test code so that it still is limited to one day when simulating.
-                    if (simulate && !setTestDay)
-                    {
-                        day = forecastDate;
-                        setTestDay = true;
-                    }
 
                     if (forecastDate.Date != day.Date)
                     {
@@ -152,7 +138,7 @@ namespace WeatherApp.WeatherAPIs
             };
         }
 
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
 
@@ -167,42 +153,36 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
-            {
-                responseBody = GetTestJSON("visual_crossing_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    var latitude = location.Latitude.ToString().Replace(",", ".");
-                    var longitude = location.Longitude.ToString().Replace(",", ".");
-                    string url = $"{_baseURL}/rest/services/timeline/{latitude}%2C%20{longitude}?unitGroup=metric&key={_apiKey}&contentType=json&lang=id";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        int errorCode = (int)response.StatusCode;
-                        var errorData = responseBody;
-                        string errorMessage;
-                        if (errorData == null)
-                        {
-                            errorMessage = "Could not get error information.";
-                        }
-                        else
-                        {
-                            errorMessage = errorData ?? "Unknown Error";
-                        }
 
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name
-                        };
-                    }
+            using (HttpClient client = new())
+            {
+                var latitude = location.Latitude.ToString().Replace(",", ".");
+                var longitude = location.Longitude.ToString().Replace(",", ".");
+                string url = $"{_baseURL}/rest/services/timeline/{latitude}%2C%20{longitude}?unitGroup=metric&key={_apiKey}&contentType=json&lang=id";
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
                     responseBody = await response.Content.ReadAsStringAsync();
+                    int errorCode = (int)response.StatusCode;
+                    var errorData = responseBody;
+                    string errorMessage;
+                    if (errorData == null)
+                    {
+                        errorMessage = "Could not get error information.";
+                    }
+                    else
+                    {
+                        errorMessage = errorData ?? "Unknown Error";
+                    }
+
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);
@@ -286,7 +266,5 @@ namespace WeatherApp.WeatherAPIs
                 _ => WeatherCondition.UNKNOWN // Default fallback
             };
         }
-
-
     }
 }

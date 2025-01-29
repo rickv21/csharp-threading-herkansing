@@ -11,7 +11,5 @@ namespace WeatherApp.Utils
         public Dictionary<string, WeatherService> WeatherServices { get; set; } = [];
         public Dictionary<int, List<WeatherDataModel>> WeatherCache { get; set; } = [];
         public List<LocationModel> Locations { get; set; } = [];
-        public bool SimulateMode { get; set; } = true;
     }
-
 }
