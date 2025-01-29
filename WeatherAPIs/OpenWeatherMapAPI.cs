@@ -6,10 +6,65 @@ namespace WeatherApp.WeatherAPIs
 {
     public class OpenWeatherMapAPI : WeatherService
     {
-        public string OpenWeatherApiKey => _apiKey;
 
         public OpenWeatherMapAPI() : base("Open Weather Map", "https://api.openweathermap.org/data/2.5/", 1000, -1)
         {
+        }
+
+        public string GetMapCode()
+        {
+            // Kaart
+            string htmlContent = @"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <link rel=""stylesheet"" href=""https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"" />
+                        <script src=""https://unpkg.com/leaflet@1.9.3/dist/leaflet.js""></script>
+                    </head>
+                    <body>
+                        <div id=""map"" style=""width: 100%; height: 100%;""></div>
+                        <button id=""toggleClouds"" style=""position: absolute; top: 10px; right: 10px; z-index: 1000; padding: 10px; background: white; border: 1px solid black; cursor: pointer;"">Wolklaag</button>
+        
+                        <script>
+                            var map = L.map('map', {
+                                center: [52.1326, 5.2913], // Center of the Netherlands
+                                zoom: 7, // Initial zoom level
+                                minZoom: 7, // Minimum zoom level (zoom out (restricted))
+                                maxZoom: 19, // Maximum zoom level (zoom in)
+                                maxBounds: [[50.7504, 3.3584], [53.6316, 7.2275]], // Southwest and northeast bounds of NL
+                                maxBoundsViscosity: 0.5,
+                                wheelPxPerZoomLevel: 60,
+                            });
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: 'Map data © <a href=""https://www.openstreetmap.org/"">OpenStreetMap</a> contributors',
+                                maxZoom: 19,
+                            }).addTo(map);
+
+                            var cloudLayer = L.tileLayer('https://tile.openweathermap.org/map/clouds/{z}/{x}/{y}.png?appid=APIKEY', {
+                                attribution: 'Cloud data © <a href=""https://openweathermap.org/"">OpenWeatherMap</a>',
+                                maxZoom: 19,
+                            });
+
+                            var cloudsVisible = false;
+
+                            document.getElementById('toggleClouds').addEventListener('click', function() {
+                                if (cloudsVisible) {
+                                    map.removeLayer(cloudLayer);
+                                } else {
+                                    map.addLayer(cloudLayer);
+                                }
+                                cloudsVisible = !cloudsVisible;
+                            });
+
+                        </script>
+                    </body>
+                    </html>";
+
+
+            htmlContent = htmlContent.Replace("APIKEY", _apiKey);
+
+            return htmlContent;
         }
 
         public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
@@ -21,14 +76,13 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
             string responseBody;
             if (simulate)
             {
                 responseBody = GetTestJSON("openweather_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -47,10 +101,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -84,7 +137,6 @@ namespace WeatherApp.WeatherAPIs
                 WeatherCondition condition = CalculateWeatherCondition(weatherId);
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)main["temp_min"]!,
@@ -96,7 +148,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
 
@@ -111,7 +163,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -124,7 +176,6 @@ namespace WeatherApp.WeatherAPIs
 
                 date = DateTime.Now.AddDays(2);
                 responseBody = responseBody.Replace("2022-09-04", date.ToString("yyyy-MM-dd"));
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -143,10 +194,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -190,7 +240,6 @@ namespace WeatherApp.WeatherAPIs
                 WeatherCondition condition = CalculateWeatherCondition(firstWeatherId);
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     condition,
                     day,
                     minTemperature: dayData.Min(d => (double)d["main"]!["temp_min"]!),
@@ -202,7 +251,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }
@@ -293,17 +342,17 @@ namespace WeatherApp.WeatherAPIs
         /// <param name="location">A specified location</param>
         /// <param name="simulate">True to simulate data, false to retrieve actual data</param>
         /// <returns>Returns an API response containing a WeatherDataModel depending on the outcome of the executed method</returns>
-        public async Task<APIResponse<WeatherDisplayItem>> GetCurrentWeatherAsync(LocationModel location, bool simulate = false)
+        public async Task<APIResponse<WeatherDataModel>> GetCurrentWeatherAsync(LocationModel location, bool simulate = false)
         {
             try
             {
                 if (HasReachedRequestLimit())
                 {
-                    return new APIResponse<WeatherDisplayItem>
+                    return new APIResponse<WeatherDataModel>
                     {
                         Success = false,
                         ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                        Data = null
+                        Source = Name
                     };
                 }
 
@@ -311,7 +360,6 @@ namespace WeatherApp.WeatherAPIs
                 if (simulate)
                 {
                     responseBody = GetTestJSON("openweather_test.json");
-                    //CountRequest(); // Important: this counts the requests for the limit.
                 }
                 else
                 {
@@ -327,15 +375,14 @@ namespace WeatherApp.WeatherAPIs
                         string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
                         string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
                         
-                        return new APIResponse<WeatherDisplayItem>
+                        return new APIResponse<WeatherDataModel>
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
 
-                    //CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
 
@@ -347,11 +394,11 @@ namespace WeatherApp.WeatherAPIs
 
                 if (main == null || weather == null || weather["id"] == null)
                 {
-                    return new APIResponse<WeatherDisplayItem>
+                    return new APIResponse<WeatherDataModel>
                     {
                         Success = false,
                         ErrorMessage = "Missing weather data in API response",
-                        Data = null
+                        Source = Name
                     };
                 }
 
@@ -362,26 +409,28 @@ namespace WeatherApp.WeatherAPIs
                 // Prepare the WeatherInfo string
                 string weatherInfo = $"Time: {DateTime.Now.ToString("HH:mm")}, Min Temp: {main["temp_min"]}°C, Max Temp: {main["temp_max"]}°C, Humidity: {main["humidity"]}, Condition: {condition}";
 
-                WeatherDisplayItem currentWeather = new(
-                    image: null,
-                    weatherInfo: weatherInfo,
-                    isDayItem: true
+                WeatherDataModel model = new WeatherDataModel(
+                    condition,
+                    DateTime.Now,
+                    minTemperature: (double)main["temp_min"],
+                    maxTemperature: (double)main["temp_max"],
+                    humidity: (double)main["humidity"]
                 );
 
-                return new APIResponse<WeatherDisplayItem>
+                return new APIResponse<WeatherDataModel>
                 {
                     Success = true,
-                    ErrorMessage = null,
-                    Data = currentWeather
+                    Source = Name,
+                    Data = model
                 };
             }
             catch (Exception ex)
             {
-                return new APIResponse<WeatherDisplayItem>
+                return new APIResponse<WeatherDataModel>
                 {
                     Success = false,
                     ErrorMessage = "An error occurred: " + ex.Message,
-                    Data = null
+                    Source = Name
                 };
             }
         }
