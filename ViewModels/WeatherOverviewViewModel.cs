@@ -150,8 +150,8 @@ namespace WeatherApp.ViewModels
             ExportCommand = new Command(Export);
             SettingsCommand = new Command(OpenSettings);
             DayWeekCommand = new Command(SwitchDayWeek);
-            LeftArrowCommand = new Command(LeftArrow);
-            RightArrowCommand = new Command(RightArrow);
+            LeftArrowCommand = new Command(LeftArrowClick);
+            RightArrowCommand = new Command(RightArrowClick);
 
             _dangerCons = new List<WeatherCondition>()
             {
@@ -433,7 +433,7 @@ namespace WeatherApp.ViewModels
 
             foreach (var item in data)
             {
-                alertMessage.AppendLine($"Om {item.TimeStamp} komt er {item.Condition} aan.");
+                alertMessage.AppendLine($"Op {item.TimeStamp} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
             }
 
             // Delay if needed (Optional: Keeps original 2s delay)
