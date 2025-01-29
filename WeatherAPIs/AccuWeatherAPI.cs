@@ -55,7 +55,7 @@ namespace WeatherApp.WeatherAPIs
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
 
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -63,7 +63,7 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
 
                         return new APIResponse<string>
@@ -153,7 +153,7 @@ namespace WeatherApp.WeatherAPIs
                         responseBody = await response.Content.ReadAsStringAsync();
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -161,7 +161,7 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
                         return new APIResponse<List<WeatherDataModel>>
                         {
@@ -296,7 +296,7 @@ namespace WeatherApp.WeatherAPIs
                         responseBody = await response.Content.ReadAsStringAsync();
                         var errorResponse = JObject.Parse(responseBody);
                         int errorCode = (int)response.StatusCode;
-                        var errorData = errorResponse["fault"];
+                        var errorData = errorResponse["Message"];
                         string errorMessage;
                         if (errorData == null)
                         {
@@ -304,7 +304,7 @@ namespace WeatherApp.WeatherAPIs
                         }
                         else
                         {
-                            errorMessage = errorData["faultstring"]?.ToString() ?? "Unknown Error";
+                            errorMessage = errorData.ToString() ?? "Unknown Error";
                         }
 
                         return new APIResponse<List<WeatherDataModel>>

@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows.Input;
@@ -38,12 +39,33 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        private string _displayedDateFormatted;
+
+        public string DisplayedDateFormatted
+        {
+            get => _displayedDateFormatted;
+            set
+            {
+                if(_displayedDateFormatted != value)
+                {
+                    _displayedDateFormatted = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private int GetWeekNumber(DateTime date)
+        {
+            var culture = CultureInfo.CurrentCulture;
+            return culture.Calendar.GetWeekOfYear(date, culture.DateTimeFormat.CalendarWeekRule, culture.DateTimeFormat.FirstDayOfWeek);
+        }
+
         public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
 
         public ObservableCollection<LocationModel> Locations { get; set; }
 
-        private LocationModel _selectedTab;
-        public LocationModel SelectedTab
+        private LocationModel? _selectedTab;
+        public LocationModel? SelectedTab
         {
             get => _selectedTab;
             set
@@ -127,7 +149,6 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public WeatherOverviewViewModel(WeatherAppData weatherAppData)
         {
-            Debug.WriteLine("CONSTRUCT");
             _weatherAppData = weatherAppData;
             SetDefaultViewData();
  
@@ -144,6 +165,7 @@ namespace WeatherApp.ViewModels
         public void SetDefaultViewData()
         {
             DayWeekButtonText = "Week Overzicht";
+            DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
             DisplayedDate = DateTime.Now;
 
             // Replace the collection and notify the change
@@ -155,16 +177,9 @@ namespace WeatherApp.ViewModels
 
             Locations = newLocations; // This should trigger PropertyChanged for Locations
 
-            Debug.WriteLine(Locations);
-
-            // Set the first item as the selected tab if available
-            if (Locations.Any())
-            {
-                SelectedTab = Locations.First();
-            }
-
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
-            UpdateGUI();
+
+            OnPropertyChanged();
         }
 
 
@@ -378,6 +393,10 @@ namespace WeatherApp.ViewModels
         /// </summary>
         public async Task UpdateGUI()
         {
+            if (SelectedTab == null)
+            {
+                return;
+            }
             var data = await GetUpdatedWeatherData();
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -391,11 +410,15 @@ namespace WeatherApp.ViewModels
                     // Only adds :00 if the day is displayed rather than the week.
                     if (DayWeekButtonText.Equals("Week Overzicht"))
                     {
-                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key}:00 - {model.ToString()}", true);
+                        string displayName = model.TimeStamp.ToString("HH:mm");
+                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), model, displayName);
                     }
                     else
                     {
-                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), $"{entry.Key} - {model.ToString()}", false);
+             
+                        string displayName = WeatherUtils.TranslateDayOfTheWeek(model.TimeStamp.DayOfWeek);
+
+                        weatherItem = new WeatherDisplayItem(GetWeatherIcon(model.Condition), model, displayName);
                     }
                     Debug.WriteLine("GUI - " + model.ToString());
                     WeatherItems.Add(weatherItem);
@@ -557,17 +580,32 @@ namespace WeatherApp.ViewModels
 
         public async void SwitchDayWeek()
         {
-            if(DayWeekButtonText.Equals("Week Overzicht"))
+            TimedData.Clear();
+            if (DayWeekButtonText.Equals("Week Overzicht"))
             {
-                TimedData.Clear();
+                IsPreviousButtonEnabled = false;
+                IsNextButtonEnabled = false;
                 DayWeekButtonText = "Dag Overzicht";
-                await UpdateGUI();
             }
             else
             {
-                TimedData.Clear();
+                IsPreviousButtonEnabled = true;
+                IsNextButtonEnabled = true;
                 DayWeekButtonText = "Week Overzicht";
-                await UpdateGUI();
+            }
+            UpdateDisplayedDate();
+            await UpdateGUI();
+        }
+
+        private void UpdateDisplayedDate()
+        {
+            if (DayWeekButtonText.Equals("Week Overzicht"))
+            {
+                DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
+            }
+            else
+            {
+                DisplayedDateFormatted = $"Week {GetWeekNumber(DisplayedDate)}, {DisplayedDate:yyyy}";
             }
         }
 
@@ -580,12 +618,14 @@ namespace WeatherApp.ViewModels
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(-1);
             IsPreviousButtonEnabled = DisplayedDate.Date <= DateTime.Now;
+            UpdateDisplayedDate();
             await UpdateGUI();
         }
         public async void RightArrow()
         {
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(1);
+            UpdateDisplayedDate();
             await UpdateGUI();
         }
     }

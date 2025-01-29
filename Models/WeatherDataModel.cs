@@ -1,4 +1,5 @@
-﻿using WeatherApp.WeatherAPIs;
+﻿using WeatherApp.Utils;
+using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.Models
 {
@@ -31,6 +32,12 @@ namespace WeatherApp.Models
         /// The humidity level recorded.
         /// </summary>
         public double Humidity { get; } = humidity;
+
+        // 🟢 Computed Properties for UI Binding
+        public string ConditionFormatted => WeatherUtils.TranslateWeatherCondition(condition);
+        public string MinTemperatureFormatted => $"Min. Temp: {MinTemperature}°C";
+        public string MaxTemperatureFormatted => $"Max. Temp: {MaxTemperature}°C";
+        public string HumidityFormatted => $"Luchtvochtigheid: {Math.Round(Humidity, 2)}%";
 
         /// <summary>
         /// Returns a string that represents the weather data.

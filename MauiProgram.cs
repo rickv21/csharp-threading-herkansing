@@ -12,6 +12,8 @@ namespace WeatherApp
     {
         public static MauiApp CreateMauiApp()
         {
+
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -42,13 +44,9 @@ namespace WeatherApp
             JsonFileManager jsonManager = new JsonFileManager();
 
             // Retrieve the simulateData boolean.
-            var data = jsonManager.GetData("data", "simulateMode") as string;
-            Debug.WriteLine("SimulateMode: " + data);
-            if (bool.TryParse(data, out bool isEnabled))
-            {
-                appData.SimulateMode = isEnabled;
-                Debug.WriteLine("Loaded SimulateMode: " + isEnabled);
-            }
+            var data = jsonManager.GetBoolean(["data", "simulateMode"]) ?? false;
+            appData.SimulateMode = data;
+            Debug.WriteLine("Loaded SimulateMode: " + data);
 
             PlacesManager placesManager = new PlacesManager();
             appData.Locations = placesManager.LoadLocationsFromFile();

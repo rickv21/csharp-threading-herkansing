@@ -50,9 +50,9 @@ namespace WeatherApp.Models
         /// An ObservableCollection of WeatherDataModels
         /// This either represents multiple hours of a day or multiple days of a week
         /// </summary>
-        private ObservableCollection<WeatherDisplayItem> _weatherData;
+        private ObservableCollection<WeatherDataModel> _weatherData;
 
-        public ObservableCollection<WeatherDisplayItem> WeatherData
+        public ObservableCollection<WeatherDataModel> WeatherData
         {
             get => _weatherData;
             set

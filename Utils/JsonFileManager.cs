@@ -96,6 +96,26 @@ namespace WeatherApp.Utils
         }
 
         /// <summary>
+        /// Gets a boolean value from the JSON data using a specified path of keys.
+        /// </summary>
+        /// <param name="keys">An array of keys representing the path to the value.</param>
+        /// <returns>The boolean value if found, otherwise null.</returns>
+        public bool? GetBoolean(params string[] keys)
+        {
+            JObject root = GetAllJson();
+            JToken? token = root;
+
+            // Traverse the JSON hierarchy
+            foreach (var key in keys)
+            {
+                token = token?[key];
+                if (token == null) return null; // If any key does not exist, return null
+            }
+
+            return token.Type == JTokenType.Boolean ? token.Value<bool>() : null;
+        }
+
+        /// <summary>
         /// Sets a value in the JSON data using a specified path of keys.
         /// </summary>
         /// <param name="value">The value to set in the JSON data.</param>

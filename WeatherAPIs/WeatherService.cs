@@ -49,7 +49,7 @@ namespace WeatherApp.WeatherAPIs
             }
             else
             {
-                Debug.WriteLine("Data is null, empty or not a valid boolean");
+                jsonManager.SetData(true, "status", Name, "enabled");
                 return true;
             }
         }
