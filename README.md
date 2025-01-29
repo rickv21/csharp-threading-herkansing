@@ -1,6 +1,6 @@
 # Weatherapplication
 
-[> Startdocument van **Monique Sabong Land**, **Yannieck Blaauw**, **Thijs Janse** en **Chris Klunder**.](./start-document/WEATHERAPPLICATION-STARTDOCUMENT.md)
+[> Startdocument van **Monique Sabong Land**, **Rick Vinke**, **Thijs Janse** en **Chris Klunder**.](./start-document/WEATHERAPPLICATION-STARTDOCUMENT.md)
 
 ## Installatie handleiding
 Hieronder staan de stappen die genomen worden om gebruik te kunnen maken van de applicatie.
