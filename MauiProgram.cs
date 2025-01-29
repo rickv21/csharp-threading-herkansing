@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using WeatherApp.Alerts;
 using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
 

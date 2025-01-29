@@ -49,7 +49,7 @@ namespace WeatherApp.Utils
                 WeatherCondition.WINDY => "Winderig",
                 WeatherCondition.DRIZZLE => "Motregen",
                 WeatherCondition.FOG => "Dichte mist",
-                WeatherCondition.HAZE => "Wazig",
+                WeatherCondition.HAZE => "Nevel",
                 WeatherCondition.DUST => "Stof",
                 WeatherCondition.ASH => "As",
                 WeatherCondition.SQUALL => "Vlaag",

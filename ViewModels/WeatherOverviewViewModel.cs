@@ -413,7 +413,7 @@ namespace WeatherApp.ViewModels
                 );
 
             var riskyData = sortedAggregatedData.Values
-                .Where(item => !_dangerCons.Contains(item.Condition))
+                .Where(item => _dangerCons.Contains(item.Condition))
                 .ToList();
 
             DisplayAlerts(riskyData);
@@ -433,16 +433,22 @@ namespace WeatherApp.ViewModels
 
             foreach (var item in data)
             {
-                alertMessage.AppendLine($"Op {item.TimeStamp} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
+                if (DayWeekButtonText.Equals("Week Overzicht"))
+                {
+                    alertMessage.AppendLine($"Let op, om {item.TimeStamp.ToString("HH:mm")} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
+                } 
+                else
+                {
+                    alertMessage.AppendLine($"Let op, {WeatherUtils.TranslateDayOfTheWeek(item.TimeStamp.DayOfWeek)} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
+                }
             }
 
-            // Delay if needed (Optional: Keeps original 2s delay)
-            await Task.Delay(2000);
+            //Wait until weather data is visually updated.
+            await Task.Delay(1000);
 
             // Show single alert with all messages
             App.AlertSvc.ShowAlert("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
         }
-
 
         /// <summary>
         /// Updates the UI with the latest weather data by clearing and refilling the WeatherItems collection.

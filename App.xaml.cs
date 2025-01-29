@@ -1,4 +1,6 @@
-﻿namespace WeatherApp
+﻿using WeatherApp.Alerts;
+
+namespace WeatherApp
 {
     public partial class App : Application
     {
