@@ -43,6 +43,20 @@ Hieronder staan de stappen die genomen moeten worden om gebruik te kunnen maken 
      Dit zijn Visual Studio 2022 inclusief ".NET 8", ".NET Desktop Development" en de ".NET Multi-platform App UI development" modules.
 - "Zelfs na het installeren van het certificaat wil de applicatie niet installeren."
     - .NET MAUI is erg streng met certificaten. Als de meegeleverde certificaat niet werkt, kan je de applicatie helaas alleen uitvoeren door Visual Studio 2022 met de vereisten uit de vorige vraag te installeren en het via Visual Studio uit te voeren.
+- "In de applicatie krijg ik bij het ophalen van weerdata de fout melding: "API key not found in environment variables.""
+    - In de .msix versie van de applicatie zitten onze API keys voor alle weer API's inbegrepen. Deze API keys zijn niet inbegrepen bij de code en dit geeft dus een foutmelding wanneer de code zelf gecompileerd is. Om dit op te lossen moet `.env-example` worden hernoemd naar `.env` en moeten eigen API keys worden toegevoegd. Iedere API (behalve Geocoding en OpenWeatherMap) kunnen volledig worden uitgeschakeld om de applicatie te laten werken zonder de bijbehorende API keys. 
+- "Sommige API's geven geen data terug."  
+    - Dit kan komen door problemen aan de API kant of omdat het aantal aanvragen van de API is opgebruikt. Iedere API die de applicatie gebruikt heeft een limiet. Sommigen zijn erg laag omdat er gebruik wordt gemaakt van gratis accounts. Zelfs als er een aantal API's stoppen met werken, de applicatie kan blijven doorwerken met de resterende API's.
+    - Dit zijn de limieten van de API's:
+        - Open Weather Map: 1000 per dag.
+        - Weerlive: 300 per dag.
+        - WeatherAPI: 1000000 per maand.
+        - AccuWeather: 50 per dag.
+        - WeatherBit: 50 per dag.
+        - WeatherStack: 100 per maand.
+        - VisualCrossing: 1000 per dag.
+        - Geocoding: 3000 per dag.
+   - Er is een systeem in de applicatie die een melding moet geven als je aan je limiet zit met een van de API's zodat je die kan uitzetten. Maar het kan zijn dat deze niet acuraat is als het configuratie bestand eerder is verwijdert of als de applicatie door meerdere mensen wordt gebruikt.
 
 ## Functionaliteiten
 
