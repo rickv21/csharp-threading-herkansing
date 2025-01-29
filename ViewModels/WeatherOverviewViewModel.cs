@@ -90,6 +90,8 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        private readonly Export _exporter;
+
         /// <summary>
         /// Initializes the ViewModel, sets default values, and starts loading data.
         /// </summary>
@@ -99,6 +101,7 @@ namespace WeatherApp.ViewModels
             DisplayedDate = DateTime.Now;
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
             _weatherAppData = weatherAppData;
+            _exporter = new Export();
             this.Locations = new ObservableCollection<LocationModel>();
             foreach(var location in weatherAppData.Locations)
             {
@@ -376,19 +379,6 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Converts weather data to JSON
-        /// </summary>
-        public string GetWeatherDataAsJson()
-        {
-            if (WeatherItems == null || WeatherItems.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            return JsonSerializer.Serialize(WeatherItems, new JsonSerializerOptions { WriteIndented = true });
-        }
-
-        /// <summary>
         /// Handles export data
         /// 
         /// Multithreading: export-method starts 3 threads to export weatherdata to JSON, CSV and TXT-files
@@ -407,30 +397,9 @@ namespace WeatherApp.ViewModels
                     return;
                 }
 
-                string jsonData = GetWeatherDataAsJson();
+                LocationModel location = _selectedTab ?? Locations.First();
 
-                string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-                // Location where export documents get saved
-                string exportFolder = Path.Combine(documentsFolder, "ExportWeatherData");
-
-                // Creates folder 'ExportWeatherDat' if it doesnt exists
-                if (!Directory.Exists(exportFolder))
-                {
-                    Directory.CreateDirectory(exportFolder);
-                }
-
-                // Filename based on date time
-                string timestamp = DateTime.Now.ToString("ddMMyyyy_HHmmss");
-
-                // Start export threads
-                await Task.WhenAll(
-                    Task.Run(() => ExportToJson(jsonData, exportFolder, timestamp)),
-                    Task.Run(() => ExportToCsv(exportFolder, timestamp)),
-                    Task.Run(() => ExportToTxt(exportFolder, timestamp))
-                );
-
-                await Shell.Current.DisplayAlert("Export Succesvol", $"Bestanden opgeslagen in: {exportFolder}", "OK");
+                await _exporter.ExportWeatherData(WeatherItems.ToList(), location, Locations.ToList());
             }
             catch (Exception ex)
             {
@@ -438,106 +407,6 @@ namespace WeatherApp.ViewModels
                 await Shell.Current.DisplayAlert("Export Fout", $"Er is een fout opgetreden: {ex.Message}", "OK");
             }
         }
-
-        /// <summary>
-        /// Exports weather data to JSON
-        /// </summary>
-        private void ExportToJson(string jsonData, string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.json");
-
-            // Location
-            if (_selectedTab != null)
-            {
-                location = _selectedTab;
-            }
-            else
-            {
-                location = this.Locations.First();
-            }
-
-            var weatherWithLocation = new
-            {
-                Location = location.Name,
-                WeatherData = WeatherItems
-            };
-
-            // Serialize to JSON
-            string jsonWithLocation = JsonSerializer.Serialize(weatherWithLocation, new JsonSerializerOptions { WriteIndented = true });
-
-            File.WriteAllText(filePath, jsonWithLocation);
-            Debug.WriteLine($"Weather data exported to JSON: {filePath}");
-        }
-
-        private LocationModel location;
-
-        /// <summary>
-        /// Exports weather data to CSV
-        /// </summary>
-        private void ExportToCsv(string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.csv");
-
-            if (WeatherItems == null) return;
-
-            // CSV-header 
-            var csvLines = new List<string> { "Plaats;Tijdstip;Weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
-
-            if(_selectedTab != null)
-            {
-                location = _selectedTab;
-            }
-            else
-            {
-                location = this.Locations.First();
-            }
-
-            csvLines.AddRange(WeatherItems.Select(item =>
-                $"{location};{item.TimeStamp};{item.Condition.Trim()};{GetTemperatureValue(item.MinTemp)};{GetTemperatureValue(item.MaxTemp)};{item.Humidity}"
-            ));
-
-            File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
-            Debug.WriteLine($"Weather data exported to CSV: {filePath}");
-        }
-
-        /// <summary>
-        /// Trims min and max temperature for CSV export so as example only 8°C is displayed in the csv column
-        /// </summary>
-        private string GetTemperatureValue(string temperature)
-        {
-            var cleanedTemperature = System.Text.RegularExpressions.Regex.Replace(temperature, @"[^\d.,-]", "");
-            return $"{cleanedTemperature} °C";
-        }
-
-        /// <summary>
-        /// Exports weather data to TXT
-        /// </summary>
-        private void ExportToTxt(string folder, string timestamp)
-        {
-            string filePath = Path.Combine(folder, $"WeatherData_{timestamp}.txt");
-
-            if (WeatherItems == null) return;
-
-
-            //location
-            if (_selectedTab != null)
-            {
-                location = _selectedTab;
-            }
-            else
-            {
-                location = this.Locations.First();
-            }
-
-            // Adds location
-            var txtLines = new List<string> { $"Locatie: {location.Name}" };
-
-            txtLines.AddRange(WeatherItems.Select(item => item.DisplayText));
-
-            File.WriteAllLines(filePath, txtLines);
-            Debug.WriteLine($"Weather data exported to TXT: {filePath}");
-        }
-
 
         /// <summary>
         /// Opens the settings page.
