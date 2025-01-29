@@ -38,7 +38,7 @@ namespace WeatherApp.Utils
         /// 
         /// Based on paragraph 'Multithreading' in: https://stackify.com/c-threading-and-multithreading-a-guide-with-examples/
         /// </summary>
-        public async Task ExportWeatherData(List<WeatherDisplayItem> weatherItems, LocationModel selectedLocation, List<LocationModel> locations)
+        public async Task ExportWeatherData(List<WeatherDisplayModel> weatherItems, LocationModel selectedLocation, List<LocationModel> locations)
         {
             LocationModel location = selectedLocation ?? locations.First();
 
@@ -58,7 +58,7 @@ namespace WeatherApp.Utils
         /// <summary>
         /// Exports weather data to JSON
         /// </summary>
-        private void ExportToJson(List<WeatherDisplayItem> weatherItems, LocationModel location, string timestamp)
+        private void ExportToJson(List<WeatherDisplayModel> weatherItems, LocationModel location, string timestamp)
         {
             if (weatherItems == null || weatherItems.Count == 0)
             {
@@ -71,7 +71,17 @@ namespace WeatherApp.Utils
             var weatherWithLocation = new
             {
                 Location = location.Name,
-                WeatherData = weatherItems // Direct de lijst opslaan zonder extra serialisatie
+                WeatherData = weatherItems.Select(item => new
+                {
+                    item.WeatherData.Condition,
+                    item.WeatherData.ConditionFormatted,
+                    item.WeatherData.TimeStamp,
+                    item.WeatherData.MinTemperature,
+                    item.WeatherData.MaxTemperature,
+                    item.WeatherData.Humidity,
+                    item.LocalizedName,
+                    item.DisplayText
+                })
             };
 
             string jsonWithLocation = JsonSerializer.Serialize(weatherWithLocation, new JsonSerializerOptions { WriteIndented = true });
@@ -84,14 +94,14 @@ namespace WeatherApp.Utils
         /// <summary>
         /// Exports weather data to CSV
         /// </summary>
-        private void ExportToCsv(List<WeatherDisplayItem> weatherItems, LocationModel location, string timestamp)
+        private void ExportToCsv(List<WeatherDisplayModel> weatherItems, LocationModel location, string timestamp)
         {
             string filePath = Path.Combine(_exportFolder, $"WeatherData_{timestamp}.csv");
 
-            var csvLines = new List<string> { "Plaats;Tijdstip;Weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
+            var csvLines = new List<string> { "Plaats;Tijdstip;Weersomstandigheden;Vertaalde weersomstandigheden;Min Temperatuur;Max Temperatuur;Vochtigheid" };
 
             csvLines.AddRange(weatherItems.Select(item =>
-                $"{location.Name};{item.TimeStamp};{item.Condition.Trim()};{GetTemperatureValue(item.MinTemp)};{GetTemperatureValue(item.MaxTemp)};{item.Humidity}"
+                $"{location.Name};{item.WeatherData.TimeStamp};{item.WeatherData.Condition};{item.WeatherData.ConditionFormatted};{(item.WeatherData.MinTemperature)};{(item.WeatherData.MaxTemperature)};{item.WeatherData.Humidity}"
             ));
 
             File.WriteAllLines(filePath, csvLines, Encoding.UTF8);
@@ -101,7 +111,7 @@ namespace WeatherApp.Utils
         /// <summary>
         /// Exports weather data to TXT
         /// </summary>
-        private void ExportToTxt(List<WeatherDisplayItem> weatherItems, LocationModel location, string timestamp)
+        private void ExportToTxt(List<WeatherDisplayModel> weatherItems, LocationModel location, string timestamp)
         {
             string filePath = Path.Combine(_exportFolder, $"WeatherData_{timestamp}.txt");
 
@@ -110,14 +120,6 @@ namespace WeatherApp.Utils
 
             File.WriteAllLines(filePath, txtLines);
             Debug.WriteLine($"Weather data exported to TXT: {filePath}");
-        }
-
-        /// <summary>
-        /// Trims min and max temperature for CSV export so as example only 8°C is displayed in the csv column
-        /// </summary>
-        private string GetTemperatureValue(string temperature)
-        {
-            return System.Text.RegularExpressions.Regex.Replace(temperature, @"[^\d.,-]", "") + " °C";
         }
     }
 }

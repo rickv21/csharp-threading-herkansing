@@ -24,7 +24,7 @@ namespace WeatherApp.Models
 
         public override string ToString()
         {
-            return $"Tijd: {WeatherData.TimeStamp}, Min. Temp: {WeatherData.MinTemperature}, Max. Temp: {WeatherData.MaxTemperature}, Luchtvochtigheid: {WeatherData.Humidity}, Conditie: {WeatherData.Condition}";
+            return $"Tijd: {WeatherData.TimeStamp}, Min. Temp: {WeatherData.MinTemperature}, Max. Temp: {WeatherData.MaxTemperature}, Luchtvochtigheid: {WeatherData.Humidity}, Conditie: {WeatherData.Condition}, Vertaalde conditie: {WeatherData.ConditionFormatted}";
         }
     }
 }
