@@ -16,6 +16,4 @@
     <ShellContent Route="WeatherOverview" ContentTemplate="{DataTemplate local:WeatherOverviewView}" />
     <ShellContent Route="City" ContentTemplate="{DataTemplate local:CityView}" />
     <ShellContent Route="Settings" ContentTemplate="{DataTemplate local:SettingsPage}" />
-    <ShellContent Route="TestPage" ContentTemplate="{DataTemplate local:TestPage}" />
-    
 </Shell>

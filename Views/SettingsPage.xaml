@@ -25,8 +25,7 @@
             </CollectionView>
 
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <Button Text="Ga naar de testpagina" HorizontalOptions="Center" Command="{Binding NavigateToTestPageCommand}" Margin="0,20,0,0" />
-                <Button Text="Opslaan" HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
+                <Button Text="Opslaan"  HorizontalOptions="Center" Command="{Binding SaveCommand}" Margin="0,20,0,0" />
             </HorizontalStackLayout>
         </StackLayout>
     </ScrollView>
