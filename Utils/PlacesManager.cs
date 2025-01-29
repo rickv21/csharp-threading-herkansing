@@ -7,7 +7,7 @@ namespace WeatherApp.Utils
 {
     public class PlacesManager
     {
-        JsonFileManager jsonFileManager = new JsonFileManager(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "places.json"));
+        JsonFileManager jsonFileManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "places.json"));
 
         /// <summary>
         /// Update the JSON file with favorite places
@@ -45,7 +45,7 @@ namespace WeatherApp.Utils
         /// <returns>A list of favorited locations.</returns>
         public List<LocationModel> LoadLocationsFromFile()
         {
-            JObject locationsObject = (jsonFileManager.GetData("Locations") as JObject) ?? new JObject();
+            JObject locationsObject = (jsonFileManager.GetData("Locations") as JObject) ?? [];
 
             return locationsObject.Properties()
                 .Select(prop =>

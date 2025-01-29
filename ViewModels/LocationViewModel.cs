@@ -224,20 +224,20 @@ namespace WeatherApp.ViewModels
 
                 if (response.Success)
                 {
-                    location.WeatherData = new ObservableCollection<WeatherDataModel> { response.Data };
+                    location.WeatherData = [response.Data];
                     location.IsWeatherDataAvailable = true;
                     Debug.WriteLine($"Weather data for {location.Name}: {string.Join(", ", location.WeatherData.Select(data => data.ToString()))}");
                 }
                 else
                 {
-                    location.WeatherData = new ObservableCollection<WeatherDataModel>();
+                    location.WeatherData = [];
                     location.IsWeatherDataAvailable = false;
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error fetching weather for {location.Name}: {ex.Message}");
-                location.WeatherData = new ObservableCollection<WeatherDataModel>();
+                location.WeatherData = [];
             }
         }
 

@@ -15,10 +15,9 @@ namespace WeatherApp.WeatherAPIs
         /// </summary>
         /// <param name="day"></param>
         /// <param name="location"></param>
-        /// <param name="simulate"></param>
         /// <returns>weather data hourly from current day</returns>
         /// <exception cref="Exception"></exception>
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherDataAsync(DateTime day, LocationModel location)
         {
             Debug.WriteLine($"Requesting day data for {Name}.");
             if (HasReachedRequestLimit())
@@ -32,34 +31,28 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("weather_api_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                var latitude = location.Latitude.ToString().Replace(",", ".");
+                var longitude = location.Longitude.ToString().Replace(",", ".");
+                string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&dt={day:yyyy-MM-dd}";
+                Debug.WriteLine("URL: " + url);
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    var latitude = location.Latitude.ToString().Replace(",", ".");
-                    var longitude = location.Longitude.ToString().Replace(",", ".");
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&dt={day:yyyy-MM-dd}";
-                    Debug.WriteLine("URL: " + url);
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
-                        string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JObject.Parse(responseBody);
+                    string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
+                    string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);
@@ -76,7 +69,7 @@ namespace WeatherApp.WeatherAPIs
                 var condition = CalculateWeatherCondition(hour["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(hour["time"]?.ToString()!);
 
-                if (!simulate && forecastDate.Date != day.Date) continue;
+                if (forecastDate.Date != day.Date) continue;
 
                 weatherData.Add(new WeatherDataModel(
                     condition,
@@ -100,10 +93,9 @@ namespace WeatherApp.WeatherAPIs
         /// Only the next 3 days is free with weatherapi free subscription
         /// </summary>
         /// <param name="location"></param>
-        /// <param name="simulate"></param>
         /// <returns>weatherdata from the next 3 days</returns>
         /// <exception cref="Exception"></exception>
-        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location, bool simulate = false)
+        public override async Task<APIResponse<List<WeatherDataModel>>> GetWeatherForAWeekAsync(LocationModel location)
         {
             Debug.WriteLine($"Requesting week data for {Name}.");
             if (HasReachedRequestLimit())
@@ -117,33 +109,27 @@ namespace WeatherApp.WeatherAPIs
             }
 
             string responseBody;
-            if (simulate)
+
+            using (HttpClient client = new())
             {
-                responseBody = GetTestJSON("weather_api_week_test.json");
-            }
-            else
-            {
-                using (HttpClient client = new HttpClient())
+                var latitude = location.Latitude.ToString().Replace(",", ".");
+                var longitude = location.Longitude.ToString().Replace(",", ".");
+                string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&days=7";
+                HttpResponseMessage response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    var latitude = location.Latitude.ToString().Replace(",", ".");
-                    var longitude = location.Longitude.ToString().Replace(",", ".");
-                    string url = $"{_baseURL}forecast.json?key={_apiKey}&q={latitude},{longitude}&days=7";
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
-                        string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
-                        return new APIResponse<List<WeatherDataModel>>
-                        {
-                            Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Source = Name
-                        };
-                    }
                     responseBody = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JObject.Parse(responseBody);
+                    string errorCode = errorResponse["error"]?["code"]?.ToString() ?? "Unknown Code";
+                    string errorMessage = errorResponse["error"]?["message"]?.ToString() ?? "Unknown Error";
+                    return new APIResponse<List<WeatherDataModel>>
+                    {
+                        Success = false,
+                        ErrorMessage = $"{errorCode} - {errorMessage}",
+                        Source = Name
+                    };
                 }
+                responseBody = await response.Content.ReadAsStringAsync();
             }
 
             Debug.WriteLine(responseBody);

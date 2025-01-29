@@ -40,14 +40,8 @@ namespace WeatherApp
         /// <param name="appData">The WeatherAppData object to be updated.</param>
         private static void InitializeWeatherAppData(WeatherAppData appData)
         {
-            JsonFileManager jsonManager = new JsonFileManager();
-
-            // Retrieve the simulateData boolean.
-            var data = jsonManager.GetBoolean(["data", "simulateMode"]) ?? false;
-            appData.SimulateMode = data;
-            Debug.WriteLine("Loaded SimulateMode: " + data);
-
-            PlacesManager placesManager = new PlacesManager();
+            JsonFileManager jsonManager = new();
+            PlacesManager placesManager = new();
             appData.Locations = placesManager.LoadLocationsFromFile();
 
             try
