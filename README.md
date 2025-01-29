@@ -28,7 +28,7 @@ Hieronder staan de stappen die genomen moeten worden om gebruik te kunnen maken 
 
 2. Ga naar de map van het project en open PowerShell in deze map.
 
-3. Voer ./Add-AppDevPackage.ps1 uit in PowerShell, je zal om administrator rechten worden gevraagd. Na het toevoegen van het cerificaat zal het een foutmelding geven, dit kan je negeren.
+3. Voer `./Add-AppDevPackage.ps1` uit in PowerShell, je zal om administrator rechten worden gevraagd. Na het toevoegen van het cerificaat zal het een foutmelding geven, dit kan je negeren.
 
 4. Dubbel klik op WeatherApp_1.0.0.0_x64.msix en klik op installeren.
 
