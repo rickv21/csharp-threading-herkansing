@@ -1,11 +1,17 @@
-﻿namespace WeatherApp
+﻿using WeatherApp.Alerts;
+
+namespace WeatherApp
 {
     public partial class App : Application
     {
-        public App()
+        public static IServiceProvider Services;
+        public static IAlertService AlertSvc;
+        public App(IServiceProvider provider)
         {
             InitializeComponent();
             UserAppTheme = AppTheme.Dark;
+            Services = provider;
+            AlertSvc = Services.GetService<IAlertService>();
             MainPage = new AppShell();
         }
     }

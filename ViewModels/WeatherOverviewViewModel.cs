@@ -29,6 +29,8 @@ namespace WeatherApp.ViewModels
         public ICommand LeftArrowCommand { get; }
         public ICommand RightArrowCommand { get; }
 
+        private List<WeatherCondition> _dangerCons;
+
         private DateTime _displayedDate;
         public DateTime DisplayedDate {
             get => _displayedDate;
@@ -150,6 +152,16 @@ namespace WeatherApp.ViewModels
             DayWeekCommand = new Command(SwitchDayWeek);
             LeftArrowCommand = new Command(LeftArrowClick);
             RightArrowCommand = new Command(RightArrowClick);
+
+            _dangerCons = new List<WeatherCondition>()
+            {
+                WeatherCondition.THUNDERSTORM,
+                WeatherCondition.ICE,
+                WeatherCondition.FOG,
+                WeatherCondition.HAZE,
+                WeatherCondition.MIST,
+                WeatherCondition.TORNADO
+            };
         }
 
         /// <summary>
@@ -399,9 +411,43 @@ namespace WeatherApp.ViewModels
                     group => group.OrderBy(x => x.Value.TimeStamp).First().Value // Take the earliest by Timestamp
                 );
 
+            var riskyData = sortedAggregatedData.Values
+                .Where(item => _dangerCons.Contains(item.Condition))
+                .ToList();
+
+            DisplayAlerts(riskyData);
             return sortedAggregatedData;
         }
 
+        /// <summary>
+        /// Displays a bad weather alert for a list of weatherData
+        /// </summary>
+        private async void DisplayAlerts(List<WeatherDataModel> data)
+        {
+            if (data == null || data.Count == 0)
+                return;
+
+            // Build a message string with all alerts
+            StringBuilder alertMessage = new StringBuilder("");
+
+            foreach (var item in data)
+            {
+                if (DayWeekButtonText.Equals("Week Overzicht"))
+                {
+                    alertMessage.AppendLine($"Let op, om {item.TimeStamp.ToString("HH:mm")} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
+                } 
+                else
+                {
+                    alertMessage.AppendLine($"Let op, {WeatherUtils.TranslateDayOfTheWeek(item.TimeStamp.DayOfWeek)} komt er {WeatherUtils.TranslateWeatherCondition(item.Condition)} aan.");
+                }
+            }
+
+            //Wait until weather data is visually updated.
+            await Task.Delay(1000);
+
+            // Show single alert with all messages
+            App.AlertSvc.ShowAlertAsync("Slecht weer opkomst!", alertMessage.ToString(), "Ik ben gewaarschuwd");
+        }
 
         /// <summary>
         /// Updates the UI with the latest weather data by clearing and refilling the WeatherItems collection.

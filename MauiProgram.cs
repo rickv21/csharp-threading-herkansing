@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using WeatherApp.Alerts;
 using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
 
@@ -24,6 +25,7 @@ namespace WeatherApp
                 InitializeWeatherAppData(data);
                 return data;
             });
+            builder.Services.AddSingleton<IAlertService, AlertService>();
 
 #if DEBUG
             builder.Logging.AddDebug();
