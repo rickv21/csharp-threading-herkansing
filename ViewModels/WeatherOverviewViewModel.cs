@@ -152,8 +152,11 @@ namespace WeatherApp.ViewModels
         public void SetDefaultViewData()
         {
             DayWeekButtonText = "Week Overzicht";
-            DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
             DisplayedDate = DateTime.Now;
+            DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
+
+            IsPreviousButtonEnabled = false;
+            IsNextButtonEnabled = true;
 
             //Use main thread here due to the UI not updating correctly otherwise.
             MainThread.BeginInvokeOnMainThread(() =>
@@ -161,7 +164,6 @@ namespace WeatherApp.ViewModels
                 Locations.Clear();
                 foreach (var location in _weatherAppData.Locations)
                 {
-                    Debug.WriteLine(location);
                     Locations.Add(location);
                 }
             });
@@ -270,14 +272,7 @@ namespace WeatherApp.ViewModels
                 // During testing this happened really rarely and sending the request again had no issues.
                 // So when such an error happens we just reset the locations so the tabs become unselected so another attempt can be made.
                 // This is a bit of a band-aid fix but this issue is really rare and is caused by the API's.
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Locations.Clear();
-                    foreach (var location in _weatherAppData.Locations)
-                    {
-                        Locations.Add(location);
-                    }
-                });
+                SetDefaultViewData();
                 return Array.Empty<APIResponse<List<WeatherDataModel>>>();
             }
         }
@@ -315,7 +310,6 @@ namespace WeatherApp.ViewModels
                 else
                 {
                     Debug.WriteLine(result.ErrorMessage);
-                    await Shell.Current.DisplayAlert("API Error", $"Onverwacht antwoord van {result.Source}\n{result.ErrorMessage}\n\nDeze melding kan genegeerd worden als er andere API bronnen ingeschakeld zijn.", "Oké");
                 }
             }
 
@@ -602,6 +596,9 @@ namespace WeatherApp.ViewModels
         public async void SwitchDayWeek()
         {
             TimedData.Clear();
+
+            DisplayedDate = DateTime.Now;
+
             if (DayWeekButtonText.Equals("Week Overzicht"))
             {
                 IsPreviousButtonEnabled = false;
@@ -610,7 +607,7 @@ namespace WeatherApp.ViewModels
             }
             else
             {
-                IsPreviousButtonEnabled = true;
+                IsPreviousButtonEnabled = false;
                 IsNextButtonEnabled = true;
                 DayWeekButtonText = "Week Overzicht";
             }
@@ -645,7 +642,7 @@ namespace WeatherApp.ViewModels
             }
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(-1);
-            IsPreviousButtonEnabled = DisplayedDate.Date <= DateTime.Now;
+            IsPreviousButtonEnabled = DisplayedDate.Date > DateTime.Now;
             UpdateDisplayedDate();
             await UpdateGUI();
         }
@@ -658,8 +655,15 @@ namespace WeatherApp.ViewModels
         {
             TimedData.Clear();
             DisplayedDate = DisplayedDate.AddDays(1);
+            IsPreviousButtonEnabled = true;
             UpdateDisplayedDate();
             await UpdateGUI();
+
+            if (DisplayedDate.Date >= DateTime.Now.AddDays(13))
+            {
+                IsNextButtonEnabled = false;
+                return;
+            }
         }
     }
 }

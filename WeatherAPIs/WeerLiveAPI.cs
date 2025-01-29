@@ -35,20 +35,39 @@ namespace WeatherApp.WeatherAPIs
                     string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                     HttpResponseMessage response = await client.GetAsync(url);
                     Debug.WriteLine(response.StatusCode);
-                    if (!response.IsSuccessStatusCode)
+
+                    responseBody = await response.Content.ReadAsStringAsync();
+
+                    try
                     {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
-                        string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
+                        var jsonResponse = JObject.Parse(responseBody);
+                        var liveweerArray = jsonResponse["liveweer"] as JArray;
+
+                        if (liveweerArray != null && liveweerArray.Count > 0)
+                        {
+                            var firstElement = liveweerArray.First();
+                            if (firstElement["fout"] != null)
+                            {
+                                string errorMessage = firstElement["fout"].ToString();
+                                return new APIResponse<List<WeatherDataModel>>
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"API Error: {errorMessage}",
+                                    Source = Name
+                                };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
                         return new APIResponse<List<WeatherDataModel>>
                         {
                             Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
+                            ErrorMessage = "Invalid JSON response from API.",
                             Source = Name
                         };
                     }
-                    responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
             Debug.WriteLine(responseBody);
@@ -125,20 +144,41 @@ namespace WeatherApp.WeatherAPIs
                 {
                     string url = $"{_baseURL}{_apiKey}&locatie={location.Name}";
                     HttpResponseMessage response = await client.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
+                    Debug.WriteLine(response.StatusCode);
+
+                    responseBody = await response.Content.ReadAsStringAsync();
+
+                    // ✅ Handle API error messages inside 200 responses
+                    try
                     {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        var errorResponse = JObject.Parse(responseBody);
-                        string errorCode = errorResponse["cod"]?.ToString() ?? "Unknown Code";
-                        string errorMessage = errorResponse["message"]?.ToString() ?? "Unknown Error";
+                        var jsonResponse = JObject.Parse(responseBody);
+                        var liveweerArray = jsonResponse["liveweer"] as JArray;
+
+                        if (liveweerArray != null && liveweerArray.Count > 0)
+                        {
+                            var firstElement = liveweerArray.First();
+                            if (firstElement["fout"] != null)
+                            {
+                                string errorMessage = firstElement["fout"].ToString();
+                                return new APIResponse<List<WeatherDataModel>>
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"API Error: {errorMessage}",
+                                    Source = Name
+                                };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"JSON Parsing Error: {ex.Message}");
                         return new APIResponse<List<WeatherDataModel>>
                         {
                             Success = false,
-                            ErrorMessage = $"{errorCode} - {errorMessage}",
+                            ErrorMessage = "Invalid JSON response from API.",
                             Source = Name
                         };
                     }
-                    responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
             Debug.WriteLine(responseBody);
@@ -173,26 +213,43 @@ namespace WeatherApp.WeatherAPIs
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-            return (string)data switch
+            switch ((string)data)
             {
-                "zonnig" => WeatherCondition.SUNNY,
-                "bliksem" => WeatherCondition.THUNDERSTORM,
-                "regen" => WeatherCondition.RAIN,
-                "buien" => WeatherCondition.RAIN,
-                "hagel" => WeatherCondition.HAIL,
-                "mist" => WeatherCondition.MIST,
-                "sneeuw" => WeatherCondition.SNOW,
-                "bewolkt" => WeatherCondition.CLOUDY,
-                "lichtbewolkt" => WeatherCondition.PARTLY_CLOUDY,
-                "halfbewolkt" => WeatherCondition.PARTLY_CLOUDY,
-                "halfbewolkt_regen" => WeatherCondition.RAIN,
-                "zwaarbewolkt" => WeatherCondition.CLOUDY,
-                "nachtmist" => WeatherCondition.MIST,
-                "helderenacht" => WeatherCondition.CLEAR,
-                "nachtbewolkt" => WeatherCondition.CLOUDY,
-                "wolkennacht" => WeatherCondition.CLOUDY,
-                _ => WeatherCondition.UNKNOWN,
-            };
+                case "zonnig":
+                    return WeatherCondition.SUNNY;
+                case "bliksem":
+                    return WeatherCondition.THUNDERSTORM;
+                case "regen":
+                    return WeatherCondition.RAIN;
+                case "buien":
+                    return WeatherCondition.RAIN;
+                case "hagel":
+                    return WeatherCondition.HAIL;
+                case "mist":
+                    return WeatherCondition.MIST;
+                case "sneeuw":
+                    return WeatherCondition.SNOW;
+                case "bewolkt":
+                    return WeatherCondition.CLOUDY;
+                case "lichtbewolkt":
+                    return WeatherCondition.PARTLY_CLOUDY;
+                case "halfbewolkt":
+                    return WeatherCondition.PARTLY_CLOUDY;
+                case "halfbewolkt_regen":
+                    return WeatherCondition.RAIN;
+                case "zwaarbewolkt":
+                    return WeatherCondition.CLOUDY;
+                case "nachtmist":
+                    return WeatherCondition.MIST;
+                case "helderenacht":
+                    return WeatherCondition.CLEAR;
+                case "nachtbewolkt":
+                    return WeatherCondition.CLOUDY;
+                case "wolkennacht":
+                    return WeatherCondition.CLOUDY;
+                default:
+                    return WeatherCondition.UNKNOWN;
+            }
         }
     }
 }

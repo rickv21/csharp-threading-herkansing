@@ -37,7 +37,7 @@ namespace WeatherApp.WeatherAPIs
             {
                 using (HttpClient client = new())
                 {
-                    string url = $"{_baseURL}/v1/geocode/search?filter=countrycode:nl&text={Uri.EscapeDataString(searchQuery)}&format=json&apiKey={_apiKey}";
+                    string url = $"{_baseURL}/v1/geocode/search?filter=countrycode:nl&text={Uri.EscapeDataString(searchQuery)}&format=json&lang=nl&apiKey={_apiKey}";
                     HttpResponseMessage response = await client.GetAsync(url);
 
                     if (!response.IsSuccessStatusCode)
