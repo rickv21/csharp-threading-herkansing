@@ -11,7 +11,7 @@ namespace WeatherApp.Models
     /// <param name="latitude">The latitude of the location.</param>
     /// <param name="longitude">The longitude of the location.</param>
     /// <param name="weatherData">A list of WeatherDataModels, optional.</param>
-    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, ObservableCollection<WeatherDataModel>? weatherData = null) : INotifyPropertyChanged
+    public class LocationModel(string name, string state, string country, string placeId, double latitude, double longitude, ObservableCollection<WeatherDisplayModel>? weatherData = null) : INotifyPropertyChanged
     {
         /// <summary>
         /// The name of the location
@@ -31,7 +31,7 @@ namespace WeatherApp.Models
         /// <summary>
         /// The place id of the location
         /// </summary>
-        public string? PlaceId { get; set; } = placeId;
+        public string PlaceId { get; set; } = placeId;
 
         /// <summary>
         /// The latitude of the location.

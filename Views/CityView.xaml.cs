@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using WeatherApp.Models;
 using WeatherApp.Utils;
 using WeatherApp.ViewModels;
@@ -8,14 +7,12 @@ namespace WeatherApp.Views
     public partial class CityView : ContentPage
     {
         private static LocationViewModel _viewModel;
-        public ObservableCollection<LocationModel> SavedLocations { get; set; }
 
         public CityView()
         {
             InitializeComponent();
-            _viewModel = new LocationViewModel();
+            _viewModel = new LocationViewModel(App.Current.Handler.MauiContext.Services.GetService<WeatherAppData>());
             BindingContext = _viewModel;
-            SavedLocations = _viewModel.SavedLocations;
         }
 
         private async void OnItemTapped(object sender, EventArgs e)

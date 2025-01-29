@@ -1,10 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WeatherApp.Utils
 {
@@ -34,14 +28,6 @@ namespace WeatherApp.Utils
             if (File.Exists(_filePath))
             {
                 string json = File.ReadAllText(_filePath);
-
-                // Check if the JSON starts with "[" (indicating an array)
-                if (json.TrimStart().StartsWith("["))
-                {
-                    // Wrap the array in an object with a property for consistency
-                    return new JObject { ["Geocoding"] = JArray.Parse(json) };
-                }
-
                 return JObject.Parse(json);
             }
 
@@ -101,6 +87,26 @@ namespace WeatherApp.Utils
             }
 
             return token?.ToObject<object>(); // Return as object (can cast to specific type)
+        }
+
+        /// <summary>
+        /// Gets a boolean value from the JSON data using a specified path of keys.
+        /// </summary>
+        /// <param name="keys">An array of keys representing the path to the value.</param>
+        /// <returns>The boolean value if found, otherwise null.</returns>
+        public bool? GetBoolean(params string[] keys)
+        {
+            JObject root = GetAllJson();
+            JToken? token = root;
+
+            // Traverse the JSON hierarchy
+            foreach (var key in keys)
+            {
+                token = token?[key];
+                if (token == null) return null; // If any key does not exist, return null
+            }
+
+            return token.Type == JTokenType.Boolean ? token.Value<bool>() : null;
         }
 
         /// <summary>

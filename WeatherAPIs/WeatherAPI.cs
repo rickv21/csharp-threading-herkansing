@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using WeatherApp.Models;
 
@@ -28,7 +27,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached. Reset your request count or check the API settings.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -56,10 +55,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -81,7 +79,6 @@ namespace WeatherApp.WeatherAPIs
                 if (!simulate && forecastDate.Date != day.Date) continue;
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)hour["temp_c"]!,
@@ -93,7 +90,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }
@@ -115,7 +112,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached. Reset your request count or check the API settings.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -142,10 +139,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -158,14 +154,12 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var day in forecastDays)
             {
-
                 var condition = CalculateWeatherCondition(day["day"]?["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(day["date"]?.ToString()!);
 
                 double humidity = day["day"]?["humidity"] != null ? (double)day["day"]?["humidity"] : 0;
 
                 weatherData.Add(new WeatherDataModel(
-                    Name,
                     condition,
                     forecastDate,
                     minTemperature: (double)day["day"]?["mintemp_c"]!,
@@ -177,7 +171,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }

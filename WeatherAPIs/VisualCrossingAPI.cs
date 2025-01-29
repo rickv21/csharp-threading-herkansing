@@ -1,10 +1,7 @@
-﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Devices.Sensors;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using WeatherApp.Models;
-using WeatherApp.Utils;
 
 namespace WeatherApp.WeatherAPIs
 {
@@ -22,7 +19,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -58,10 +55,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -116,7 +112,6 @@ namespace WeatherApp.WeatherAPIs
                             WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
                             weatherData.Add(new WeatherDataModel(
-                                Name,
                                 condition: condition,
                                 timeStamp: timestamp,
                                 minTemperature: temperature,
@@ -143,6 +138,7 @@ namespace WeatherApp.WeatherAPIs
                 return new APIResponse<List<WeatherDataModel>>
                 {
                     Success = false,
+                    Source = Name,
                     ErrorMessage = "The API did not return data for the given datatime.",
                 };
             }
@@ -151,7 +147,7 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                ErrorMessage = null,
+                Source = Name,
                 Data = weatherData
             };
         }
@@ -166,7 +162,7 @@ namespace WeatherApp.WeatherAPIs
                 {
                     Success = false,
                     ErrorMessage = "Request limit reached\nTo reset change the value in weatherAppData.json in your Documents folder,\nor delete that file.",
-                    Data = null
+                    Source = Name
                 };
             }
 
@@ -202,10 +198,9 @@ namespace WeatherApp.WeatherAPIs
                         {
                             Success = false,
                             ErrorMessage = $"{errorCode} - {errorMessage}",
-                            Data = null
+                            Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -238,7 +233,6 @@ namespace WeatherApp.WeatherAPIs
                     WeatherCondition condition = CalculateWeatherCondition(splitCondition);
 
                     weatherData.Add(new WeatherDataModel(
-                        Name,
                         condition: condition,
                         timeStamp: forecastDate,
                         minTemperature: minTemperature,
@@ -256,7 +250,8 @@ namespace WeatherApp.WeatherAPIs
             return new APIResponse<List<WeatherDataModel>>
             {
                 Success = true,
-                Data = weatherData
+                Data = weatherData,
+                Source = Name,
             };
         }
 
