@@ -54,7 +54,6 @@ namespace WeatherApp.WeatherAPIs
                 }
             }
 
-            CountRequest();
             var locations = ParseLocations(responseBody);
 
             return new APIResponse<List<LocationModel>>

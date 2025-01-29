@@ -82,7 +82,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }

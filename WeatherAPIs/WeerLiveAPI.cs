@@ -49,7 +49,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -140,7 +139,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }

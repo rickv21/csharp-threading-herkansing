@@ -59,7 +59,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -144,7 +143,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest();
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }

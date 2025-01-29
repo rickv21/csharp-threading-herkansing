@@ -1,4 +1,5 @@
 ﻿using Sprache;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -62,7 +63,7 @@ namespace WeatherApp.ViewModels
 
         public Dictionary<DateTime, List<WeatherDataModel>> TimedData { get; set; } = new Dictionary<DateTime, List<WeatherDataModel>>();
 
-        public ObservableCollection<LocationModel> Locations { get; set; }
+        public ObservableCollection<LocationModel> Locations { get; set; } = new ObservableCollection<LocationModel>();
 
         private LocationModel? _selectedTab;
         public LocationModel? SelectedTab
@@ -168,18 +169,19 @@ namespace WeatherApp.ViewModels
             DisplayedDateFormatted = DisplayedDate.ToString("dd-MM-yyyy");
             DisplayedDate = DateTime.Now;
 
-            // Replace the collection and notify the change
-            var newLocations = new ObservableCollection<LocationModel>();
-            foreach (var location in _weatherAppData.Locations)
+            //Use main thread here due to the UI not updating correctly otherwise.
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                newLocations.Add(location);
-            }
+                Locations.Clear();
+                foreach (var location in _weatherAppData.Locations)
+                {
+                    Debug.WriteLine(location);
+                    Locations.Add(location);
+                }
+            });
 
-            Locations = newLocations; // This should trigger PropertyChanged for Locations
 
             WeatherItems = new ObservableCollection<WeatherDisplayItem>();
-
-            OnPropertyChanged();
         }
 
 
@@ -244,22 +246,36 @@ namespace WeatherApp.ViewModels
 
             try
             {
+                var usedServices = new ConcurrentBag<WeatherService>();
                 IEnumerable<Task<APIResponse<List<WeatherDataModel>>>> tasks = null;
+
                 if (DayWeekButtonText.Equals("Week Overzicht"))
                 {
                     tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
-                        .Select(service => service.GetWeatherDataAsync(DisplayedDate, location, _weatherAppData.SimulateMode)
-                    );
+                        .Select(async service =>
+                        {
+                            var response = await service.GetWeatherDataAsync(DisplayedDate, location, _weatherAppData.SimulateMode);
+                            usedServices.Add(service);
+                            return response;
+                        });
                 }
                 else
                 {
                     tasks = _weatherAppData.WeatherServices.Values.Where(service => service.IsEnabled)
-                        .Select(service => service.GetWeatherForAWeekAsync(location, _weatherAppData.SimulateMode)
-                    );
+                        .Select(async service =>
+                        {
+                            var response = await service.GetWeatherForAWeekAsync(location, _weatherAppData.SimulateMode);
+                            usedServices.Add(service);
+                            return response;
+                        });
                 }
 
                 Debug.WriteLine("Fetching weather data from services...");
                 var results = await Task.WhenAll(tasks);
+                foreach (var service in usedServices.Distinct())
+                {
+                    service.CountRequest();
+                }
                 return results;
             }
             catch (Exception ex)

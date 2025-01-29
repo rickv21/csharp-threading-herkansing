@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using WeatherApp.Models;
 
 namespace WeatherApp.Utils
@@ -13,22 +14,28 @@ namespace WeatherApp.Utils
         /// </summary>
         public void UpdatePlacesJson(ObservableCollection<LocationModel> savedLocations)
         {
-            JObject locationsObject = (JObject)jsonFileManager.GetData(["Locations"]) ?? [];
-            foreach (var location in savedLocations)
+            try
             {
-                string placeId = location.PlaceId;
-                locationsObject[placeId] = JObject.FromObject(new
+                JObject locationsObject = [];
+                foreach (var location in savedLocations)
                 {
-                    location.Name,
-                    location.Latitude,
-                    location.Longitude,
-                    location.Country,
-                    location.State,
-                    WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : []
-                });
-            }
+                    string placeId = location.PlaceId;
+                    locationsObject[placeId] = JObject.FromObject(new
+                    {
+                        location.Name,
+                        location.Latitude,
+                        location.Longitude,
+                        location.Country,
+                        location.State,
+                        WeatherData = location.WeatherData != null ? JArray.FromObject(location.WeatherData) : []
+                    });
+                }
 
-            jsonFileManager.SetData(locationsObject, ["Locations"]);
+                jsonFileManager.SetData(locationsObject, ["Locations"]);
+            } catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+            }
         }
 
         /// <summary>
@@ -38,14 +45,24 @@ namespace WeatherApp.Utils
         /// <returns>A list of favorited locations.</returns>
         public List<LocationModel> LoadLocationsFromFile()
         {
-            JObject locationsObject = (jsonFileManager.GetData("Locations") as JObject) ?? [];
+            JObject locationsObject = (jsonFileManager.GetData("Locations") as JObject) ?? new JObject();
 
             return locationsObject.Properties()
-                                  .Select(prop => prop.Value.ToObject<LocationModel>())
-                                  .Where(location => location != null && !string.IsNullOrEmpty(location!.Name))
-                                  .Select(location => location!)
-                                  .ToList();
+                .Select(prop =>
+                {
+                    var location = prop.Value.ToObject<LocationModel>(); // Deserialize
+                    if (location != null)
+                    {
+                        location.PlaceId = prop.Name;
+                        Debug.WriteLine("NAME: " + location.PlaceId);
+                    }
+                    return location;
+                })
+                .Where(location => location != null && !string.IsNullOrEmpty(location!.Name))
+                .Select(location => location!)
+                .ToList();
         }
+
 
         /// <summary>
         /// Save the selected location to places.json

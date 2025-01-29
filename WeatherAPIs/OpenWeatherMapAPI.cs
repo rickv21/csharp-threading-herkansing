@@ -68,7 +68,6 @@ namespace WeatherApp.WeatherAPIs
             if (simulate)
             {
                 responseBody = GetTestJSON("openweather_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -90,7 +89,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -163,7 +161,6 @@ namespace WeatherApp.WeatherAPIs
 
                 date = DateTime.Now.AddDays(2);
                 responseBody = responseBody.Replace("2022-09-04", date.ToString("yyyy-MM-dd"));
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -185,7 +182,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -349,7 +345,6 @@ namespace WeatherApp.WeatherAPIs
                 if (simulate)
                 {
                     responseBody = GetTestJSON("openweather_test.json");
-                    //CountRequest(); // Important: this counts the requests for the limit.
                 }
                 else
                 {
@@ -373,7 +368,6 @@ namespace WeatherApp.WeatherAPIs
                         };
                     }
 
-                    //CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
 

@@ -81,6 +81,7 @@ namespace WeatherApp.ViewModels
             if(result == SaveLocationResult.Success)
             {
                 SavedLocations.Add(selectedLocation);
+                _weatherAppData.Locations = [.. SavedLocations];
             }
             return result;
         }
@@ -126,8 +127,15 @@ namespace WeatherApp.ViewModels
 
             if (isConfirmed)
             {
-                SavedLocations.Remove(location);
+                var locationToRemove = SavedLocations.FirstOrDefault(loc => loc.Name == location.Name);
+                Debug.WriteLine(locationToRemove);
+                if (locationToRemove != null)
+                {
+                    SavedLocations.Remove(locationToRemove);
+                }
+                Debug.WriteLine(SavedLocations);
                 _placesManager.UpdatePlacesJson(SavedLocations);
+                _weatherAppData.Locations = [.. SavedLocations];
             }
         }
 
@@ -152,6 +160,7 @@ namespace WeatherApp.ViewModels
                 if (SearchQuery.Length > 2)
                 {
                     var response = await _api.GetLocationAsync(SearchQuery);
+                    _api.CountRequest();
                     if (response.Success)
                     {
                         SearchResults.Clear();
@@ -255,6 +264,12 @@ namespace WeatherApp.ViewModels
             }
 
             countdown.Wait();
+            for (int i = 0; i < SavedLocations.Count; i++)
+            {
+                //Count the request outside the threadpool.
+                _weatherAPI.CountRequest();
+            }
+
             _placesManager.UpdatePlacesJson(SavedLocations);
         }
     }

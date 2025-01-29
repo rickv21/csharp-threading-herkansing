@@ -150,7 +150,7 @@ namespace WeatherApp.WeatherAPIs
         /// <summary>
         /// Increments the request values by 1 and calls SaveRequestCountsToFile().
         /// </summary>
-        protected void CountRequest()
+        public void CountRequest()
         {
             RequestLimitDay.CountRequest();
             RequestLimitMonth.CountRequest();

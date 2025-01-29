@@ -10,7 +10,7 @@ namespace WeatherApp.WeatherAPIs
 {
     public class AccuWeatherAPI : WeatherService
     {
-        public AccuWeatherAPI() : base("AccuWeather", "http://dataservice.accuweather.com", 50, -1)
+        public AccuWeatherAPI() : base("AccuWeather", "http://dataservice.accuweather.com", 40, -1)
         {
         }
 
@@ -74,7 +74,6 @@ namespace WeatherApp.WeatherAPIs
                             Data = null
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
         
                 }
@@ -140,7 +139,6 @@ namespace WeatherApp.WeatherAPIs
             if (simulate)
             {
                 responseBody = GetTestJSON("accu_weather_hour_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -170,7 +168,6 @@ namespace WeatherApp.WeatherAPIs
                             ErrorMessage = $"{errorCode} - {errorMessage}",
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -283,7 +280,6 @@ namespace WeatherApp.WeatherAPIs
             if (simulate)
             {
                 responseBody = GetTestJSON("accu_weather_week_test.json");
-                CountRequest(); // Important: this counts the requests for the limit.
             }
             else
             {
@@ -314,7 +310,6 @@ namespace WeatherApp.WeatherAPIs
                             Source = Name,
                         };
                     }
-                    CountRequest(); // Important: this counts the requests for the limit.
                     responseBody = await response.Content.ReadAsStringAsync();
                 }
             }
