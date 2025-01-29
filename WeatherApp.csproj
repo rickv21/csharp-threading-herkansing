@@ -83,7 +83,6 @@
 	  <None Remove="TestData\accu_weather_location_test.json" />
 	  <None Remove="TestData\accu_weather_week_test.json" />
 	  <None Remove="TestData\openweather_test.json" />
-	  <None Remove="TestData\test_api.json" />
 	  <None Remove="TestData\visual_crossing_test.json" />
 	  <None Remove="TestData\weatherbit_week_test.json" />
 	  <None Remove="TestData\weather_api_test.json" />
@@ -166,7 +165,6 @@
 	  <EmbeddedResource Include="TestData\geocoding_location_test.json" />
 	  <EmbeddedResource Include="TestData\accu_weather_week_test.json" />
 	  <EmbeddedResource Include="TestData\openweather_test.json" />
-	  <EmbeddedResource Include="TestData\test_api.json" />
 	  <EmbeddedResource Include="TestData\visual_crossing_test.json" />
 	  <EmbeddedResource Include="TestData\weather_api_week_test.json" />
 	  <EmbeddedResource Include="TestData\weather_api_test.json" />
