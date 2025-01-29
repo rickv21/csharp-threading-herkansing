@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Devices.Sensors;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using WeatherApp.Models;
 using WeatherApp.Utils;
 using WeatherApp.WeatherAPIs;
 
@@ -12,8 +9,6 @@ namespace WeatherApp
     {
         public static MauiApp CreateMauiApp()
         {
-
-
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -30,8 +25,6 @@ namespace WeatherApp
                 return data;
             });
 
-
-
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -39,6 +32,10 @@ namespace WeatherApp
             return builder.Build();
         }
 
+        /// <summary>
+        /// Loads the config values and weather services.
+        /// </summary>
+        /// <param name="appData">The WeatherAppData object to be updated.</param>
         private static void InitializeWeatherAppData(WeatherAppData appData)
         {
             JsonFileManager jsonManager = new JsonFileManager();

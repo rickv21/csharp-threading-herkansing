@@ -8,6 +8,9 @@ using WeatherApp.WeatherAPIs;
 
 namespace WeatherApp.ViewModels
 {
+    /// <summary>
+    /// ViewModel for the Location screen. 
+    /// </summary>
     public class LocationViewModel : INotifyPropertyChanged
     {
         private readonly WeatherAppData _weatherAppData;
@@ -18,10 +21,16 @@ namespace WeatherApp.ViewModels
         private CancellationTokenSource _debounceCts;
         private PlacesManager _placesManager;
 
+        /// <summary>
+        /// Collection of search results returned from the geocoding API.
+        /// </summary>
         public ObservableCollection<LocationModel> SearchResults { get; set; }
 
         private ObservableCollection<LocationModel> _savedLocations;
 
+        /// <summary>
+        /// Collection of saved locations.
+        /// </summary>
         public ObservableCollection<LocationModel> SavedLocations
         {
             get { return _savedLocations; }
@@ -61,6 +70,9 @@ namespace WeatherApp.ViewModels
             LoadSavedLocations();
         }
 
+        /// <summary>
+        /// Loads saved locations from the weatherAppData.
+        /// </summary>
         private void LoadSavedLocations()
         {
             SavedLocations.Clear();
@@ -70,6 +82,11 @@ namespace WeatherApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Saves the selected location.
+        /// </summary>
+        /// <param name="selectedLocation">The location to save.</param>
+        /// <returns>The result of the save operation.</returns>
         public SaveLocationResult SaveSelectedLocation(LocationModel selectedLocation)
         {
             if (HasReachedFavoriteLimit())
@@ -140,9 +157,10 @@ namespace WeatherApp.ViewModels
         }
 
         /// <summary>
-        /// Perform a search request on the Geocoding API
+        /// Performs a search request on the Geocoding API with a debounce mechanism.
+        /// Ensures efficient API calls by waiting for the user to stop typing before searching.
         /// </summary>
-        /// <returns>A task representing the async operation</returns>
+        /// <returns>A task representing the asynchronous search operation.</returns>
         private async Task PerformSearch()
         {
             if (_debounceCts != null)

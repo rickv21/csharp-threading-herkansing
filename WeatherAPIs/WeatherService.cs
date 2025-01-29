@@ -1,7 +1,5 @@
 ﻿using WeatherApp.Models;
 using WeatherApp.Utils;
-using System.Reflection;
-using System.Diagnostics;
 
 namespace WeatherApp.WeatherAPIs
 {

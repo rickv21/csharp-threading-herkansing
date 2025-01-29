@@ -41,7 +41,7 @@
 
             <!-- Saved Places -->
             <Label Text="Favoriete locaties" FontSize="Large" FontAttributes="Bold" Margin="25, 0 ,25, 10" HorizontalOptions="Center"/>
-
+            <Label Text="Klik op een plaats om deze te verwijderen." HorizontalOptions="Center"></Label>
             <!-- Button to fetch weather data -->
             <Button Text="Haal weerdata op" 
                     Command="{Binding FetchWeatherDataCommand}" 

@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.Maui.Controls;
 using WeatherApp.Utils;
 using WeatherApp.ViewModels;
 using WeatherApp.WeatherAPIs;

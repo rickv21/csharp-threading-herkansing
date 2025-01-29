@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using WeatherApp.Models;
 
@@ -155,7 +154,6 @@ namespace WeatherApp.WeatherAPIs
 
             foreach (var day in forecastDays)
             {
-
                 var condition = CalculateWeatherCondition(day["day"]?["condition"]?["text"]?.ToString());
                 var forecastDate = DateTime.Parse(day["date"]?.ToString()!);
 

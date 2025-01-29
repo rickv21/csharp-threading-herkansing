@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using WeatherApp.Models;
 using WeatherApp.Utils;
 using WeatherApp.ViewModels;

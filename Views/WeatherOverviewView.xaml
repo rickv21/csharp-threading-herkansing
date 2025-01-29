@@ -5,6 +5,7 @@
              x:Class="WeatherApp.Views.WeatherOverviewView"
              Title="Weeroverzicht">
 
+    <ScrollView>
     <Grid RowDefinitions="Auto, Auto, Auto, 2*">
 
         <ScrollView Orientation="Horizontal" Grid.Row="1">
@@ -112,9 +113,6 @@
         </ScrollView>
 
         <VerticalStackLayout Grid.Row="3">
-            <!--Navigate to City View-->
-
-
             <ScrollView
                 Margin="5"
                 Padding="5">
@@ -124,7 +122,8 @@
                      HorizontalOptions="Fill"
                      VerticalOptions="FillAndExpand" />
             </ScrollView>
-            <Button
+            <HorizontalStackLayout Spacing="5">
+                <Button
                 Text="Instellingen"
                 HorizontalOptions="Start"
                 WidthRequest="110" 
@@ -134,7 +133,7 @@
                 Margin="0"
                 Padding="0"
                 Command="{Binding SettingsCommand}" />
-            <Button Text="Exporteer" 
+                <Button Text="Exporteer" 
             HorizontalOptions="Start" 
             VerticalOptions="Center" 
             Grid.Column="0" 
@@ -145,7 +144,10 @@
             Padding="0"
             CornerRadius="5" 
             Clicked="OnExportButtonClicked" />
+            </HorizontalStackLayout>
+
         </VerticalStackLayout>
 
     </Grid>
+    </ScrollView>
 </ContentPage>

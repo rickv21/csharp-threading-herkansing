@@ -33,7 +33,7 @@ namespace WeatherApp.Models
         /// </summary>
         public double Humidity { get; } = humidity;
 
-        // 🟢 Computed Properties for UI Binding
+        //Computed Properties for UI Binding
         public string ConditionFormatted => WeatherUtils.TranslateWeatherCondition(condition);
         public string MinTemperatureFormatted => $"Min. Temp: {MinTemperature}°C";
         public string MaxTemperatureFormatted => $"Max. Temp: {MaxTemperature}°C";

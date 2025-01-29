@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using WeatherApp.Models;
 
@@ -174,42 +173,26 @@ namespace WeatherApp.WeatherAPIs
 
         protected override WeatherCondition CalculateWeatherCondition(object data)
         {
-            switch ((string)data)
+            return (string)data switch
             {
-                case "zonnig":
-                    return WeatherCondition.SUNNY;
-                case "bliksem":
-                    return WeatherCondition.THUNDERSTORM;
-                case "regen":
-                    return WeatherCondition.RAIN;
-                case "buien":
-                    return WeatherCondition.RAIN;
-                case "hagel":
-                    return WeatherCondition.HAIL;
-                case "mist":
-                    return WeatherCondition.MIST;
-                case "sneeuw":
-                    return WeatherCondition.SNOW;
-                case "bewolkt":
-                    return WeatherCondition.CLOUDY;
-                case "lichtbewolkt":
-                    return WeatherCondition.PARTLY_CLOUDY;
-                case "halfbewolkt":
-                    return WeatherCondition.PARTLY_CLOUDY;
-                case "halfbewolkt_regen":
-                    return WeatherCondition.RAIN;
-                case "zwaarbewolkt":
-                    return WeatherCondition.CLOUDY;
-                case "nachtmist":
-                    return WeatherCondition.MIST;
-                case "helderenacht":
-                    return WeatherCondition.CLEAR;
-                case "nachtbewolkt":
-                    return WeatherCondition.CLOUDY;
-                case "wolkennacht":
-                    return WeatherCondition.CLOUDY;
-            }
-            return WeatherCondition.UNKNOWN;
+                "zonnig" => WeatherCondition.SUNNY,
+                "bliksem" => WeatherCondition.THUNDERSTORM,
+                "regen" => WeatherCondition.RAIN,
+                "buien" => WeatherCondition.RAIN,
+                "hagel" => WeatherCondition.HAIL,
+                "mist" => WeatherCondition.MIST,
+                "sneeuw" => WeatherCondition.SNOW,
+                "bewolkt" => WeatherCondition.CLOUDY,
+                "lichtbewolkt" => WeatherCondition.PARTLY_CLOUDY,
+                "halfbewolkt" => WeatherCondition.PARTLY_CLOUDY,
+                "halfbewolkt_regen" => WeatherCondition.RAIN,
+                "zwaarbewolkt" => WeatherCondition.CLOUDY,
+                "nachtmist" => WeatherCondition.MIST,
+                "helderenacht" => WeatherCondition.CLEAR,
+                "nachtbewolkt" => WeatherCondition.CLOUDY,
+                "wolkennacht" => WeatherCondition.CLOUDY,
+                _ => WeatherCondition.UNKNOWN,
+            };
         }
     }
 }
